@@ -1,9 +1,13 @@
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 
 const app = express();
 
 require('dotenv').config();
+
+app.use(express.json());
+app.use(cookieParser());
 
 const connectDb = async () => {
   try {
@@ -16,6 +20,8 @@ const connectDb = async () => {
   }
 }
 
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/user', require('./routes/user'));
 
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
