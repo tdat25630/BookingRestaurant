@@ -1,6 +1,8 @@
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
+
 
 const app = express();
 
@@ -8,6 +10,8 @@ require('dotenv').config();
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(cors());
 
 const connectDb = async () => {
   try {
@@ -22,6 +26,7 @@ const connectDb = async () => {
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
+app.use('/api/menu', require('./routes/menu'));
 
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
@@ -34,7 +39,7 @@ app.use((err, req, res, next) => {
   })
 })
 
-app.listen(8989, () => {
+app.listen(8080, () => {
   connectDb();
-  console.log("Server is running on port 8989");
+  console.log("Server is running on port 8080");
 })
