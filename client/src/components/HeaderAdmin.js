@@ -40,18 +40,13 @@ const Header = () => {
             padding: 0,
           }}
         >
-          <li>
-            <Link to="/about" style={navLinkStyle}>Giới thiệu</Link>
-          </li>
-          <li>
-            <Link to="/menu" style={navLinkStyle}>Thực đơn</Link>
-          </li>
-          <li>
-            <Link to="/space" style={navLinkStyle}>Không gian nhà hàng</Link>
-          </li>
-          <li>
-            <Link to="/booking" style={navLinkStyle}>Đặt bàn</Link>
-          </li>
+                    <li><Link to="/admin/dashboard" style={navLinkStyle}>Dashboard</Link></li>
+          <li><Link to="/admin/menu" style={navLinkStyle}>Thực đơn</Link></li>
+          <li><Link to="/admin/bookings" style={navLinkStyle}>Đặt bàn</Link></li>
+          <li><Link to="/admin/orders" style={navLinkStyle}>Đơn hàng</Link></li>
+          <li><Link to="/admin/staff" style={navLinkStyle}>Nhân viên</Link></li>
+          <li><Link to="/admin/reports" style={navLinkStyle}>Báo cáo</Link></li>
+
 
           {user ? (
             <>
