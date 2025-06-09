@@ -5,9 +5,9 @@ import Footer from "./components/Footer";
 import Home from "./pages/user/Home";
 import Menu from "./pages/user/Menu";
 import Register from "./pages/auth/Register";
+import Reservation from "./pages/reservation/Reservation";
 import Login from "./pages/auth/Login";
 import AdminRoutes from "./routes/AdminRoutes";
-
 
 
 
@@ -21,6 +21,7 @@ function App() {
         <Route path="/menu" element={<Menu />} /> 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/booking" element={<Reservation />} />
      
 
     
