@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 
+const menuCategoryRoutes = require('./routes/menuCategoryRoutes');
+const menuItemRoutes = require('./routes/menuItemRoutes');
+
 const app = express();
 
 require('dotenv').config();
@@ -31,9 +34,11 @@ const connectDb = async () => {
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
-app.use('/api/menu', require('./routes/menu'));
+
 
 // app.use('/api/admin', require('./routes/AdminRoute'));
+app.use('/api/menu-categories', menuCategoryRoutes);
+app.use('/api/menu-items', menuItemRoutes);
 
 
 app.use((err, req, res, next) => {

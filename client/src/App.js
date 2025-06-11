@@ -3,12 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/user/Home";
-import Menu from "./pages/user/Menu";
+
 import Register from "./pages/auth/Register";
 import Login from "./pages/auth/Login";
 import AdminRoutes from "./routes/AdminRoutes";
 
 
+import MenuPage from './pages/user/MenuPage';
 
 
 function App() {
@@ -18,7 +19,7 @@ function App() {
       {/* <Header /> */}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/menu" element={<Menu />} /> 
+        <Route path="/menu" element={<MenuPage />} /> 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
      
