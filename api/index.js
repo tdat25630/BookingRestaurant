@@ -7,6 +7,11 @@ const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const menuCategoryRoutes = require('./routes/menuCategoryRoutes');
 const menuItemRoutes = require('./routes/menuItemRoutes');
+const diningSessionRoutes = require('./routes/diningSessionRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const orderItemRoutes = require('./routes/orderItemRoutes');
+
+
 
 const app = express();
 
@@ -42,6 +47,11 @@ app.use('/api/reservation', require('./routes/reservation.route'));
 // app.use('/api/admin', require('./routes/AdminRoute'));
 app.use('/api/menu-categories', menuCategoryRoutes);
 app.use('/api/menu-items', menuItemRoutes);
+
+app.use('/api/dining-sessions', diningSessionRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/order-items', orderItemRoutes);
+
 
 // middlewares
 app.use(errorMiddleware);

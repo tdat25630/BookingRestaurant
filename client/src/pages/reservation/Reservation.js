@@ -19,7 +19,9 @@ function Reservation() {
 
   const validate = () => {
     const errs = {};
-    const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
+   // const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
+   const phoneRegex = /^0\d{9}$/;
+
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
     if (!phoneRegex.test(formData.phone)) errs.phone = 'Invalid phone number';
