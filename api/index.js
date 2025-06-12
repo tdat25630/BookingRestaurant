@@ -18,7 +18,7 @@ app.use(cookieParser());
 // app.use(cors());
 app.use(cors({
   origin: 'http://localhost:3000', // địa chỉ frontend của bạn
-  credentials: true 
+  credentials: true
 }));
 
 

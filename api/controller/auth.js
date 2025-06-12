@@ -9,6 +9,12 @@ const register = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
+    const existingUser = await User.find({ $or: [{ username: req.body.username }, { email: req.body.email }] });
+    if (existingUser.length > 0) {
+      next(createError(400, "Username or email already exists!"));
+      return;
+    }
+
     const newUser = new User({
       username: req.body.username,
       email: req.body.email,
@@ -30,7 +36,7 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    
+
     if (!user) {
       return next(createError(404, "User with this email not found!"));
     }
