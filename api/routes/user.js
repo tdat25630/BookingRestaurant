@@ -1,9 +1,10 @@
 const express = require('express');
-const { getUsers } = require('../controller/user');
-const { verifyAdmin } = require('../util/verifyToken');
+const { getUsers, getUserById } = require('../controller/user');
+const { verifyAdmin, verifyUser } = require('../util/verifyToken');
 
 const router = express.Router();
 
-router.get('/',verifyAdmin, getUsers);
+router.get('/', verifyAdmin, getUsers);
+router.get('/:id', verifyUser, getUserById);
 
 module.exports = router;
