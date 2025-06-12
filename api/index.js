@@ -11,7 +11,12 @@ require('dotenv').config();
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // địa chỉ frontend của bạn
+  credentials: true
+}));
+
 
 const connectDb = async () => {
   try {
@@ -27,6 +32,9 @@ const connectDb = async () => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/menu', require('./routes/menu'));
+
+// app.use('/api/admin', require('./routes/AdminRoute'));
+
 
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;

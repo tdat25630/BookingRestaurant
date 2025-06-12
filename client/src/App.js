@@ -1,17 +1,22 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Header from "./components/Header";
-import Home from "./pages/user/Home";
-import Menu from "./pages/user/Menu";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
+import Home from './component/pages/Home/Home';
+import Login from './component/pages/Login/Login';
+
 function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/menu" element={<Menu />} /> {/* ← Thêm route này */}
-      </Routes>
-    </Router>
-  );
+    return (
+        <Router>
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/" element={<Navigate to="/login" />} />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;
