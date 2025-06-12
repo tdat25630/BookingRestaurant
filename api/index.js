@@ -2,7 +2,6 @@ const cookieParser = require('cookie-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const invoiceRoutes = require('./routes/invoice');
 
 const app = express();
 
@@ -32,7 +31,7 @@ const connectDb = async () => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/menu', require('./routes/menu'));
-app.use('/api/invoices', invoiceRoutes);
+app.use('/api/invoices', require('./routes/invoice'));
 // app.use('/api/admin', require('./routes/AdminRoute'));
 
 

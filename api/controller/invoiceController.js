@@ -1,10 +1,29 @@
-const vnpayService = require('../services/vnpay.service');
 const dateFormat = require('date-format');
 const Invoice = require('../models/Invoice');
 const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
-const { calculateBill } = require('../services/invoiceService');
 
+
+const calculateBill = async (orderId) => {
+    const order = await Order.findById(orderId);
+    const orderItems = await OrderItem.find({
+        order_id: orderId
+    });
+    if (!order || orderItems.length === 0) {
+        throw new Error('Không tìm thấy đơn hàng hoặc đơn hàng trống');
+    }
+    //Tinhs tong tien
+    const subTotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const totalAmount = subTotal;//nếu tính thêm tax tủng thì thêm vào đây
+    return {
+        order,
+        orderItems,
+        subTotal,
+        discount: 0,
+        tax_amount: 0,
+        total_amount: totalAmount
+    };
+};
 // Xem trước hóa đơn trước khi thanh toán
 const previewInvoice = async (req, res, next) => {
     try {
@@ -30,27 +49,45 @@ const previewInvoice = async (req, res, next) => {
 const createVnpayUrl = async (req, res, next) => {
     try {
         const { orderId } = req.body;
+
         const billDetails = await calculateBill(orderId);
         const amount = billDetails.total_amount;
-        const returnUrl = 'http://localhost:8080/api/invoices/vnpay_return';
 
-        if (!amount || amount <= 0) {
-            return res.status(400).json({ success: false, message: 'Số tiền không hợp lệ.' });
+        if (!orderId || !amount || amount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Dữ liệu không hợp lệ. Cần có orderId và số tiền hợp lệ.'
+            });
         }
 
+        const vnpay = new VNPay({
+            tmnCode: process.env.VNP_TMN_CODE,
+            secureSecret: process.env.VNP_HASH_SECRET,
+            vnpayHost: 'https://sandbox.vnpayment.vn',
+            hashAlgorithm: 'SHA512',
+        });
+
+        const createDate = new Date();
+
         const ipAddr = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-        const paymentUrl = await vnpayService.buildPaymentUrl({
+
+        const returnUrl = `${process.env.APP_URL}/api/invoices/vnpay_return`;
+
+        const paymentUrl = await vnpay.buildPaymentUrl({
             vnp_Amount: amount * 100,
             vnp_IpAddr: ipAddr,
             vnp_TxnRef: `${orderId}_${Date.now()}`,
-            vnp_OrderInfo: `Thanh toán đơn hàng ${orderId}`,
+            vnp_OrderInfo: `Thanh toan don hang ${orderId}`,
             vnp_OrderType: 'other',
             vnp_ReturnUrl: returnUrl,
             vnp_Locale: 'vn',
-            vnp_CreateDate: dateFormat(new Date(), 'yyyyMMddHHmmss'),
+            vnp_CreateDate: dateFormat(createDate, 'yyyymmddHHMMss'),
         });
 
-        res.status(200).json({ success: true, data: { paymentUrl } });
+        res.status(200).json({
+            success: true,
+            data: { paymentUrl }
+        });
 
     } catch (error) {
         console.error("Lỗi khi tạo URL VNPAY:", error);
@@ -82,26 +119,26 @@ const handleVnpayIpn = async (req, res, next) => {
     try {
         const isVerified = vnpayService.verifyIpnUrl(req.query);
         if (!isVerified) {
-            return res.status(200).json({ code: '97', Message: 'Invalid Checksum' });
+            return res.status(200).json({ RspCode: '97', Message: 'Invalid Checksum' });
         }
 
         const { vnp_ResponseCode, vnp_TxnRef } = req.query;
         const orderId = vnp_TxnRef.split('_')[0];
 
         if (vnp_ResponseCode !== '00') {
-            return res.status(200).json({ code: '01', Message: 'Transaction Failed' });
+            return res.status(200).json({ RspCode: '01', Message: 'Transaction Failed' });
         }
 
         const existingInvoice = await Invoice.findOne({ order_id: orderId });
         if (existingInvoice) {
-            return res.status(200).json({ code: '02', Message: 'Invoice Already Exists' });
+            return res.status(200).json({ RspCode: '02', Message: 'Invoice Already Exists' });
         }
 
         const billDetails = await calculateBill(orderId);
         const order = await Order.findById(orderId);
 
         if (!order) {
-            return res.status(200).json({ code: '03', Message: 'Order Not Found' });
+            return res.status(200).json({ RspCode: '03', Message: 'Order Not Found' });
         }
 
         const newInvoice = new Invoice({
