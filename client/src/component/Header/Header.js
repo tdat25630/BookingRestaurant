@@ -3,8 +3,19 @@ import { Navbar, Container, Nav, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils, faUser, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import './Header.css';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
+
+    const { currentUser, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    }
+
     return (
         <Navbar expand="lg" className="custom-navbar" variant="dark">
             <Container>
@@ -24,7 +35,7 @@ const Header = () => {
                             title={
                                 <span>
                                     <FontAwesomeIcon icon={faUser} className="me-1" />
-                                    Profile
+                                    {currentUser?.username || 'Profile'}
                                 </span>
                             }
                             id="basic-nav-dropdown"
@@ -32,7 +43,7 @@ const Header = () => {
                         >
                             <NavDropdown.Item href="/profile">Settings</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item href="/logout">
+                            <NavDropdown.Item onClick={handleLogout}>
                                 <FontAwesomeIcon icon={faSignOutAlt} className="me-1" />
                                 Logout
                             </NavDropdown.Item>

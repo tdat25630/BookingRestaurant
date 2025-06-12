@@ -35,7 +35,62 @@ const Home = () => {
           </Col>
         </Row>
 
+        <Row className="mb-4">
+          <Col>
+            <h2 className="section-title">
+              <FontAwesomeIcon icon={faUtensils} className="me-2" />
+              Popular Restaurants
+            </h2>
+          </Col>
+        </Row>
 
+        <Row>
+          {restaurants.map(restaurant => (
+            <Col key={restaurant.id} xs={12} md={6} lg={3} className="mb-4">
+              <Card className="restaurant-card">
+                <div className="card-img-container">
+                  <Card.Img variant="top" src={restaurant.image} />
+                  <div className="card-rating">{restaurant.rating}</div>
+                </div>
+                <Card.Body>
+                  <Card.Title>{restaurant.name}</Card.Title>
+                  <Card.Text>{restaurant.cuisine} Cuisine</Card.Text>
+                  <Button fullWidth>Book Now</Button>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+
+        <Row className="mt-5 mb-4">
+          <Col>
+            <h2 className="section-title">
+              <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
+              Your Upcoming Bookings
+            </h2>
+          </Col>
+        </Row>
+
+        <Row>
+          {upcomingBookings.map(booking => (
+            <Col key={booking.id} xs={12} md={6} className="mb-4">
+              <Card className="booking-card">
+                <Card.Body>
+                  <Card.Title>{booking.restaurant}</Card.Title>
+                  <Card.Text>
+                    <div><strong>Date:</strong> {booking.date}</div>
+                    <div><strong>Time:</strong> {booking.time}</div>
+                    <div><strong>Guests:</strong> {booking.guests}</div>
+                  </Card.Text>
+                  <div className="d-flex justify-content-between">
+                    <Button variant="outline">Modify</Button>
+                    <Button variant="danger">Cancel</Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
       </Container>
     </div>
   );
