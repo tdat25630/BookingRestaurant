@@ -45,3 +45,12 @@ exports.endDiningSession = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getAllSessions = async (req, res) => {
+  try {
+    const sessions = await DiningSession.find();
+    res.json(sessions);
+  } catch (err) {
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách sessions' });
+  }
+};

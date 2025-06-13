@@ -28,6 +28,8 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, cartItems }) {
       </div>
     </div>
   );
+
+
 }
 
 export default ConfirmationModal;

@@ -11,7 +11,7 @@ const diningSessionRoutes = require('./routes/diningSessionRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const orderItemRoutes = require('./routes/orderItemRoutes');
 
-
+const tableRoutes = require('./routes/tableRoutes');
 
 const app = express();
 
@@ -51,7 +51,7 @@ app.use('/api/menu-items', menuItemRoutes);
 app.use('/api/dining-sessions', diningSessionRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/order-items', orderItemRoutes);
-
+app.use('/api/tables', tableRoutes);
 
 // middlewares
 app.use(errorMiddleware);

@@ -11,4 +11,7 @@ router.get('/table/:tableId', diningSessionController.getActiveSessionByTable);
 // Kết thúc session
 router.put('/end/:id', diningSessionController.endDiningSession);
 
+router.get('/', diningSessionController.getAllSessions);
+
+
 module.exports = router;

@@ -77,16 +77,71 @@
 
 // export default MenuPage;
 
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import Header from "../../components/Header";
+
+// import MenuItemCard from "../../components/MenuItemCard";
+// import { useOrder } from "../../context/OrderContext";
+
+// function MenuPage() {
+//   const [menuItems, setMenuItems] = useState([]);
+//   const { cartItems } = useOrder(); // 👉 Truy cập giỏ hàng
+
+//   useEffect(() => {
+//     axios.get("http://localhost:8080/api/menu-items")
+//       .then(res => setMenuItems(res.data))
+//       .catch(err => console.error(err));
+//   }, []);
+
+//   return (
+//      <>
+//           <Header />
+
+//     <div>
+//       <h2>Menu</h2>
+//       <p>🛒 Số món đã gọi: {cartItems.length}</p> {/* Xem giỏ hàng cập nhật chưa */}
+//       <div className="menu-grid">
+//         {menuItems.map(item => (
+//           <MenuItemCard key={item._id} item={item} />
+//         ))}
+//       </div>
+//     </div>
+//     </>
+//   );
+// }
+// export default MenuPage;
+
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Header from "../../components/Header";
-
 import MenuItemCard from "../../components/MenuItemCard";
 import { useOrder } from "../../context/OrderContext";
+import { useSession } from "../../context/SessionContext"; // 👈 dùng session context
+import { useSearchParams } from "react-router-dom";
 
 function MenuPage() {
   const [menuItems, setMenuItems] = useState([]);
-  const { cartItems } = useOrder(); // 👉 Truy cập giỏ hàng
+  const { cartItems } = useOrder();
+  const { sessionId, saveSession } = useSession();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const idFromUrl = searchParams.get("sessionId");
+    if (idFromUrl) {
+      saveSession(idFromUrl);
+      console.log("✅ Đã lưu sessionId:", idFromUrl);
+    } else {
+      const stored = localStorage.getItem("sessionId");
+      if (stored) {
+        saveSession(stored);
+        console.log("♻️ Khôi phục từ localStorage:", stored);
+      } else {
+        alert("⚠️ Không tìm thấy sessionId! Vui lòng quét mã QR hoặc chọn bàn.");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     axios.get("http://localhost:8080/api/menu-items")
@@ -95,19 +150,20 @@ function MenuPage() {
   }, []);
 
   return (
-     <>
-          <Header />
+    <>
+      <Header />
 
-    <div>
-      <h2>Menu</h2>
-      <p>🛒 Số món đã gọi: {cartItems.length}</p> {/* Xem giỏ hàng cập nhật chưa */}
-      <div className="menu-grid">
-        {menuItems.map(item => (
-          <MenuItemCard key={item._id} item={item} />
-        ))}
+      <div>
+        <h2>Menu</h2>
+        <p>🛒 Số món đã gọi: {cartItems.length}</p>
+        <div className="menu-grid">
+          {menuItems.map(item => (
+            <MenuItemCard key={item._id} item={item} />
+          ))}
+        </div>
       </div>
-    </div>
     </>
   );
 }
+
 export default MenuPage;
