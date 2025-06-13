@@ -4,6 +4,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
+
+const menuCategoryRoutes = require('./routes/menuCategoryRoutes');
+const menuItemRoutes = require('./routes/menuItemRoutes');
+
 const app = express();
 
 require('dotenv').config();
@@ -33,9 +37,13 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/menu', require('./routes/menu'));
 app.use('/api/invoices', require('./routes/invoice'));
+
 app.use('/api/reservation', require('./routes/reservation.route'));
 
+
 // app.use('/api/admin', require('./routes/AdminRoute'));
+app.use('/api/menu-categories', menuCategoryRoutes);
+app.use('/api/menu-items', menuItemRoutes);
 
 // middlewares
 app.use(errorMiddleware);
