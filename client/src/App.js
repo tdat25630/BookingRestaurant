@@ -13,7 +13,8 @@ import AdminRoutes from "./routes/AdminRoutes";
 
 import CheckoutPage from "./pages/user/CheckoutPage";
 import MenuPage from "./pages/user/MenuPage";
-import ConfirmOrderPage from "./components/ConfirmOrderPage"; // sửa đường dẫn đúng nhé
+import ConfirmOrderPage from "./components/ConfirmOrderPage"; 
+
 
 function App() {
   return (
@@ -34,6 +35,9 @@ function App() {
       <Route path="/admin/*" element={<AdminRoutes />} />
 
       <Route path="/confirm" element={<ConfirmOrderPage />} />
+
+  
+
       </Routes>
       {/* <Footer /> */}
     </Router>

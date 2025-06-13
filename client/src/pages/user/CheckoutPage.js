@@ -1,83 +1,90 @@
-// import React from "react";
-// import { useOrder } from "../../context/OrderContext";
-// import axios from "axios";
-
-// function CheckoutPage() {
-//   const { cartItems, clearCart } = useOrder();
-
-//   const handleCheckout = async () => {
-//     const orderData = {
-//       tableId: "TABLE_ID_HERE", // bạn sẽ cập nhật sau khi làm QR
-//     //   orderItems: cartItems.map(item => ({
-//     //     menuItemId: item.menuItem._id,
-//     //     quantity: item.quantity,
-//     //     notes: item.notes || "",
-//     //     price: item.menuItem.price
-//     //   }))
-//     orderItems: cartItems.map(item => ({
-//         menuItemId: item._id,
-//         quantity: item.quantity,
-//         notes: item.notes || "",
-//         price: item.price
-//       }))
-      
-//     };
-
-//     try {
-//       await axios.post("/api/orders", orderData);
-//       alert("Gửi đơn hàng thành công!");
-//       clearCart();
-//     } catch (err) {
-//       alert("Lỗi gửi đơn hàng.");
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h2>Xác nhận đơn</h2>
-//       {/* <ul>
-//         {cartItems.map(({ menuItem, quantity }) => (
-//           <li key={menuItem._id}>{menuItem.name} x {quantity}</li>
-//         ))}
-//       </ul> */}
-//       <ul>
-//   {cartItems.map(item => (
-//     <li key={item._id}>{item.name} x {item.quantity}</li>
-//   ))}
-// </ul>
-//       <button onClick={handleCheckout}>Gửi đơn hàng</button>
-//     </div>
-//   );
-// }
-
-// export default CheckoutPage;
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useSession } from "../../context/SessionContext";
+import Header from "../../components/Header";
+import { useNavigate } from "react-router-dom";
 
 
-import React from "react";
-import { useOrder } from "../../context/OrderContext";
-import { Link } from "react-router-dom";
 
 function CheckoutPage() {
-  const { cartItems } = useOrder(); // cart có thể đã bị clear, nên đây chỉ là tham khảo
+  const { sessionId, clearSession } = useSession();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    axios.get(`http://localhost:8080/api/orders/session/${sessionId}`)
+      .then(res => setOrders(res.data))
+      .catch(err => console.error("❌ Lỗi khi lấy đơn hàng:", err))
+      .finally(() => setLoading(false));
+  }, [sessionId]);
+
+  const handleCash = () => {
+    alert("Bạn chọn thanh toán tiền mặt.");
+    handlePayment();
+  };
+  
+  const handleQRCode = () => {
+    alert("Bạn chọn chuyển khoản qua QR.");
+    // Thêm xử lý sau, ví dụ redirect đến trang QR hoặc hiển thị ảnh QR Hưng làm nhé
+  };
+
+  
+  const handlePayment = async () => {
+    try {
+      // Gọi API cập nhật trạng thái từng đơn là đã thanh toán
+      await Promise.all(
+        orders.map(order =>
+          axios.put(`http://localhost:8080/api/orders/${order._id}/status`, {
+            status: "paid",
+          })
+        )
+      );
+      alert("✅ Đã thanh toán!");
+      clearSession();
+      navigate("/"); // Quay về trang chủ hoặc hiển thị trang "Cảm ơn"
+    } catch (err) {
+      console.error("❌ Lỗi thanh toán:", err);
+      alert("Có lỗi khi thanh toán!");
+    }
+  };
+
+  if (!sessionId) return <p>⚠️ Chưa có phiên đặt bàn!</p>;
+  if (loading) return <p>Đang tải...</p>;
 
   return (
-    <div>
-      <h2>Đơn hàng đã gửi</h2>
-      <ul>
-        {cartItems.length > 0 ? (
-          cartItems.map(item => (
-            <li key={item._id}>{item.name} x {item.quantity}</li>
-          ))
-        ) : (
-          <li>Đơn hàng đã được gửi!</li>
-        )}
-      </ul>
+    <>
+      <Header />
+      <div className="checkout-container">
+        <h2>🧾 Hóa đơn hiện tại</h2>
+        {orders.map(order => (
+          <div key={order._id} className="order-card">
+            <h3>🕒 {new Date(order.orderTime).toLocaleString()}</h3>
+            <p>Trạng thái đơn hàng: <strong>{order.status}</strong></p>
+            <ul>
+              {order.items.map(item => (
+                <li key={item._id}>
+                  {item.menuItemId?.name || 'Món không rõ'} × {item.quantity} — {item.price.toLocaleString('vi-VN') + '₫'}
+                  <span style={{ marginLeft: "10px", fontStyle: "italic" }}>
+                    [{item.status}]
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p><strong>Tổng cộng: {order.totalAmount.toLocaleString()}₫</strong></p>
+          </div>
+        ))}
+<button onClick={() => navigate("/pay")}>💵 Thanh toán</button>
 
-      <div style={{ marginTop: "20px" }}>
-        <Link to="/menu">🔄 Gọi thêm món</Link> | 
-        <Link to="/payment">💳 Thanh toán</Link>
+
+
+
       </div>
-    </div>
+    </>
   );
 }
 

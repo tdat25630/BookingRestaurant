@@ -13,6 +13,8 @@ exports.createDiningSession = async (req, res) => {
     const session = new DiningSession({ table: tableId, user: userId });
     await session.save();
 
+     // Cập nhật trạng thái bàn thành 'occupied'
+     await Table.findByIdAndUpdate(tableId, { status: 'occupied' });
     res.status(201).json(session);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -33,18 +35,38 @@ exports.getActiveSessionByTable = async (req, res) => {
 };
 
 // Kết thúc session
+// exports.endDiningSession = async (req, res) => {
+//   try {
+//     const session = await DiningSession.findByIdAndUpdate(
+//       req.params.id,
+//       { status: 'completed', endTime: new Date() },
+//       { new: true }
+//     );
+//     res.json(session);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+// Kết thúc session
 exports.endDiningSession = async (req, res) => {
   try {
-    const session = await DiningSession.findByIdAndUpdate(
-      req.params.id,
-      { status: 'completed', endTime: new Date() },
-      { new: true }
-    );
-    res.json(session);
+    const session = await DiningSession.findById(req.params.id);
+    if (!session) return res.status(404).json({ message: 'Session không tồn tại' });
+
+    // Cập nhật session
+    session.status = 'completed';
+    session.endTime = new Date();
+    await session.save();
+
+    // Cập nhật trạng thái bàn
+    await Table.findByIdAndUpdate(session.table, { status: 'available' });
+
+    res.json({ message: 'Phiên đã được kết thúc thành công', session });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 exports.getAllSessions = async (req, res) => {
   try {
@@ -52,5 +74,18 @@ exports.getAllSessions = async (req, res) => {
     res.json(sessions);
   } catch (err) {
     res.status(500).json({ error: 'Lỗi khi lấy danh sách sessions' });
+  }
+};
+
+
+exports.getSessionById = async (req, res) => {
+  try {
+    const session = await DiningSession.findById(req.params.id);
+    if (!session) {
+      return res.status(404).json({ message: 'Session không tồn tại' });
+    }
+    res.json(session);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };

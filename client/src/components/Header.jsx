@@ -154,6 +154,8 @@ const Header = () => {
             <Link to="/booking" style={navLinkStyle}>Đặt bàn</Link>
           </li>
 
+<li> <button onClick={() => navigate("/checkout")}>Xem hóa đơn</button>
+</li>
           <li>
             <button
               onClick={() => setDrawerOpen(true)}

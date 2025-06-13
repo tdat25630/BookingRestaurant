@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import UserManagement from '../pages/admin/UserManagement';
-
+import AdminTableQRPage from '../pages/admin/AdminTableQRPage';
+import AdminReservationPage from '../pages/admin/AdminReservationPage';
 const isAdmin = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   return user?.role === "admin";
@@ -16,7 +17,9 @@ const AdminRoutes = () => {
 
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="/tables" element={<AdminTableQRPage />} />
 
+<Route path="/reservations" element={<AdminReservationPage />} />
         </>
       ) : (
         <Route path="*" element={<Navigate to="/login" />} />

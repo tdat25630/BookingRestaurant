@@ -42,7 +42,8 @@ const Header = () => {
         >
                     <li><Link to="/admin/dashboard" style={navLinkStyle}>Dashboard</Link></li>
           <li><Link to="/admin/menu" style={navLinkStyle}>Thực đơn</Link></li>
-          <li><Link to="/admin/bookings" style={navLinkStyle}>Đặt bàn</Link></li>
+          <li><Link to="/admin/tables" style={navLinkStyle}>Quản lý bàn</Link></li>
+          <li><Link to="/admin/reservations" style={navLinkStyle}>Đặt bàn</Link></li>
           <li><Link to="/admin/orders" style={navLinkStyle}>Đơn hàng</Link></li>
           <li><Link to="/admin/staff" style={navLinkStyle}>Nhân viên</Link></li>
           <li><Link to="/admin/reports" style={navLinkStyle}>Báo cáo</Link></li>

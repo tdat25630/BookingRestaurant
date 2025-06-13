@@ -1,128 +1,14 @@
-// import React, { useEffect, useState } from 'react';
-// import axios from 'axios';
-// import CategoryList from '../../components/CategoryList';
-// import MenuItemList from '../../components/MenuItemList';
-// import Header from "../../components/Header";
-// import Footer from "../../components/Footer";
-
-
-// const MenuPage = () => {
-//   const [categories, setCategories] = useState([]);
-//   const [menuItems, setMenuItems] = useState([]);
-//   const [selectedCategory, setSelectedCategory] = useState(null);
-
-//   useEffect(() => {
-//     // Fetch danh mục
-//     axios.get('http://localhost:8080/api/menu-categories')
-//       .then(res => setCategories(res.data))
-//       .catch(err => console.error(err));
-//   }, []);
-
-//   useEffect(() => {
-//     // Fetch món ăn (toàn bộ hoặc theo category)
-//     const url = selectedCategory
-//       ? `http://localhost:8080/api/menu-items?category=${selectedCategory}`
-//       : `http://localhost:8080/api/menu-items`;
-
-//     axios.get(url)
-//       .then(res => setMenuItems(res.data))
-//       .catch(err => console.error(err));
-//   }, [selectedCategory]);
-
-//   return (
-//     <>
-//       <Header />
-   
-      
-//     <div>
-//       <h1>Thực Đơn Nhà Hàng</h1>
-//       <CategoryList categories={categories} onSelect={setSelectedCategory} />
-//       <MenuItemList items={menuItems} />
-//     </div>
-
-//     <Footer />
-   
-//     </>
-//   );
-// };
-
-// export default MenuPage;
-
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-// import MenuItemCard from "../../components/MenuItemCard";
-
-// function MenuPage() {
-//   const [menuItems, setMenuItems] = useState([]);
-
-//   useEffect(() => {
-//     axios.get("http://localhost:8080/api/menu-items")
-
-//     // axios.get("/api/menu-items")
-//       .then(res => setMenuItems(res.data))
-//       .catch(err => console.error(err));
-//   }, []);
-
-//   return (
-//     <div>
-//       <h2>Menu</h2>
-//       <div className="menu-grid">
-//         {menuItems.map(item => (
-//           <MenuItemCard key={item._id} item={item} />
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default MenuPage;
-
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-// import Header from "../../components/Header";
-
-// import MenuItemCard from "../../components/MenuItemCard";
-// import { useOrder } from "../../context/OrderContext";
-
-// function MenuPage() {
-//   const [menuItems, setMenuItems] = useState([]);
-//   const { cartItems } = useOrder(); // 👉 Truy cập giỏ hàng
-
-//   useEffect(() => {
-//     axios.get("http://localhost:8080/api/menu-items")
-//       .then(res => setMenuItems(res.data))
-//       .catch(err => console.error(err));
-//   }, []);
-
-//   return (
-//      <>
-//           <Header />
-
-//     <div>
-//       <h2>Menu</h2>
-//       <p>🛒 Số món đã gọi: {cartItems.length}</p> {/* Xem giỏ hàng cập nhật chưa */}
-//       <div className="menu-grid">
-//         {menuItems.map(item => (
-//           <MenuItemCard key={item._id} item={item} />
-//         ))}
-//       </div>
-//     </div>
-//     </>
-//   );
-// }
-// export default MenuPage;
-
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Header from "../../components/Header";
 import MenuItemCard from "../../components/MenuItemCard";
 import { useOrder } from "../../context/OrderContext";
-import { useSession } from "../../context/SessionContext"; // 👈 dùng session context
+import { useSession } from "../../context/SessionContext";
 import { useSearchParams } from "react-router-dom";
 
 function MenuPage() {
   const [menuItems, setMenuItems] = useState([]);
+  const [sessionValid, setSessionValid] = useState(null); // null: chưa kiểm tra, true: hợp lệ, false: không hợp lệ
   const { cartItems } = useOrder();
   const { sessionId, saveSession } = useSession();
   const [searchParams] = useSearchParams();
@@ -131,6 +17,7 @@ function MenuPage() {
     const idFromUrl = searchParams.get("sessionId");
     if (idFromUrl) {
       saveSession(idFromUrl);
+      localStorage.setItem("sessionId", idFromUrl);
       console.log("✅ Đã lưu sessionId:", idFromUrl);
     } else {
       const stored = localStorage.getItem("sessionId");
@@ -139,15 +26,53 @@ function MenuPage() {
         console.log("♻️ Khôi phục từ localStorage:", stored);
       } else {
         alert("⚠️ Không tìm thấy sessionId! Vui lòng quét mã QR hoặc chọn bàn.");
+        setSessionValid(false);
       }
     }
   }, []);
 
+  // Kiểm tra session hợp lệ
   useEffect(() => {
-    axios.get("http://localhost:8080/api/menu-items")
-      .then(res => setMenuItems(res.data))
-      .catch(err => console.error(err));
-  }, []);
+    const validateSession = async () => {
+      if (!sessionId) return;
+
+      try {
+        const res = await axios.get(`http://localhost:8080/api/dining-sessions/${sessionId}`);
+        if (res.data.status !== "active") {
+          throw new Error("Session không còn active");
+        }
+        setSessionValid(true);
+      } catch (err) {
+        console.error("❌ Session ID không hợp lệ hoặc không còn active:", err);
+        setSessionValid(false);
+      }
+    };
+
+    validateSession();
+  }, [sessionId]);
+
+  // Lấy menu sau khi xác nhận session hợp lệ
+  useEffect(() => {
+    if (sessionValid) {
+      axios
+        .get("http://localhost:8080/api/menu-items")
+        .then((res) => setMenuItems(res.data))
+        .catch((err) => console.error(err));
+    }
+  }, [sessionValid]);
+
+  if (sessionValid === null) {
+    return <p>🔍 Đang kiểm tra phiên ăn uống...</p>;
+  }
+
+  if (sessionValid === false) {
+    return (
+      <div style={{ padding: 20 }}>
+        <h2 style={{ color: "red" }}>❌ Phiên không hợp lệ hoặc đã kết thúc</h2>
+        <p>Vui lòng quét lại mã QR hoặc chọn lại bàn để bắt đầu phiên mới.</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -157,7 +82,7 @@ function MenuPage() {
         <h2>Menu</h2>
         <p>🛒 Số món đã gọi: {cartItems.length}</p>
         <div className="menu-grid">
-          {menuItems.map(item => (
+          {menuItems.map((item) => (
             <MenuItemCard key={item._id} item={item} />
           ))}
         </div>
