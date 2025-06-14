@@ -40,7 +40,7 @@ const Header = () => {
                         <Nav className="ms-auto">
                             <Nav.Link href="/home" className="nav-link">Home</Nav.Link>
                             <Nav.Link href="/restaurants" className="nav-link">Restaurants</Nav.Link>
-                            <Nav.Link href="/bookings" className="nav-link">My Bookings</Nav.Link>
+                            <Nav.Link href="/booking" className="nav-link">My Bookings</Nav.Link>
 
 
 

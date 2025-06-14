@@ -1,0 +1,53 @@
+/* Container */
+.reservation-container {
+    max-width: 900px;
+  }
+  
+  /* Title */
+  h3 {
+    font-weight: bold;
+    color: #444;
+  }
+  
+  /* Form */
+  form.bg-light {
+    background-color: #f9f9f9 !important;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Label behavior fix */
+  .form-floating > .form-control,
+  .form-floating > textarea.form-control {
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Label color */
+  .form-floating label {
+    color: #666;
+    font-size: 0.95rem;
+  }
+  
+  /* Submit Button */
+  .text-center button {
+    padding: 12px 36px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+  }
+  
+  /* Alerts */
+  .alert-success,
+  .alert-danger {
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+  
+  /* Responsive tweak */
+  @media (max-width: 576px) {
+    .form-floating {
+      margin-bottom: 1rem;
+    }
+  }
+  
