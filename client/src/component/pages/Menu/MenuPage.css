@@ -1,0 +1,37 @@
+/* MenuPage.css */
+
+.menu-page-container {
+    padding: 80px 20px 40px; /* padding-top để tránh bị che bởi navbar nếu có */
+    background-color: #1a1a1a;
+    min-height: 100vh;
+    color: #ffffff;
+  }
+  
+  .menu-page-container h2 {
+    color: #ffc107;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .menu-page-container p {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #cccccc;
+  }
+  
+  /* Grid layout for menu items */
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 0 20px;
+  }
+  
+  /* Optional: Empty state */
+  .menu-grid:empty::after {
+    content: "Không có món ăn nào.";
+    color: #ccc;
+    text-align: center;
+    grid-column: 1 / -1;
+  }
+  

@@ -8,6 +8,12 @@ const errorMiddleware = require('./middlewares/errorMiddleware');
 const menuCategoryRoutes = require('./routes/menuCategoryRoutes');
 const menuItemRoutes = require('./routes/menuItemRoutes');
 
+const diningSessionRoutes = require('./routes/diningSessionRoutes');
+const tableRoutes = require('./routes/tableRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const orderItemRoutes = require('./routes/orderItemRoutes');
+
+
 const app = express();
 
 require('dotenv').config();
@@ -17,7 +23,7 @@ app.use(cookieParser());
 
 // app.use(cors());
 app.use(cors({
-  origin: 'http://localhost:3000', // địa chỉ frontend của bạn
+  origin: 'http://localhost:3000', 
   credentials: true
 }));
 
@@ -43,6 +49,11 @@ app.use('/api/reservation', require('./routes/reservation.route'));
 app.use('/api/menu-categories', menuCategoryRoutes);
 app.use('/api/menu-items', menuItemRoutes);
 
+app.use('/api/dining-sessions', diningSessionRoutes);
+app.use('/api/tables', tableRoutes);
+
+app.use('/api/orders', orderRoutes);
+app.use('/api/order-items', orderItemRoutes);
 // middlewares
 app.use(errorMiddleware);
 

@@ -1,6 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import AdminDashboard from '../pages/admin/AdminDashboard';
-import UserManagement from '../pages/admin/UserManagement';
+import AdminDashboard from '../component/pages/Dashboard/AdminDashboard';
+import AdminTableQRPage from '../component/pages/ManagementTable/AdminTableQRPage';
+
+import AdminReservation from '../component/pages/Reservation/AdminReservation';
+import AdminCheckoutPage from "../component/pages/Checkout/AdminCheckoutPage";
 
 const isAdmin = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -14,12 +17,15 @@ const AdminRoutes = () => {
         <>
            <Route path="/" element={<AdminDashboard />} /> 
 
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="users" element={<UserManagement />} />
+          {/* <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<UserManagement />} /> */}
+          <Route path="reservation" element={<AdminReservation />} />
+          <Route path="tables" element={<AdminTableQRPage />} />
+          <Route path="checkout" element={<AdminCheckoutPage />} />
 
         </>
       ) : (
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       )}
     </Routes>
   );
