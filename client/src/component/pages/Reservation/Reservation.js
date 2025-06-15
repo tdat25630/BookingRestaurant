@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import {
   Container, Form, Button, Row, Col, Alert, FloatingLabel
 } from 'react-bootstrap';
-import Header from '../../Header/Header';
+
+// import Header from '../../Header/Header';
 
 function Reservation() {
     const [formData, setFormData] = useState({
@@ -74,13 +75,16 @@ function Reservation() {
   
     return (
       <>
-        <Header />
+        {/* <Header /> */}
+        
         <Container className="mt-4">
-          <h3 className="mb-4 text-center">Đặt bàn</h3>
-  
+          <h3 className="mb-4 text-center">Đặt bàn ne </h3>
+ 
           {success && <Alert variant="success">{success}</Alert>}
           {errors.api && <Alert variant="danger">{errors.api}</Alert>}
-  
+        
+
+
           <Form onSubmit={handleSubmit} className="p-4 shadow-sm rounded bg-light">
             <Row className="mb-3">
               <Col md={6}>
@@ -92,6 +96,7 @@ function Reservation() {
                     isInvalid={!!errors.phone}
                     onChange={handleChange}
                     placeholder="+84123456789"
+                    style={{ height: '58px' }}
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.phone}
@@ -115,6 +120,7 @@ function Reservation() {
                 </FloatingLabel>
               </Col>
             </Row>
+            
   
             <Row className="mb-3">
               <Col md={6}>

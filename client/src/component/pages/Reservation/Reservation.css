@@ -9,6 +9,10 @@
     color: #444;
   }
   
+  .form-floating > .form-control {
+    height: 58px;
+  }
+  
   /* Form */
   form.bg-light {
     background-color: #f9f9f9 !important;

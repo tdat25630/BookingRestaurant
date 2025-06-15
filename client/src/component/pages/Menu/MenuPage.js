@@ -61,24 +61,65 @@ function MenuPage() {
   }, [sessionId]);
 
   // Tải dữ liệu menu, category và giỏ hàng
-  useEffect(() => {
-    const fetchData = async () => {
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const [categoriesRes, menuRes, orderRes] = await Promise.all([
+  //         axios.get("http://localhost:8080/api/menu-categories"),
+  //         axios.get("http://localhost:8080/api/menu-items"),
+  //         axios.get(`http://localhost:8080/api/orders/session/${sessionId}`)
+  //       ]);
+
+  //       setCategories(categoriesRes.data);
+  //       setMenuItems(menuRes.data);
+
+  //       const currentOrder = orderRes.data;
+  //       if (currentOrder?._id) {
+  //         setOrderId(currentOrder._id);
+  //         const itemsRes = await axios.get(
+  //           `http://localhost:8080/api/order-items/order/${currentOrder._id}`
+  //         );
+  //         const formattedItems = itemsRes.data.map((item) => ({
+  //           _id: item.menuItemId,
+  //           name: item.menuItem?.name || "Không rõ",
+  //           price: item.price,
+  //           quantity: item.quantity,
+  //           notes: item.notes || "",
+  //         }));
+  //         loadCartFromServer(formattedItems);
+  //       }
+  //     } catch (err) {
+  //       console.error(" Lỗi khi tải dữ liệu:", err);
+  //     }
+  //   };
+  //   if (sessionValid) fetchData();
+  // }, [sessionValid]);
+
+  // Tải dữ liệu menu, category và giỏ hàng
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // Gọi menu và category
+      const [categoriesRes, menuRes] = await Promise.all([
+        axios.get("http://localhost:8080/api/menu-categories"),
+        axios.get("http://localhost:8080/api/menu-items")
+      ]);
+
+      setCategories(categoriesRes.data);
+      setMenuItems(menuRes.data);
+
+      // Gọi order nếu có (bắt lỗi riêng)
       try {
-        const [categoriesRes, menuRes, orderRes] = await Promise.all([
-          axios.get("http://localhost:8080/api/menu-categories"),
-          axios.get("http://localhost:8080/api/menu-items"),
-          axios.get(`http://localhost:8080/api/orders/session/${sessionId}`)
-        ]);
-
-        setCategories(categoriesRes.data);
-        setMenuItems(menuRes.data);
-
+        const orderRes = await axios.get(`http://localhost:8080/api/orders/session/${sessionId}`);
         const currentOrder = orderRes.data;
+
         if (currentOrder?._id) {
           setOrderId(currentOrder._id);
+
           const itemsRes = await axios.get(
             `http://localhost:8080/api/order-items/order/${currentOrder._id}`
           );
+
           const formattedItems = itemsRes.data.map((item) => ({
             _id: item.menuItemId,
             name: item.menuItem?.name || "Không rõ",
@@ -86,14 +127,23 @@ function MenuPage() {
             quantity: item.quantity,
             notes: item.notes || "",
           }));
+
           loadCartFromServer(formattedItems);
         }
-      } catch (err) {
-        console.error(" Lỗi khi tải dữ liệu:", err);
+      } catch (orderErr) {
+        if (orderErr.response?.status === 404) {
+          console.log("📭 Chưa có đơn hàng nào cho phiên này.");
+        } else {
+          console.error("❌ Lỗi khi lấy đơn hàng:", orderErr);
+        }
       }
-    };
-    if (sessionValid) fetchData();
-  }, [sessionValid]);
+    } catch (err) {
+      console.error("❌ Lỗi khi tải dữ liệu menu hoặc danh mục:", err);
+    }
+  };
+
+  if (sessionValid) fetchData();
+}, [sessionValid]);
 
   if (sessionValid === null) return <p>🔍 Đang kiểm tra phiên ăn uống...</p>;
   if (sessionValid === false) {
