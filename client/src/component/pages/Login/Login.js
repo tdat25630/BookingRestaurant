@@ -6,9 +6,14 @@ import axios from 'axios';
 import './Login.css';
 import Button from '../../Button/Button';
 import Input from '../../Input/Input';
+import { useAuth } from '../../../context/AuthContext';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const navigate = useNavigate();
+
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [validated, setValidated] = useState(false);
   const [error, setError] = useState('');
@@ -24,19 +29,43 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:8080/api/login', {
+      setLoading(true);
+      console.log('Sending login data:', { email, password });
+
+      const response = await axios.post('http://localhost:8080/api/auth/login', {
         email,
         password
       }, {
         withCredentials: true
       });
-      localStorage.setItem('user', JSON.stringify(response.data));
 
-      Navigate('/home')
+      console.log('Login response:', response);
+
+      if (response.data) {
+        login(response.data);
+
+        // Redirect based on user role
+        if (response.data.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/home');
+        }
+      } else {
+        setError('Invalid response from server');
+      }
     } catch (err) {
-      console.error('Login failed: ', err);
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login failed - Error object:', err);
+      console.error('Error type:', typeof err);
+      console.error('Error toString:', String(err));
+      console.error('Response available:', err.response ? 'Yes' : 'No');
 
+      let errorMessage = "Login failed. Please try again.";
+
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -60,12 +89,12 @@ const Login = () => {
 
         <Form noValidate validated={validated} onSubmit={handleSubmit}>
           <Input
-            label="Username"
+            label="Email"
             type="text"
-            placeholder="Enter your username"
-            value={username}
+            placeholder="Enter your Email"
+            value={email}
             required
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
 
           <Input
@@ -84,7 +113,7 @@ const Login = () => {
           </div>
 
           <div className="text-center mt-3">
-            <p className="mb-0">Don't have an account? <a href="#register" className="register-link">Register</a></p>
+            <p className="mb-0">Don't have an account? <Link to="/register" className='register-link'>Register</Link></p>
           </div>
         </Form>
       </div>
