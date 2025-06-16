@@ -2,7 +2,11 @@ const cookieParser = require('cookie-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const errorMiddleware = require('./middlewares/errorMiddleware');
 
+
+const menuCategoryRoutes = require('./routes/menuCategoryRoutes');
+const menuItemRoutes = require('./routes/menuItemRoutes');
 
 const app = express();
 
@@ -31,21 +35,16 @@ const connectDb = async () => {
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
-app.use('/api/menu', require('./routes/menu'));
+
+app.use('/api/reservation', require('./routes/reservation.route'));
+
 
 // app.use('/api/admin', require('./routes/AdminRoute'));
+app.use('/api/menu-categories', menuCategoryRoutes);
+app.use('/api/menu-items', menuItemRoutes);
 
-
-app.use((err, req, res, next) => {
-  const errorStatus = err.status || 500;
-  const errorMessage = err.message || "Something went wrong!";
-  return res.status(errorStatus).json({
-    success: false,
-    status: errorStatus,
-    message: errorMessage,
-    stack: err.stack
-  })
-})
+// middlewares
+app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 8080;
 
