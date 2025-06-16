@@ -21,7 +21,7 @@
 
 .login-title {
   color: #ffc107;
-
+  /* Bootstrap gold */
   font-weight: 600;
   margin-top: 10px;
 }
@@ -29,7 +29,7 @@
 .restaurant-icon {
   font-size: 3rem;
   color: #ffc107;
-
+  /* Bootstrap gold */
 }
 
 .register-link {
@@ -41,4 +41,9 @@
 .register-link:hover {
   color: #ffca28;
   text-decoration: underline;
+}
+
+/* Additional Login styling */
+.mt-4 {
+  margin-top: 1.5rem;
 }

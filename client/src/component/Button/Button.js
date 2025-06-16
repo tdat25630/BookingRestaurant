@@ -1,18 +1,17 @@
 import React from 'react';
-import { Button as BootstrapButton } from 'react-bootstrap';
 import './Button.css';
 
-const Button = ({ children, variant = "primary", fullWidth, ...props }) => {
-    const className = `custom-button ${fullWidth ? 'w-100' : ''}`;
+const Button = ({ children, variant = "primary", fullWidth, className, ...props }) => {
+    const buttonClass = `custom-button ${fullWidth ? 'w-100' : ''} ${className || ''}`;
 
     return (
-        <BootstrapButton
-            variant={variant}
-            className={className}
+        <button
+            type="button"
+            className={buttonClass}
             {...props}
         >
             {children}
-        </BootstrapButton>
+        </button>
     );
 };
 

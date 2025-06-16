@@ -1,19 +1,18 @@
 import React from 'react';
-import { Form } from 'react-bootstrap';
 import './Input.css';
 
-const Input = ({ label, ...props }) => {
+const Input = ({ label, className, ...props }) => {
     return (
-        <Form.Group className="mb-3 custom-input">
-            {label && <Form.Label>{label}</Form.Label>}
-            <Form.Control
+        <div className={`mb-3 custom-input ${className || ''}`}>
+            {label && <label className="custom-input-label">{label}</label>}
+            <input
                 className="custom-form-control"
                 {...props}
             />
-            <Form.Control.Feedback type="invalid">
+            <div className="invalid-feedback">
                 This field is required
-            </Form.Control.Feedback>
-        </Form.Group>
+            </div>
+        </div>
     );
 };
 

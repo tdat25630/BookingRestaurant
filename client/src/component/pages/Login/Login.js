@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
@@ -7,7 +6,7 @@ import './Login.css';
 import Button from '../../Button/Button';
 import Input from '../../Input/Input';
 import { useAuth } from '../../../context/AuthContext';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -39,15 +38,24 @@ const Login = () => {
         withCredentials: true
       });
 
-      console.log('Login response:', response);
+      console.log('Login response:', response); if (response.data) {
+        console.log('Login successful, user data:', response.data);
 
-      if (response.data) {
+        // Store auth data in localStorage as expected by ProtectedRoute
+        localStorage.setItem('token', response.data.token || 'dummy-token'); // In case token isn't provided
+        localStorage.setItem('userRole', response.data.role || 'user');
+
+        // Call login from AuthContext
         login(response.data);
+
+        console.log('About to navigate based on role:', response.data.role);
 
         // Redirect based on user role
         if (response.data.role === 'admin') {
+          console.log('Redirecting to admin page');
           navigate('/admin');
         } else {
+          console.log('Redirecting to home page');
           navigate('/home');
         }
       } else {
@@ -85,9 +93,7 @@ const Login = () => {
           <div className="alert alert-danger" role="alert">
             {error}
           </div>
-        )}
-
-        <Form noValidate validated={validated} onSubmit={handleSubmit}>
+        )}        <form noValidate onSubmit={handleSubmit}>
           <Input
             label="Email"
             type="text"
@@ -106,16 +112,14 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <div className="d-grid gap-2 mt-4">
-            <Button type="submit" fullWidth>
-              Login
+          <div className="mt-4">
+            <Button type="submit" fullWidth disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
-          </div>
-
-          <div className="text-center mt-3">
+          </div><div className="text-center mt-3">
             <p className="mb-0">Don't have an account? <Link to="/register" className='register-link'>Register</Link></p>
           </div>
-        </Form>
+        </form>
       </div>
     </div>
   );
