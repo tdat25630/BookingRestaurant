@@ -1,6 +1,6 @@
 import React from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
-import './QRCodeComponent.css'; // Tạo file CSS riêng
+import './QRCodeComponent.css'; 
 
 function QRCodeComponent({ sessionId }) {
   const url = `http://localhost:3000/menu?sessionId=${sessionId}`;

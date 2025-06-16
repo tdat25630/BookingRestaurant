@@ -10,8 +10,8 @@ const menuItemRoutes = require('./routes/menuItemRoutes');
 
 const diningSessionRoutes = require('./routes/diningSessionRoutes');
 const tableRoutes = require('./routes/tableRoutes');
-const orderRoutes = require('./routes/orderRoutes');
 const orderItemRoutes = require('./routes/orderItemRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 
 const app = express();
