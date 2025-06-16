@@ -1,7 +1,7 @@
 // controllers/reservation.controller.js
-
 const { validationResult } = require("express-validator");
 const Reservation = require("../models/reservation");
+const emailUtil = require('../util/send-mail.util');
 
 
 // Create a new reservation
@@ -15,7 +15,19 @@ exports.createReservation = async (req, res) => {
       throw err;
     }
     const reservation = new Reservation(req.body);
-    await reservation.save();
+    const newReservation = await reservation.save();
+    if (newReservation && req.body.email) {
+      emailUtil.sendEmail({
+        to: "jackfrost8520@gmail.com",
+        subject: "Confirm booking",
+        html: `<header>
+                  <h1>Booking confirmation</h1>
+                </header>
+<div>Bàn của quý khách đã được đặt. Nhà hàng sẽ giữ bàn trong vòng 15 phút. Chúc quý khách một ngày tốt lành!</div>
+`
+      })
+    }
+
     res.status(201).json(reservation);
   } catch (err) {
     throw err
