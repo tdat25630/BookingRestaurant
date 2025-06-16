@@ -1,0 +1,58 @@
+# --- General ---
+node_modules/
+.env
+.env.*         # e.g. .env.local, .env.production
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+
+# --- Build Outputs ---
+dist/
+build/
+out/
+
+# --- IDEs & Editors ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# --- Coverage ---
+coverage/
+.nyc_output/
+__coverage__/
+
+# --- Logs ---
+logs/
+*.log
+*.tsbuildinfo
+
+# --- React (frontend-specific) ---
+# If using Create React App or Vite
+*.cache
+.cache/
+public/static/
+*.eslintcache
+
+# --- Optional: Storybook / Testing tools ---
+.storybook-out/
+storybook-static/
+
+# --- Express (backend-specific) ---
+# If you use TypeScript
+build/
+dist/
+tsconfig.tsbuildinfo
+
+# --- Monorepo tools (optional) ---
+turbo/
+*.turbo/
+
