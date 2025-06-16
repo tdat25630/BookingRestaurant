@@ -28,6 +28,8 @@ const AdminHeader = () => {
                         <Nav.Link href="/admin/tables" className="nav-link">Manage Tables</Nav.Link>
                         <Nav.Link href="/admin/reservation" className="nav-link">Manage Bookings</Nav.Link>
                         <Nav.Link href="/admin/users" className="nav-link">User Management</Nav.Link>
+                        <Nav.Link href="/admin/category" className="nav-link">Category Management</Nav.Link>
+                        <Nav.Link href="/admin/item" className="nav-link">MenuItem Management</Nav.Link>
 
                         <NavDropdown
                             title={
