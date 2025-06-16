@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Home from './component/pages/Home/Home';
 import Login from './component/pages/Login/Login';
+import Register from './component/pages/Register/Register';
 import Reservation from "./component/pages/Reservation/Reservation";
 
 import MenuPage from "./component/pages/Menu/MenuPage";
@@ -22,6 +23,7 @@ function App() {
     <OrderProvider>
         <Router>
             <Routes>
+            <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/" element={<Navigate to="/login" />} />
