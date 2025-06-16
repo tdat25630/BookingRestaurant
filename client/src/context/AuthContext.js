@@ -13,15 +13,21 @@ export const AuthProvider = ({ children }) => {
             setCurrentUser(JSON.parse(storedUser));
         }
         setLoading(false);
-    }, []);
-
-    const login = (userData) => {
+    }, []); const login = (userData) => {
+        // Store the complete user data
         localStorage.setItem('user', JSON.stringify(userData));
-        setCurrentUser(userData);
-    };
 
-    const logout = () => {
+        // Also store token and role separately for route protection
+        if (userData.token) localStorage.setItem('token', userData.token);
+        if (userData.role) localStorage.setItem('userRole', userData.role);
+
+        setCurrentUser(userData);
+    }; const logout = () => {
+        // Clear all auth data from localStorage
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+
         setCurrentUser(null);
         // Có thể thêm API call để logout ở server
     };
