@@ -12,8 +12,7 @@ const validationHandler = (req, res, next) => {
 }
 
 router.post('/', [
- // body('phone').matches(/^\+?[1-9][0-9]{7,14}$/),
- body("phone").matches(/^0\d{9}$/),
+  body('phone').matches(/^\+?[0-9]{7,14}$/),
   body('name').isString().notEmpty(),
   body('reservationDate').isDate(),
   body('reservationTime').matches(/^([01]\d|2[0-3]):([0-5]\d)$/),

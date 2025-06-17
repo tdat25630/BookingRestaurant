@@ -2,32 +2,87 @@ import React, { useState } from 'react';
 import { Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
 
 import './Login.css';
 import Button from '../../Button/Button';
 import Input from '../../Input/Input';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  // const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [validated, setValidated] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    const form = e.currentTarget;
+const handleSubmit = async (e) => {
     e.preventDefault();
+    const form = e.currentTarget;
 
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      // Add login logic here
-      console.log("Login attempt with:", username);
-      // Redirect to home on success
-      // history.push('/home');
-    }
+  //   if (form.checkValidity() === false) {
+  //     e.stopPropagation();
+  //   } else {
+  //     // Add login logic here
+  //     console.log("Login attempt with:", username);
+  //     // Redirect to home on success
+  //     // history.push('/home');
+  //   }
 
+  //   setValidated(true);
+  // };
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
     setValidated(true);
-  };
+    return;
+  }
 
+  try {
+    // const response = await axios.post('/api/login', {
+    //   username,
+    //   password,
+    // });
+    const response = await axios.post(
+      'http://localhost:8080/api/auth/login',
+      {
+        email,
+        password,
+      },
+      { withCredentials: true }
+    );
+
+    if (response.status === 200) {
+      const userData = response.data;
+
+      // Lưu thông tin nếu cần (ví dụ: token hoặc user role)
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      // Điều hướng sang trang chủ
+    //   navigate('/home');
+    // } else {
+    //   setError('Login failed. Please try again.');
+    // }
+
+    const role = response.data.role;
+    // hoặc lấy mảng roles
+
+    if (role === 'admin') {
+      navigate('/admin');
+    } else if (role === 'chef') {
+      navigate('/chef');
+    } else {
+      navigate('/home'); 
+    }
+    }
+  } catch (err) {
+    console.error('Login error:', err);
+    setError('Invalid username or password.');
+  }
+
+  setValidated(true);
+};
   return (
     <div className="login-page">
       <div className="login-card">
@@ -36,7 +91,7 @@ const Login = () => {
           <h2 className="login-title">Restaurant Booking</h2>
         </div>
 
-        <Form noValidate validated={validated} onSubmit={handleSubmit}>
+        {/* <Form noValidate validated={validated} onSubmit={handleSubmit}>
           <Input
             label="Username"
             type="text"
@@ -44,6 +99,16 @@ const Login = () => {
             value={username}
             required
             onChange={(e) => setUsername(e.target.value)}
+          /> */}
+
+<Form noValidate validated={validated} onSubmit={handleSubmit}>
+          <Input
+            label="Email"
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            required
+            onChange={(e) => setEmail(e.target.value)}
           />
 
           <Input
@@ -54,6 +119,7 @@ const Login = () => {
             required
             onChange={(e) => setPassword(e.target.value)}
           />
+          {error && <p className="text-danger text-center">{error}</p>}
 
           <div className="d-grid gap-2 mt-4">
             <Button type="submit" fullWidth>
@@ -62,7 +128,7 @@ const Login = () => {
           </div>
 
           <div className="text-center mt-3">
-            <p className="mb-0">Don't have an account? <a href="#register" className="register-link">Register</a></p>
+            <p className="mb-0">Don't have an account? <a href="/register" className="register-link">Register</a></p>
           </div>
         </Form>
       </div>

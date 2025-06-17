@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import {
   Container, Form, Button, Row, Col, Alert, FloatingLabel
 } from 'react-bootstrap';
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import Header from '../../Header/Header';
+import './Reservation.css';
 
 function Reservation() {
   const [formData, setFormData] = useState({
@@ -12,6 +12,7 @@ function Reservation() {
     reservationDate: '',
     reservationTime: '',
     guestCount: 1,
+    email: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -19,13 +20,19 @@ function Reservation() {
 
   const validate = () => {
     const errs = {};
+<<<<<<< HEAD:client/src/pages/reservation/Reservation.js
    // const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
    const phoneRegex = /^0\d{9}$/;
+=======
+    // const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
+    const phoneRegex = /^0\d{9}$/;
+>>>>>>> origin/test:client/src/component/pages/Reservation/Reservation.js
 
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
     if (!phoneRegex.test(formData.phone)) errs.phone = 'Invalid phone number';
     if (!formData.name.trim()) errs.name = 'Name is required';
+    if (!formData.email.trim()) errs.email = 'Email is required';
     if (!formData.reservationDate) errs.reservationDate = 'Date is required';
     if (!timeRegex.test(formData.reservationTime)) errs.reservationTime = 'Invalid time (HH:mm)';
     if (formData.guestCount < 1) errs.guestCount = 'At least 1 guest';
@@ -76,18 +83,19 @@ function Reservation() {
   return (
     <>
       <Header />
-      <Container className="mt-4">
-        <h3 className="mb-4 text-center">Đặt bàn</h3>
+      <Container className="mt-4 booking-form-container">
+        <h3 className="mb-4 text-center" style={{ color: "#ffc107" }}>Đặt bàn</h3>
 
         {success && <Alert variant="success">{success}</Alert>}
         {errors.api && <Alert variant="danger">{errors.api}</Alert>}
 
-        <Form onSubmit={handleSubmit} className="p-4 shadow-sm rounded bg-light">
+        <Form onSubmit={handleSubmit} className="p-4 shadow-sm rounded "
+          style={{ backgroundColor: "#2a2a2a" }}>
           <Row className="mb-3">
             <Col md={6}>
               <FloatingLabel controlId="floatingPhone" label="Số điện thoại">
                 <Form.Control
-                  type="text"
+                  type="input"
                   name="phone"
                   value={formData.phone}
                   isInvalid={!!errors.phone}
@@ -103,7 +111,7 @@ function Reservation() {
             <Col md={6}>
               <FloatingLabel controlId="floatingName" label="Name">
                 <Form.Control
-                  type="text"
+                  type="input"
                   name="name"
                   value={formData.name}
                   isInvalid={!!errors.name}
@@ -169,16 +177,33 @@ function Reservation() {
                 </Form.Control.Feedback>
               </FloatingLabel>
             </Col>
+
+            <Col md={6}>
+              <FloatingLabel controlId="floatingEmail" label="Email">
+                <Form.Control
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  isInvalid={!!errors.email}
+                  onChange={handleChange}
+                  placeholder="+84123456789"
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.email}
+                </Form.Control.Feedback>
+              </FloatingLabel>
+            </Col>
           </Row>
 
           <div className="text-center mt-4">
-            <Button variant="primary" type="submit" size="lg">
+            <Button variant="primary" type="submit" size="lg"
+            >
               Đặt bàn
             </Button>
           </div>
         </Form>
       </Container>
-      <Footer />
+
     </>
   );
 }

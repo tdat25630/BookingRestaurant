@@ -1,49 +1,46 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { OrderProvider } from "./context/OrderContext";
 import { SessionProvider } from "./context/SessionContext";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import Home from "./pages/user/Home";
 
-import Register from "./pages/auth/Register";
-import Reservation from "./pages/reservation/Reservation";
-import Login from "./pages/auth/Login";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
+import Home from './component/pages/Home/Home';
+import Login from './component/pages/Login/Login';
+import Register from './component/pages/Register/Register';
+import Reservation from "./component/pages/Reservation/Reservation";
+
+import MenuPage from "./component/pages/Menu/MenuPage";
+import ConfirmOrderPage from "./component/pages/Order/ConfirmOrderPage"; 
+import CheckoutPage from "./component/pages/Order/CheckoutPage"; 
+
+
 import AdminRoutes from "./routes/AdminRoutes";
 
-import CheckoutPage from "./pages/user/CheckoutPage";
-import MenuPage from "./pages/user/MenuPage";
-import ConfirmOrderPage from "./components/ConfirmOrderPage"; 
-
-
 function App() {
-  return (
-    <SessionProvider> 
+    return (
+        <SessionProvider> 
     <OrderProvider>
-    <Router>
-      
-      {/* <Header /> */}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/menu" element={<MenuPage />} /> 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/booking" element={<Reservation />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
+        <Router>
+            <Routes>
+            <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/" element={<Navigate to="/login" />} />
 
-    
-      <Route path="/admin/*" element={<AdminRoutes />} />
+                <Route path="/booking" element={<Reservation />} />
 
-      <Route path="/confirm" element={<ConfirmOrderPage />} />
+                <Route path="/menu" element={<MenuPage />} /> 
+                <Route path="/confirm" element={<ConfirmOrderPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
 
-  
+                <Route path="/admin/*" element={<AdminRoutes />} />
 
-      </Routes>
-      {/* <Footer /> */}
-    </Router>
-    </OrderProvider>
-    </SessionProvider>
-  );
+            </Routes>
+        </Router>
+        </OrderProvider>
+        </SessionProvider>
+    );
 }
 
 export default App;
