@@ -109,10 +109,19 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
-// Lấy tất cả đơn hàng
+
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().lean();
+    const orders = await Order.find()
+      .populate({
+        path: 'sessionId',
+        populate: {
+          path: 'table',
+          model: 'Table'
+        }
+      })
+      .sort({ orderTime: -1 })
+      .lean();
     res.json(orders);
   } catch (err) {
     res.status(500).json({ error: 'Không thể lấy danh sách đơn hàng', details: err.message });

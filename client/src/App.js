@@ -16,6 +16,7 @@ import CheckoutPage from "./component/pages/Order/CheckoutPage";
 
 
 import AdminRoutes from "./routes/AdminRoutes";
+import ChefRoutes from "./routes/ChefRoutes";
 
 function App() {
     return (
@@ -35,6 +36,7 @@ function App() {
                 <Route path="/checkout" element={<CheckoutPage />} />
 
                 <Route path="/admin/*" element={<AdminRoutes />} />
+                <Route path="/chef/*" element={<ChefRoutes />} />
 
             </Routes>
         </Router>
@@ -44,3 +46,4 @@ function App() {
 }
 
 export default App;
+
