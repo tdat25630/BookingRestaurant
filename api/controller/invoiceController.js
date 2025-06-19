@@ -109,7 +109,7 @@ exports.createVnpayUrl = async (req, res, next) => {
 
 
         const paymentUrl = await vnpay.buildPaymentUrl({
-            vnp_Amount: amount * 100,
+            vnp_Amount: amount,
             vnp_IpAddr: ipAddr,
             vnp_TxnRef: `${orderId}_${Date.now()}`,
             vnp_OrderInfo: `Thanh toan don hang ${orderId}`,
@@ -130,59 +130,110 @@ exports.createVnpayUrl = async (req, res, next) => {
 // Xử lý khi VNPAY gọi về (IPN - Instant Payment Notification)
 exports.handleVnpayIpn = async (req, res, next) => {
     try {
-        const { vnp_ResponseCode, vnp_TxnRef } = req.query;
-        const orderId = vnp_TxnRef.split('_')[0];
+        const vnp_Params = req.query;
+        const secureHash = vnp_Params['vnp_SecureHash'];
 
-        if (vnp_ResponseCode !== '00') {
-            return res.status(200).json({ RspCode: '01', Message: 'Transaction Failed' });
+        delete vnp_Params['vnp_SecureHash'];
+        delete vnp_Params['vnp_SecureHashType'];
+
+        const sortedParams = {};
+        Object.keys(vnp_Params).sort().forEach((key) => {
+            sortedParams[key] = vnp_Params[key];
+        });
+
+        const secretKey = process.env.VNP_HASH_SECRET;
+        const signData = querystring.stringify(sortedParams, { encode: false });
+        
+        const hmac = crypto.createHmac("sha512", secretKey);
+        const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
+
+        if (secureHash !== signed) {
+            return res.status(200).json({ RspCode: '97', Message: 'Invalid Checksum' });
         }
+
+        const orderId = vnp_Params['vnp_TxnRef'].split('_')[0];
+        const responseCode = vnp_Params['vnp_ResponseCode'];
 
         const order = await Order.findById(orderId);
         if (!order) {
-            return res.status(200).json({ RspCode: '03', Message: 'Order Not Found' });
+            return res.status(200).json({ RspCode: '01', Message: 'Order not found' });
         }
-
         if (order.paymentStatus === 'paid') {
             return res.status(200).json({ RspCode: '02', Message: 'Order already confirmed' });
         }
-
+        if (responseCode !== '00') {
+            return res.status(200).json({ RspCode: '00', Message: 'Confirm Success' }); 
+        }
+        
         const billDetails = await calculateBill(orderId);
 
         const newInvoice = new Invoice({
             order_id: orderId,
             total_amount: billDetails.totalAmount,
-            discount: billDetails.discount,
-            tax_amount: billDetails.taxAmount,
             payment_method: 'vnpay_qr',
             payment_status: 'paid'
         });
         await newInvoice.save();
 
         await Order.findByIdAndUpdate(orderId, {
-            status: 'served',
+            status: 'served', 
             paymentStatus: 'paid'
         });
 
+        // Phản hồi thành công cho VNPAY
         return res.status(200).json({ RspCode: '00', Message: 'Confirm Success' });
 
     } catch (error) {
         console.error("Lỗi IPN:", error);
-        // Trả về mã lỗi cho VNPAY biết là có lỗi xảy ra
         return res.status(200).json({ RspCode: '99', Message: 'Unknown Error' });
     }
 };
 
+
+// Xử lý khi người dùng được VNPAY điều hướng về
 // Xử lý khi người dùng được VNPAY điều hướng về
 exports.handleVnpayReturn = (req, res, next) => {
+    try {
+        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+        
+        // Lấy tất cả các tham số VNPAY trả về từ URL
+        const vnp_Params = req.query;
+        
+        // Lấy các tham số quan trọng
+        const responseCode = vnp_Params['vnp_ResponseCode'];
+        const transactionRef = vnp_Params['vnp_TxnRef'];
 
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-    const { vnp_ResponseCode, vnp_TxnRef, ...restParams } = req.query;
-    const orderId = vnp_TxnRef.split('_')[0];
-    const queryString = new URLSearchParams(restParams).toString();
+        // Phải có mã tham chiếu giao dịch để xử lý
+        if (!transactionRef) {
+            console.error("Lỗi VNPAY Return: Thiếu vnp_TxnRef");
+            return res.redirect(`${frontendUrl}/payment-result?status=failed&message=InvalidResponse`);
+        }
 
-    if (vnp_ResponseCode === '00') {
-        res.redirect(`${frontendUrl}/payment-result?status=success&orderId=${orderId}&${queryString}`);
-    } else {
-        res.redirect(`${frontendUrl}/payment-result?status=failed&orderId=${orderId}&code=${vnp_ResponseCode}`);
+        // Tách orderId từ mã tham chiếu
+        const orderId = transactionRef.split('_')[0];
+        
+        // KIỂM TRA KẾT QUẢ GIAO DỊCH VÀ XÂY DỰNG URL ĐIỀU HƯỚNG
+        if (responseCode === '00') {
+            // Giao dịch thành công
+            // Chuyển hướng về frontend với status, orderId và các thông tin khác
+            res.redirect(`${frontendUrl}/payment-result?status=success&orderId=${orderId}&vnp_ResponseCode=00&vnp_Amount=${vnp_Params['vnp_Amount']}&vnp_BankCode=${vnp_Params['vnp_BankCode']}&vnp_PayDate=${vnp_Params['vnp_PayDate']}`);
+        } else {
+            // Giao dịch thất bại
+            // Chuyển hướng về frontend với status, orderId và mã lỗi
+            res.redirect(`${frontendUrl}/payment-result?status=failed&orderId=${orderId}&code=${responseCode}`);
+        }
+
+    } catch (error) {
+        // Xử lý các lỗi ngoài dự kiến
+        console.error("Lỗi nghiêm trọng trong VNPAY Return:", error);
+        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+        res.redirect(`${frontendUrl}/payment-result?status=failed&message=ServerError`);
     }
+};
+
+module.exports = {
+    previewInvoice: exports.previewInvoice,
+    createVnpayUrl: exports.createVnpayUrl,
+    handleVnpayIpn: exports.handleVnpayIpn,
+    handleVnpayReturn: exports.handleVnpayReturn,
 };

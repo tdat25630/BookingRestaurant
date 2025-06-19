@@ -7,11 +7,7 @@ export const SessionProvider = ({ children }) => {
 
   const saveSession = (id) => {
     setSessionId(id);
-<<<<<<< HEAD
-    localStorage.setItem("sessionId", id); // lưu song song
-=======
     localStorage.setItem("sessionId", id); 
->>>>>>> origin/test
   };
 
   const clearSession = () => {
