@@ -7,8 +7,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Home from './component/pages/Home/Home';
 import Login from './component/pages/Login/Login';
-import Register from './component/pages/Register/Register';
 import Reservation from "./component/pages/Reservation/Reservation";
+import PaymentResult from "./component/pages/VnpayQrModal/paymentResult";
 
 import MenuPage from "./component/pages/Menu/MenuPage";
 import ConfirmOrderPage from "./component/pages/Order/ConfirmOrderPage"; 
@@ -23,7 +23,6 @@ function App() {
     <OrderProvider>
         <Router>
             <Routes>
-            <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/" element={<Navigate to="/login" />} />
@@ -33,7 +32,7 @@ function App() {
                 <Route path="/menu" element={<MenuPage />} /> 
                 <Route path="/confirm" element={<ConfirmOrderPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
-
+                <Route path="/payment-result" element={<PaymentResult />} />
                 <Route path="/admin/*" element={<AdminRoutes />} />
 
             </Routes>

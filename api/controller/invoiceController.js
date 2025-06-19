@@ -1,62 +1,89 @@
-const dateFormat = require('date-format');
-const Invoice = require('../models/Invoice');
-const Order = require('../models/Order');
-const OrderItem = require('../models/OrderItem');
-
-
+const Invoice = require('../models/invoice');
+const Order = require('../models/order');
+const OrderItem = require('../models/orderItem');
+const { VNPay } = require('vnpay');
+/**
+ * Tính toán hóa đơn từ orderId
+ */
 const calculateBill = async (orderId) => {
-    const order = await Order.findById(orderId);
-    const orderItems = await OrderItem.find({
-        order_id: orderId
-    });
-    if (!order || orderItems.length === 0) {
-        throw new Error('Không tìm thấy đơn hàng hoặc đơn hàng trống');
+    const orderItems = await OrderItem.find({ orderId: orderId });
+
+    if (!orderItems || orderItems.length === 0) {
+        return {
+            orderItems: [],
+            subTotal: 0,
+            discount: 0,
+            taxAmount: 0,
+            totalAmount: 0
+        };
     }
-    //Tinhs tong tien
-    const subTotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const totalAmount = subTotal;//nếu tính thêm tax tủng thì thêm vào đây
+
+    const totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
     return {
-        order,
         orderItems,
-        subTotal,
+        subTotal: totalAmount,
         discount: 0,
-        tax_amount: 0,
-        total_amount: totalAmount
+        taxAmount: 0,
+        totalAmount: totalAmount
     };
 };
-// Xem trước hóa đơn trước khi thanh toán
-const previewInvoice = async (req, res, next) => {
+
+
+// Xem trước hóa đơn
+exports.previewInvoice = async (req, res, next) => {
     try {
         const { orderId } = req.params;
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
+        }
+
         const billDetails = await calculateBill(orderId);
 
-        const populatedOrderItems = await OrderItem.find({ order_id: orderId }).populate('menu_item_id', 'name');
+        const populatedOrderItems = await OrderItem.find({ orderId: orderId })
+            .populate('menuItemId', 'name price')
+            .lean();
 
         res.status(200).json({
             success: true,
             data: {
-                ...billDetails,
-                orderItems: populatedOrderItems
+                order,
+                items: populatedOrderItems,
+                summary: {
+                    subTotal: billDetails.subTotal,
+                    discount: billDetails.discount,
+                    taxAmount: billDetails.taxAmount,
+                    totalAmount: billDetails.totalAmount,
+                }
             }
         });
     } catch (error) {
         console.error("Lỗi khi xem trước hóa đơn:", error);
-        next(error);
+        res.status(500).json({ success: false, message: "Lỗi máy chủ khi xem trước hóa đơn", error: error.message });
     }
 };
 
 // Tạo URL thanh toán VNPAY
-const createVnpayUrl = async (req, res, next) => {
+exports.createVnpayUrl = async (req, res, next) => {
     try {
         const { orderId } = req.body;
 
-        const billDetails = await calculateBill(orderId);
-        const amount = billDetails.total_amount;
-
-        if (!orderId || !amount || amount <= 0) {
+        if (!orderId) {
             return res.status(400).json({
                 success: false,
-                message: 'Dữ liệu không hợp lệ. Cần có orderId và số tiền hợp lệ.'
+                message: 'Thiếu mã đơn hàng (orderId).'
+            });
+        }
+
+        const billDetails = await calculateBill(orderId);
+        const amount = billDetails.totalAmount;
+
+        // FIX: Kiểm tra số tiền hợp lệ sau khi đã gọi calculateBill
+        if (!amount || amount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Đơn hàng trống hoặc không có giá trị để thanh toán.'
             });
         }
 
@@ -67,11 +94,19 @@ const createVnpayUrl = async (req, res, next) => {
             hashAlgorithm: 'SHA512',
         });
 
+        // ...
         const createDate = new Date();
-
         const ipAddr = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+        const returnUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment-result`;
 
-        const returnUrl = `${process.env.APP_URL}/api/invoices/vnpay_return`;
+        const yyyy = createDate.getFullYear();
+        const mm = String(createDate.getMonth() + 1).padStart(2, '0'); 
+        const dd = String(createDate.getDate()).padStart(2, '0'); 
+        const HH = String(createDate.getHours()).padStart(2, '0'); 
+        const MM = String(createDate.getMinutes()).padStart(2, '0'); 
+        const ss = String(createDate.getSeconds()).padStart(2, '0'); 
+        const vnpCreateDate = `${yyyy}${mm}${dd}${HH}${MM}${ss}`;
+
 
         const paymentUrl = await vnpay.buildPaymentUrl({
             vnp_Amount: amount * 100,
@@ -81,47 +116,20 @@ const createVnpayUrl = async (req, res, next) => {
             vnp_OrderType: 'other',
             vnp_ReturnUrl: returnUrl,
             vnp_Locale: 'vn',
-            vnp_CreateDate: dateFormat(createDate, 'yyyymmddHHMMss'),
+            vnp_CreateDate: vnpCreateDate,
         });
-
-        res.status(200).json({
-            success: true,
-            data: { paymentUrl }
-        });
+        // ...
+        res.status(200).json({ success: true, data: { paymentUrl } });
 
     } catch (error) {
-        console.error("Lỗi khi tạo URL VNPAY:", error);
-        next(error);
+        console.error(" Lỗi khi tạo URL VNPAY:", error);
+        res.status(500).json({ success: false, message: "Lỗi máy chủ khi tạo URL thanh toán", error: error.message });
     }
 };
 
-const handleVnpayReturn = (req, res, next) => {
-    const isVerified = vnpayService.verifyReturnUrl(req.query);
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-
-    const { vnp_ResponseCode, vnp_TxnRef } = req.query;
-    const orderId = vnp_TxnRef.split('_')[0];
-
-    if (!isVerified) {
-        return res.redirect(`${frontendUrl}/payment-result?status=failed&message=invalid_signature`);
-    }
-
-    if (vnp_ResponseCode === '00') {
-        setTimeout(() => {
-            res.redirect(`${frontendUrl}/payment-result?status=success&orderId=${orderId}`);
-        }, 1000);
-    } else {
-        res.redirect(`${frontendUrl}/payment-result?status=failed&orderId=${orderId}&code=${vnp_ResponseCode}`);
-    }
-};
-//xác nhận lại
-const handleVnpayIpn = async (req, res, next) => {
+// Xử lý khi VNPAY gọi về (IPN - Instant Payment Notification)
+exports.handleVnpayIpn = async (req, res, next) => {
     try {
-        const isVerified = vnpayService.verifyIpnUrl(req.query);
-        if (!isVerified) {
-            return res.status(200).json({ RspCode: '97', Message: 'Invalid Checksum' });
-        }
-
         const { vnp_ResponseCode, vnp_TxnRef } = req.query;
         const orderId = vnp_TxnRef.split('_')[0];
 
@@ -129,46 +137,52 @@ const handleVnpayIpn = async (req, res, next) => {
             return res.status(200).json({ RspCode: '01', Message: 'Transaction Failed' });
         }
 
-        const existingInvoice = await Invoice.findOne({ order_id: orderId });
-        if (existingInvoice) {
-            return res.status(200).json({ RspCode: '02', Message: 'Invoice Already Exists' });
-        }
-
-        const billDetails = await calculateBill(orderId);
         const order = await Order.findById(orderId);
-
         if (!order) {
             return res.status(200).json({ RspCode: '03', Message: 'Order Not Found' });
         }
 
+        if (order.paymentStatus === 'paid') {
+            return res.status(200).json({ RspCode: '02', Message: 'Order already confirmed' });
+        }
+
+        const billDetails = await calculateBill(orderId);
+
         const newInvoice = new Invoice({
             order_id: orderId,
-            customer_id: order.customerId,
-            total_amount: billDetails.total_amount,
+            total_amount: billDetails.totalAmount,
             discount: billDetails.discount,
-            tax_amount: billDetails.tax_amount,
-            payment_method: 'qr_code',
+            tax_amount: billDetails.taxAmount,
+            payment_method: 'vnpay_qr',
             payment_status: 'paid'
         });
-
         await newInvoice.save();
 
         await Order.findByIdAndUpdate(orderId, {
-            status: 'completed',
-            total_amount: billDetails.total_amount
+            status: 'served',
+            paymentStatus: 'paid'
         });
 
         return res.status(200).json({ RspCode: '00', Message: 'Confirm Success' });
 
     } catch (error) {
         console.error("Lỗi IPN:", error);
+        // Trả về mã lỗi cho VNPAY biết là có lỗi xảy ra
         return res.status(200).json({ RspCode: '99', Message: 'Unknown Error' });
     }
 };
 
-module.exports = {
-    previewInvoice,
-    createVnpayUrl,
-    handleVnpayReturn,
-    handleVnpayIpn,
+// Xử lý khi người dùng được VNPAY điều hướng về
+exports.handleVnpayReturn = (req, res, next) => {
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const { vnp_ResponseCode, vnp_TxnRef, ...restParams } = req.query;
+    const orderId = vnp_TxnRef.split('_')[0];
+    const queryString = new URLSearchParams(restParams).toString();
+
+    if (vnp_ResponseCode === '00') {
+        res.redirect(`${frontendUrl}/payment-result?status=success&orderId=${orderId}&${queryString}`);
+    } else {
+        res.redirect(`${frontendUrl}/payment-result?status=failed&orderId=${orderId}&code=${vnp_ResponseCode}`);
+    }
 };

@@ -20,13 +20,8 @@ function Reservation() {
 
   const validate = () => {
     const errs = {};
-<<<<<<< HEAD:client/src/pages/reservation/Reservation.js
-   // const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
-   const phoneRegex = /^0\d{9}$/;
-=======
     // const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
     const phoneRegex = /^0\d{9}$/;
->>>>>>> origin/test:client/src/component/pages/Reservation/Reservation.js
 
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 

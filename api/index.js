@@ -7,11 +7,6 @@ const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const menuCategoryRoutes = require('./routes/menuCategoryRoutes');
 const menuItemRoutes = require('./routes/menuItemRoutes');
-const diningSessionRoutes = require('./routes/diningSessionRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const orderItemRoutes = require('./routes/orderItemRoutes');
-
-const tableRoutes = require('./routes/tableRoutes');
 
 const diningSessionRoutes = require('./routes/diningSessionRoutes');
 const tableRoutes = require('./routes/tableRoutes');
@@ -46,12 +41,10 @@ const connectDb = async () => {
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
-// app.use('/api/menu', require('./routes/menu'));
-app.use('/api/invoices', require('./routes/invoice'));
 
 app.use('/api/reservation', require('./routes/reservation.route'));
 
-
+app.use('/api/invoices', require('./routes/invoice'));
 // app.use('/api/admin', require('./routes/AdminRoute'));
 app.use('/api/menu-categories', menuCategoryRoutes);
 app.use('/api/menu-items', menuItemRoutes);
