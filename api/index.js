@@ -22,10 +22,12 @@ require('dotenv').config();
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use(cors());
+// Cấu hình CORS để cho phép credentials (cookies)
 app.use(cors({
-  origin: 'http://localhost:3000', 
-  credentials: true
+  origin: 'http://localhost:3000', // URL của frontend
+  credentials: true, // Quan trọng cho việc gửi cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 
@@ -44,6 +46,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 
 app.use('/api/reservation', require('./routes/reservation.route'));
+
 
 
 // app.use('/api/admin', require('./routes/AdminRoute'));
