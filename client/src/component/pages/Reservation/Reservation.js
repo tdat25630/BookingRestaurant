@@ -65,6 +65,7 @@ function Reservation() {
           reservationDate: '',
           reservationTime: '',
           guestCount: 1,
+          email: ''
         });
         setErrors({});
       } else {
