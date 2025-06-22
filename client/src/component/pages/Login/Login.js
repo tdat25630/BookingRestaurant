@@ -53,7 +53,6 @@ const Login = () => {
         { withCredentials: true }
       ); if (response.status === 200) {
         const userData = response.data;
-        userData.role="admin"
 
         // Lưu thông tin người dùng và token vào localStorage
         localStorage.setItem('user', JSON.stringify(userData));
