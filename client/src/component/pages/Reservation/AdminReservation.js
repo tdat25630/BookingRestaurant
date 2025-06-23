@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Container, Form, Button, Row, Col, Alert, FloatingLabel, Modal
 } from 'react-bootstrap';
-import Header from '../../Header/Header';
+import Header from '../../Header/AdminHeader';
 import './AdminReservation.css';
 
 function Reservation() {
