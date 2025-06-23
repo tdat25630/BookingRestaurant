@@ -18,71 +18,74 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
 
-  //   if (form.checkValidity() === false) {
-  //     e.stopPropagation();
-  //   } else {
-  //     // Add login logic here
-  //     console.log("Login attempt with:", username);
-  //     // Redirect to home on success
-  //     // history.push('/home');
-  //   }
+    //   if (form.checkValidity() === false) {
+    //     e.stopPropagation();
+    //   } else {
+    //     // Add login logic here
+    //     console.log("Login attempt with:", username);
+    //     // Redirect to home on success
+    //     // history.push('/home');
+    //   }
 
-  //   setValidated(true);
-  // };
-  if (form.checkValidity() === false) {
-    e.stopPropagation();
+    //   setValidated(true);
+    // };
+    if (form.checkValidity() === false) {
+      e.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
+    try {
+      // const response = await axios.post('/api/login', {
+      //   username,
+      //   password,
+      // });
+      const response = await axios.post(
+        'http://localhost:8080/api/auth/login',
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      ); if (response.status === 200) {
+        const userData = response.data;
+        userData.role="admin"
+
+        // Lưu thông tin người dùng và token vào localStorage
+        localStorage.setItem('user', JSON.stringify(userData));
+
+        // Nếu token được trả về trong response, lưu vào localStorage
+        if (userData.token) {
+          // Lưu token vào localStorage để dễ truy cập
+          localStorage.setItem('token', userData.token);
+
+          // Đối với một số trường hợp, bạn có thể muốn lưu token vào cookie
+          // để nó tự động được gửi với mỗi request
+          document.cookie = `access_token=${userData.token}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax`;
+        }
+
+        const role = response.data.role;
+        // hoặc lấy mảng roles
+
+        if (role === 'admin') {
+          navigate('/admin');
+        } else if (role === 'chef') {
+          navigate('/chef');
+        } else {
+          navigate('/home');
+        }
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Invalid username or password.');
+    }
+
     setValidated(true);
-    return;
-  }
-
-  try {
-    // const response = await axios.post('/api/login', {
-    //   username,
-    //   password,
-    // });
-    const response = await axios.post(
-      'http://localhost:8080/api/auth/login',
-      {
-        email,
-        password,
-      },
-      { withCredentials: true }
-    );
-
-    if (response.status === 200) {
-      const userData = response.data;
-
-      // Lưu thông tin nếu cần (ví dụ: token hoặc user role)
-      localStorage.setItem('user', JSON.stringify(userData));
-
-      // Điều hướng sang trang chủ
-    //   navigate('/home');
-    // } else {
-    //   setError('Login failed. Please try again.');
-    // }
-
-    const role = response.data.role;
-    // hoặc lấy mảng roles
-
-    if (role === 'admin') {
-      navigate('/admin');
-    } else if (role === 'chef') {
-      navigate('/chef');
-    } else {
-      navigate('/home'); 
-    }
-    }
-  } catch (err) {
-    console.error('Login error:', err);
-    setError('Invalid username or password.');
-  }
-
-  setValidated(true);
-};
+  };
   return (
     <div className="login-page">
       <div className="login-card">
@@ -101,7 +104,7 @@ const handleSubmit = async (e) => {
             onChange={(e) => setUsername(e.target.value)}
           /> */}
 
-<Form noValidate validated={validated} onSubmit={handleSubmit}>
+        <Form noValidate validated={validated} onSubmit={handleSubmit}>
           <Input
             label="Email"
             type="email"

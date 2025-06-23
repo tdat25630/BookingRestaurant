@@ -12,6 +12,7 @@ const diningSessionRoutes = require('./routes/diningSessionRoutes');
 const tableRoutes = require('./routes/tableRoutes');
 const orderItemRoutes = require('./routes/orderItemRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const chefRoutes = require('./routes/chefRoutes');
 
 
 const app = express();
@@ -21,10 +22,12 @@ require('dotenv').config();
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use(cors());
+// Cấu hình CORS để cho phép credentials (cookies)
 app.use(cors({
-  origin: 'http://localhost:3000', 
-  credentials: true
+  origin: 'http://localhost:3000', // URL của frontend
+  credentials: true, // Quan trọng cho việc gửi cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 
@@ -44,7 +47,8 @@ app.use('/api/user', require('./routes/user'));
 
 app.use('/api/reservation', require('./routes/reservation.route'));
 
-app.use('/api/invoices', require('./routes/invoice'));
+
+
 // app.use('/api/admin', require('./routes/AdminRoute'));
 app.use('/api/menu-categories', menuCategoryRoutes);
 app.use('/api/menu-items', menuItemRoutes);
@@ -54,6 +58,9 @@ app.use('/api/tables', tableRoutes);
 
 app.use('/api/orders', orderRoutes);
 app.use('/api/order-items', orderItemRoutes);
+
+app.use('/api/chef', chefRoutes);
+
 // middlewares
 app.use(errorMiddleware);
 

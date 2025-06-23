@@ -11,35 +11,43 @@ import Reservation from "./component/pages/Reservation/Reservation";
 import PaymentResult from "./component/pages/VnpayQrModal/paymentResult";
 
 import MenuPage from "./component/pages/Menu/MenuPage";
-import ConfirmOrderPage from "./component/pages/Order/ConfirmOrderPage"; 
-import CheckoutPage from "./component/pages/Order/CheckoutPage"; 
+import ConfirmOrderPage from "./component/pages/Order/ConfirmOrderPage";
+import CheckoutPage from "./component/pages/Order/CheckoutPage";
 
 
 import AdminRoutes from "./routes/AdminRoutes";
+import ChefRoutes from "./routes/ChefRoutes";
+import UserManagement from './component/pages/UserManagement/UserManagement';
+import AdminLayout from './component/LayoutAdmin/AdminLayout';
 
 function App() {
     return (
-        <SessionProvider> 
-    <OrderProvider>
-        <Router>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/" element={<Navigate to="/login" />} />
+        <SessionProvider>
+            <OrderProvider>
+                <Router>
+                    <Routes>
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/home" element={<Home />} />
+                        <Route path="/" element={<Navigate to="/login" />} />
 
-                <Route path="/booking" element={<Reservation />} />
+                        <Route path="/booking" element={<Reservation />} />
 
-                <Route path="/menu" element={<MenuPage />} /> 
-                <Route path="/confirm" element={<ConfirmOrderPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/payment-result" element={<PaymentResult />} />
-                <Route path="/admin/*" element={<AdminRoutes />} />
+                        <Route path="/menu" element={<MenuPage />} />
+                        <Route path="/confirm" element={<ConfirmOrderPage />} />
+                        <Route path="/checkout" element={<CheckoutPage />} />
 
-            </Routes>
-        </Router>
-        </OrderProvider>
+                        <Route path="/admin/*" element={<AdminRoutes />} />
+                        <Route path="/chef/*" element={<ChefRoutes />} />
+                        <Route path='admin' element={<AdminLayout />}>
+                            <Route path="/admin/users" element={<UserManagement />} />
+                        </Route>
+                    </Routes>
+                </Router>
+            </OrderProvider>
         </SessionProvider>
     );
 }
 
 export default App;
+

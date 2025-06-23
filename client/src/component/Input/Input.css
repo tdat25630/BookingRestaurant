@@ -9,6 +9,9 @@
     color: #ffffff;
     padding: 12px;
     border-radius: 5px;
+    display: block !important;
+    width: 100% !important;
+    /* Đảm bảo chiều rộng 100% */
 }
 
 .custom-form-control:focus {
@@ -20,4 +23,10 @@
 
 .custom-form-control::placeholder {
     color: #888888;
+}
+
+.custom-input input {
+    display: block !important;
+    /* Ép buộc hiển thị */
+    width: 100% !important;
 }
