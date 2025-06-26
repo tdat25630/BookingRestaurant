@@ -19,6 +19,7 @@ import AdminRoutes from "./routes/AdminRoutes";
 import ChefRoutes from "./routes/ChefRoutes";
 import UserManagement from './component/pages/UserManagement/UserManagement';
 import AdminLayout from './component/LayoutAdmin/AdminLayout';
+import UserProfile from './component/pages/UserProfile/UserProfile';
 
 function App() {
     return (
@@ -41,6 +42,11 @@ function App() {
                         <Route path="/chef/*" element={<ChefRoutes />} />
                         <Route path='admin' element={<AdminLayout />}>
                             <Route path="/admin/users" element={<UserManagement />} />
+                            <Route path="/admin/profile" element={
+
+                                <UserProfile />
+
+                            } />
                         </Route>
                     </Routes>
                 </Router>

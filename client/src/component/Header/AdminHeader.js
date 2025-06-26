@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils, faUserShield, faSignOutAlt, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, Link } from 'react-router-dom';
 import './AdminHeader.css';
+import { FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
 
 const AdminHeader = () => {
     const navigate = useNavigate();
@@ -31,20 +32,19 @@ const AdminHeader = () => {
                         User Management
                     </Nav.Link>
                     <Nav.Link as={Link} to="/admin/category" className="nav-link">Category Management</Nav.Link>
-                    <Nav.Link as={Link} to="/admin/item" className="nav-link">MenuItem Management</Nav.Link>                        <NavDropdown
-                        title={
-                            <span>
-                                <FontAwesomeIcon icon={faUserShield} className="me-1" />
-                                Admin
-                            </span>
-                        }
-                        id="admin-nav-dropdown"
+                    <Nav.Link as={Link} to="/admin/item" className="nav-link">MenuItem Management</Nav.Link>
+                    <NavDropdown
+                        title={<span><FaUserCircle className="me-1" />Admin</span>}
+                        id="admin-dropdown"
                         align="end"
                     >
-                        <NavDropdown.Item as={Link} to="/admin/profile">Profile</NavDropdown.Item>
+                        <NavDropdown.Item as={Link} to="/admin/profile">
+                            <FaUserCircle className="me-1" />
+                            My Profile
+                        </NavDropdown.Item>
                         <NavDropdown.Divider />
                         <NavDropdown.Item onClick={handleLogout}>
-                            <FontAwesomeIcon icon={faSignOutAlt} className="me-1" />
+                            <FaSignOutAlt className="me-1" />
                             Logout
                         </NavDropdown.Item>
                     </NavDropdown>
