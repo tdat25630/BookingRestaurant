@@ -92,6 +92,7 @@ const ChefHeader = () => {
                     </Nav>
 
                     {/* Quick Stats */}
+          {/* 
                     <Nav className="chef-stats">
                         <div className="stat-item pending">
                             <FontAwesomeIcon icon={faClock} className="me-1" />
@@ -117,6 +118,7 @@ const ChefHeader = () => {
                             </Badge>
                         </div>
                     </Nav>
+          */}
 
                     {/* Actions */}
                     <Nav className="ms-auto">

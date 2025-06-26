@@ -393,7 +393,7 @@ const ChefOrder = () => {
                   </div>
                   
                   <div className="order-summary">
-                    {getStatusBadge(order.status)}
+                    {/*getStatusBadge(order.status) */}
                     <p className="order-total">{order.totalAmount.toLocaleString('vi-VN')}₫</p>
                     <p className="item-count">{order.itemCount || order.items?.length || 0} món</p>
                   </div>
