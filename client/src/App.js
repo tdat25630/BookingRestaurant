@@ -14,6 +14,8 @@ import MenuPage from "./component/pages/Menu/MenuPage";
 import ConfirmOrderPage from "./component/pages/Order/ConfirmOrderPage";
 import CheckoutPage from "./component/pages/Order/CheckoutPage";
 
+import ZaloPayGateway from "./component/pages/payment/ZaloPayGateway";
+import PaymentResult from "./component/pages/payment/PaymentResult";
 
 import AdminRoutes from "./routes/AdminRoutes";
 import ChefRoutes from "./routes/ChefRoutes";
@@ -37,7 +39,8 @@ function App() {
                         <Route path="/menu" element={<MenuPage />} />
                         <Route path="/confirm" element={<ConfirmOrderPage />} />
                         <Route path="/checkout" element={<CheckoutPage />} />
-
+                        <Route path="/payment-gateway" element={<ZaloPayGateway />} />
+                        <Route path="/payment-result" element={<PaymentResult />} />
                         <Route path="/admin/*" element={<AdminRoutes />} />
                         <Route path="/chef/*" element={<ChefRoutes />} />
                         <Route path='admin' element={<AdminLayout />}>
