@@ -54,6 +54,12 @@ a:hover {
     width: 100%;
 }
 
+input,
+.form-control {
+    display: block !important;
+    visibility: visible !important;
+}
+
 .input-field:focus {
     border-color: #ffcc00;
     /* Yellow border on focus */
@@ -76,5 +82,3 @@ a:hover {
     color: white;
     /* White text */
 }
-
-
