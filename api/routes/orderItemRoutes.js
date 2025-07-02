@@ -8,4 +8,6 @@ router.get('/order/:orderId', orderItemController.getItemsByOrder);
 router.put('/:id/status', orderItemController.updateOrderItemStatus);
 router.post('/:sessionId/items', orderController.addItemToOrder);
 
+router.get('/best-sellers', orderItemController.getBestSellerItems);
+
 module.exports = router;

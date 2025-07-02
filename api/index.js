@@ -13,10 +13,10 @@ const orderItemRoutes = require('./routes/orderItemRoutes');
 
 const tableRoutes = require('./routes/tableRoutes');
 
-const diningSessionRoutes = require('./routes/diningSessionRoutes');
-const tableRoutes = require('./routes/tableRoutes');
-const orderItemRoutes = require('./routes/orderItemRoutes');
-const orderRoutes = require('./routes/orderRoutes');
+
+
+
+
 const chefRoutes = require('./routes/chefRoutes');
 
 
