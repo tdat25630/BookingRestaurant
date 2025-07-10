@@ -11,12 +11,24 @@ const validationHandler = (req, res, next) => {
   next();
 }
 
+router.post('/otp/email', [
+  body('email').isEmail().notEmpty().withMessage("Email is required"),
+  body('name').isString().notEmpty().withMessage("Customer's name is reuqired"),
+], reservationController.bookingOtpEmail)
+
+router.post('/otp/phone', [
+  body('phone').isEmail().notEmpty().withMessage("Phone number is required"),
+], reservationController.bookingOtpPhone)
+
 router.post('/', [
   body('phone').matches(/^\+?[0-9]{7,14}$/),
   body('name').isString().notEmpty(),
+  body('specialRequest').isString().optional(),
   body('reservationDate').isDate(),
   body('reservationTime').matches(/^([01]\d|2[0-3]):([0-5]\d)$/),
   body('guestCount').isInt({ min: 1 }),
+  body('selector').isString(),
+  body('otp').isInt(),
 ],
   reservationController.createReservation);
 
@@ -27,7 +39,7 @@ router.put('/:id', [
   body('reservationDate').isDate().optional().withMessage('Invalid reservation date'),
   body('reservationTime').matches(/^([01]\d|2[0-3]):([0-5]\d)$/).optional().withMessage('Invalid time format'),
   body('guestCount').isInt({ min: 1 }).optional().withMessage('Guest count must be at least 1'),
-], 
+],
   validationHandler,
   reservationController.updateReservation);
 

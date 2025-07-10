@@ -11,6 +11,10 @@ const ReservationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  email: {
+    type: String,
+    required: false
+  },
   name: {
     type: String,
     required: true
@@ -41,7 +45,11 @@ const ReservationSchema = new mongoose.Schema({
   guestCount: {
     type: Number,
     required: true
-  }
+  },
+  preOrders: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'MenuItem' }],
+    required: false,
+  },
 }, {
   timestamps: true
 });
