@@ -20,6 +20,7 @@ import ChefRoutes from "./routes/ChefRoutes";
 import UserManagement from './component/pages/UserManagement/UserManagement';
 import AdminLayout from './component/LayoutAdmin/AdminLayout';
 import UserProfile from './component/pages/UserProfile/UserProfile';
+import AdminDashboard from './component/pages/Dashboard/AdminDashboard';
 
 function App() {
     return (
@@ -30,7 +31,7 @@ function App() {
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/home" element={<Home />} />
-                        <Route path="/" element={<Navigate to="/login" />} />
+                        <Route path="/" element={<Navigate to="/home" />} />
 
                         <Route path="/booking" element={<Reservation />} />
 
@@ -45,6 +46,11 @@ function App() {
                             <Route path="/admin/profile" element={
 
                                 <UserProfile />
+
+                            } />
+                            <Route path="/admin" element={
+
+                                <AdminDashboard />
 
                             } />
                         </Route>

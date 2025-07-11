@@ -6,4 +6,6 @@ router.get('/session/:sessionId', orderController.getOrdersBySession);
 router.put('/:id/status', orderController.updateOrderStatus);
 router.get('/', orderController.getAllOrders);
 
+router.get('/revenue/statistics', orderController.getRevenueStatistics);
+router.get('/revenue/daily-in-month', orderController.getDailyRevenueInMonth);
 module.exports = router;

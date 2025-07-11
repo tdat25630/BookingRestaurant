@@ -67,7 +67,7 @@ const login = async (req, res, next) => {
       token // Gửi thêm token trong response body để frontend có thể lưu
     });
   } catch (err) {
-    next(err);
+    next(createError(500, "Login failed!"));
   }
 }
 
