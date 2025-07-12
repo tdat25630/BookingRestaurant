@@ -21,20 +21,24 @@ router.post('/otp/phone', [
 ], reservationController.bookingOtpPhone)
 
 router.post('/', [
-  body('phone').matches(/^\+?[0-9]{7,14}$/),
+  body('phone').matches(/^\+?[0-9]{7,14}$/).optional({ checkFalsy: true }),
+  body('email').isEmail().optional({ checkFalsy: true }).withMessage('Invalid email'),
+  body('otpTarget').isString().optional().withMessage('Invalid otp target'),
   body('name').isString().notEmpty(),
   body('specialRequest').isString().optional(),
   body('reservationDate').isDate(),
   body('reservationTime').matches(/^([01]\d|2[0-3]):([0-5]\d)$/),
   body('guestCount').isInt({ min: 1 }),
-  body('selector').isString(),
+  //body('selector').isString(),
   body('otp').isInt(),
+  body('accountId').optional({ checkFalsy: true }).isMongoId(),
 ],
   reservationController.createReservation);
 
 router.put('/:id', [
   param('id').isMongoId().optional().withMessage('Invalid reservation ID'),
   body('phone').matches(/^\+?[1-9][0-9]{7,14}$/).optional().withMessage('Invalid phone number'),
+  body('email').isEmail().optional().withMessage('Invalid email'),
   body('name').isString().notEmpty().optional().withMessage('Name is required'),
   body('reservationDate').isDate().optional().withMessage('Invalid reservation date'),
   body('reservationTime').matches(/^([01]\d|2[0-3]):([0-5]\d)$/).optional().withMessage('Invalid time format'),

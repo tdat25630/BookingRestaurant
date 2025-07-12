@@ -22,9 +22,9 @@ exports.bookingOtpEmail = async (req, res) => {
   try {
     const { email, name } = req.body;
 
-    const selector = crypto.randomBytes(4).toString('hex');
+    //const selector = crypto.randomBytes(4).toString('hex');
     const otp = generateOTP(OTP_LENGTH);
-    const key = `${email}:${selector}`;
+    const key = email;
     cache.set(key, otp, OTP_TTL_SECONDS);
 
     const checkCache = cache.get(key);
@@ -32,9 +32,10 @@ exports.bookingOtpEmail = async (req, res) => {
       throw new Error("Cache failed to store OTP.");
     }
 
-    await emailService.sendBookingConfirm({ otp, email, name });
+    console.log(checkCache)
+    //await emailService.sendBookingConfirm({ otp, email, name });
 
-    return res.status(201).json({ success: true, selector });
+    return res.status(201).json({ success: true });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error." });
@@ -45,9 +46,9 @@ exports.bookingOtpPhone = async (req, res) => {
   try {
     const { phone } = req.body;
 
-    const selector = crypto.randomBytes(4).toString('hex');
+    //const selector = crypto.randomBytes(4).toString('hex');
     const otp = generateOTP(OTP_LENGTH);
-    const key = `${phone}:${selector}`;
+    const key = phone;
     cache.set(key, otp, OTP_TTL_SECONDS);
 
     const checkCache = cache.get(key);
@@ -55,9 +56,10 @@ exports.bookingOtpPhone = async (req, res) => {
       throw new Error("Cache failed to store OTP.");
     }
 
-    await sms.sendSMS(["84364119018"], "Your OTP is 123456", 2, "");
+    console.log(checkCache)
+    //await sms.sendSMS(["84364119018"], "Your OTP is 123456", 2, "");
 
-    return res.status(201).json({ success: true, selector });
+    return res.status(201).json({ success: true });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error." });
@@ -75,27 +77,27 @@ exports.createReservation = async (req, res) => {
     }
 
     const {
-      otp, selector, email, phone, specialRequest,
+      otp, otpTarget, email, phone, specialRequest,
       name, reservationDate, reservationTime,
-      guestCount, preOrders
+      guestCount, preOrders, accountId
     } = req.body;
 
-    const identity = email || phone;
+    const identity = otpTarget == 'email' ? email : phone;
     //if (!identity || !selector) {
     //  return res.status(400).json({ message: "Missing identifier or selector." });
     //}
 
-    const key = `${identity}:${selector}`;
+    const key = identity;
     const storedOtp = cache.get(key);
     console.log('OTP check:', key, storedOtp);
 
-    //if (!storedOtp) {
-    //  return res.status(400).json({ message: "OTP expired or invalid." });
-    //}
+    if (!storedOtp) {
+      return res.status(400).json({ message: "OTP expired or invalid." });
+    }
 
-    //if (storedOtp != otp) {
-    //  return res.status(400).json({ message: "Incorrect OTP." });
-    //}
+    if (storedOtp != otp) {
+      return res.status(400).json({ message: "Incorrect OTP." });
+    }
 
     cache.del(key);
 
@@ -106,7 +108,8 @@ exports.createReservation = async (req, res) => {
       reservationDate,
       reservationTime,
       specialRequest,
-      preOrders
+      preOrders,
+      accountId
     });
     const newReservation = await reservation.save();
 

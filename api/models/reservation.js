@@ -9,7 +9,7 @@ const ReservationSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: true
+    required: false
   },
   email: {
     type: String,
@@ -50,6 +50,10 @@ const ReservationSchema = new mongoose.Schema({
     type: [{ type: Schema.Types.ObjectId, ref: 'MenuItem' }],
     required: false,
   },
+  accountId: {
+    type: Schema.Types.ObjectId, ref: 'User',
+    required: false,
+  }
 }, {
   timestamps: true
 });
