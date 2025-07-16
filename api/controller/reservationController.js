@@ -105,6 +105,7 @@ exports.createReservation = async (req, res) => {
       guestCount,
       name,
       phone,
+      email,
       reservationDate,
       reservationTime,
       specialRequest,
