@@ -81,11 +81,42 @@ function Reservation() {
       case 'pending':
         return 'bg-warning text-dark';
       case 'cancelled':
-        return 'bg-danger';
-      default:
         return 'bg-secondary';
+      case 'expired':
+        return 'bg-danger';
     }
   };
+
+  const translateStatusName = (name) => {
+    switch (name) {
+      case 'pending':
+        return 'Chưa đến';
+      case 'confirmed':
+        return 'Đã nhận';
+      case 'cancelled':
+        return 'Đã hủy';
+      case 'expired':
+        return 'Hết hạn';
+    }
+  };
+
+  function isAtLeast15MinutesInFuture(reservationDate, reservationTime) {
+    const now = new Date();
+
+    // Combine date and time into a single Date object
+    const [hours, minutes] = reservationTime.split(':').map(Number);
+    const reservation = new Date(reservationDate);
+    reservation.setHours(hours);
+    reservation.setMinutes(minutes);
+    reservation.setSeconds(0);
+    reservation.setMilliseconds(0);
+
+    // Check if it's at least 15 minutes in the future
+    const diffMs = reservation - now;
+    const diffMinutes = diffMs / (1000 * 60);
+
+    return diffMinutes >= 15;
+  }
 
   return (
     <>
@@ -146,6 +177,7 @@ function Reservation() {
               <thead>
                 <tr>
                   <th>Phone</th>
+                  <th>Email</th>
                   <th>Name</th>
                   <th>Date</th>
                   <th>Time</th>
@@ -155,23 +187,29 @@ function Reservation() {
                 </tr>
               </thead>
               <tbody>
-                {reservations.map((r, idx) => (
-                  <tr key={idx}>
-                    <td>{r.phone}</td>
-                    <td>{r.name}</td>
-                    <td>{formatDate(r.reservationDate)}</td>
-                    <td>{r.reservationTime}</td>
-                    <td>{r.guestCount}</td>
-                    <td>
-                      <span className={`badge ${getStatusClass(r.status)}`}>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="text-center">
-                      <Button size="sm" variant="warning" onClick={() => { setSelectedReservation(r); setShowModal(true); }}>View</Button>
-                    </td>
-                  </tr>
-                ))}
+                {reservations.map((r, idx) => {
+                  if (r.status == 'pending' &&
+                    !isAtLeast15MinutesInFuture(r.reservationDate, r.reservationTime))
+                    r.status = 'expired'
+                  return (
+                    <tr key={idx}>
+                      <td>{r.phone}</td>
+                      <td>{r.email}</td>
+                      <td>{r.name}</td>
+                      <td>{formatDate(r.reservationDate)}</td>
+                      <td>{r.reservationTime}</td>
+                      <td>{r.guestCount}</td>
+                      <td>
+                        <span className={`badge ${getStatusClass(r.status)}`}>
+                          {translateStatusName(r.status)}
+                        </span>
+                      </td>
+                      <td className="text-center">
+                        <Button size="sm" variant="warning" onClick={() => { setSelectedReservation(r); setShowModal(true); }}>View</Button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
 
