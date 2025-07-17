@@ -8,4 +8,5 @@ router.get('/', orderController.getAllOrders);
 
 router.get('/revenue/statistics', orderController.getRevenueStatistics);
 router.get('/revenue/daily-in-month', orderController.getDailyRevenueInMonth);
+router.put('/:orderId/pay-by-cash', orderController.markAsPaidByCash);
 module.exports = router;

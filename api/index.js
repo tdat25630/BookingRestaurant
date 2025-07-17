@@ -44,9 +44,8 @@ const connectDb = async () => {
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
-
 app.use('/api/reservation', require('./routes/reservation.route'));
-
+app.use('/api/zalopay', require('./routes/zaloPayRoutes'));
 
 
 // app.use('/api/admin', require('./routes/AdminRoute'));
@@ -59,7 +58,7 @@ app.use('/api/tables', tableRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/order-items', orderItemRoutes);
 
-app.use('/api/chef', chefRoutes);
+app.use('/api/chef', chefRoutes); 
 
 // middlewares
 app.use(errorMiddleware);
