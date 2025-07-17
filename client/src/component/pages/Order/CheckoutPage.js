@@ -96,7 +96,7 @@ function CheckoutPage() {
           <button onClick={() => navigate(`/menu?sessionId=${sessionId}`)} className="btn-action">
             ➕ Gọi thêm món
           </button>
-          <button 
+          {/* <button 
             onClick={() => alert('Chức năng thanh toán bằng tiền mặt đang được phát triển.')} 
             className="btn-payment btn-cash"
             title="Chức năng đang phát triển"
@@ -108,7 +108,7 @@ function CheckoutPage() {
             className="btn-payment btn-zalo"
           >
             📲 Thanh toán qua QR
-          </button>
+          </button> */}
         </div>
       </div>
     </>
