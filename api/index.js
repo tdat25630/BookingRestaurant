@@ -13,6 +13,7 @@ const tableRoutes = require('./routes/tableRoutes');
 const orderItemRoutes = require('./routes/orderItemRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const chefRoutes = require('./routes/chefRoutes');
+const promotionRoutes = require('./routes/promotionRoute');
 
 
 const app = express();
@@ -54,6 +55,8 @@ app.use('/api/menu-items', menuItemRoutes);
 
 app.use('/api/dining-sessions', diningSessionRoutes);
 app.use('/api/tables', tableRoutes);
+
+app.use('/api/promotions', promotionRoutes);
 
 app.use('/api/orders', orderRoutes);
 app.use('/api/order-items', orderItemRoutes);
