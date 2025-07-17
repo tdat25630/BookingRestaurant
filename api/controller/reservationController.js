@@ -1,36 +1,123 @@
 // controllers/reservation.controller.js
 const { validationResult } = require("express-validator");
 const Reservation = require("../models/reservation");
-const emailUtil = require('../util/send-mail.util');
+const emailService = require('../services/email.service');
+const sms = require("../services/sms.service");
+const cache = require('../util/cache');
+const crypto = require('crypto');
 
+const OTP_TTL_SECONDS = 300; // 5 minutes
+const OTP_LENGTH = 6;
 
-// Create a new reservation
+function generateOTP(length = 6) {
+  const digits = '0123456789';
+  let otp = '';
+  for (let i = 0; i < length; i++) {
+    otp += digits[Math.floor(Math.random() * 10)];
+  }
+  return otp;
+}
+
+exports.bookingOtpEmail = async (req, res) => {
+  try {
+    const { email, name } = req.body;
+
+    //const selector = crypto.randomBytes(4).toString('hex');
+    const otp = generateOTP(OTP_LENGTH);
+    const key = email;
+    cache.set(key, otp, OTP_TTL_SECONDS);
+
+    const checkCache = cache.get(key);
+    if (!checkCache) {
+      throw new Error("Cache failed to store OTP.");
+    }
+
+    console.log(checkCache)
+    //await emailService.sendBookingConfirm({ otp, email, name });
+
+    return res.status(201).json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.bookingOtpPhone = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    //const selector = crypto.randomBytes(4).toString('hex');
+    const otp = generateOTP(OTP_LENGTH);
+    const key = phone;
+    cache.set(key, otp, OTP_TTL_SECONDS);
+
+    const checkCache = cache.get(key);
+    if (!checkCache) {
+      throw new Error("Cache failed to store OTP.");
+    }
+
+    console.log(checkCache)
+    //await sms.sendSMS(["84364119018"], "Your OTP is 123456", 2, "");
+
+    return res.status(201).json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 exports.createReservation = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const err = new Error("Bad request");
-      err.status = 400; // note: use a number, not string
-      err.errors = errors.array();
-      throw err;
-    }
-    const reservation = new Reservation(req.body);
-    const newReservation = await reservation.save();
-    if (newReservation && req.body.email) {
-      emailUtil.sendEmail({
-        to: "jackfrost8520@gmail.com",
-        subject: "Confirm booking",
-        html: `<header>
-                  <h1>Booking confirmation</h1>
-                </header>
-<div>Bàn của quý khách đã được đặt. Nhà hàng sẽ giữ bàn trong vòng 15 phút. Chúc quý khách một ngày tốt lành!</div>
-`
-      })
+      return res.status(400).json({
+        message: "Validation failed.",
+        errors: errors.array(),
+      });
     }
 
-    res.status(201).json(reservation);
+    const {
+      otp, otpTarget, email, phone, specialRequest,
+      name, reservationDate, reservationTime,
+      guestCount, preOrders, accountId
+    } = req.body;
+
+    const identity = otpTarget == 'email' ? email : phone;
+    //if (!identity || !selector) {
+    //  return res.status(400).json({ message: "Missing identifier or selector." });
+    //}
+
+    const key = identity;
+    const storedOtp = cache.get(key);
+    console.log('OTP check:', key, storedOtp);
+
+    if (!storedOtp) {
+      return res.status(400).json({ message: "OTP expired or invalid." });
+    }
+
+    if (storedOtp != otp) {
+      return res.status(400).json({ message: "Incorrect OTP." });
+    }
+
+    cache.del(key);
+
+    const reservation = new Reservation({
+      guestCount,
+      name,
+      phone,
+      email,
+      reservationDate,
+      reservationTime,
+      specialRequest,
+      preOrders,
+      accountId
+    });
+    const newReservation = await reservation.save();
+
+    return res.status(201).json(newReservation);
   } catch (err) {
-    throw err
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 

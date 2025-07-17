@@ -110,7 +110,7 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
-
+// Lấy tất cả đơn hàng
 exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
@@ -128,7 +128,8 @@ exports.getAllOrders = async (req, res) => {
     res.status(500).json({ error: 'Không thể lấy danh sách đơn hàng', details: err.message });
   }
 };
-//  Thêm một món ăn vào đơn hàng theo sessionId
+
+// Thêm một món ăn vào đơn hàng theo sessionId
 exports.addItemToOrder = async (req, res) => {
   try {
     const { sessionId } = req.params;
@@ -138,10 +139,8 @@ exports.addItemToOrder = async (req, res) => {
       return res.status(400).json({ error: 'Thiếu thông tin món ăn hoặc sessionId' });
     }
 
-    // 1. Tìm order với trạng thái pending trong session hiện tại
     let order = await Order.findOne({ sessionId, status: 'pending' });
 
-    // 2. Nếu chưa có order thì tạo mới
     if (!order) {
       order = new Order({
         sessionId,
@@ -152,11 +151,9 @@ exports.addItemToOrder = async (req, res) => {
       });
     }
 
-    // 3. Tăng tổng tiền
     order.totalAmount += price * quantity;
     await order.save();
 
-    // 4. Tạo món mới
     const newItem = new OrderItem({
       orderId: order._id,
       menuItemId,
@@ -165,50 +162,40 @@ exports.addItemToOrder = async (req, res) => {
     });
     await newItem.save();
 
-    res.status(201).json({ message: ' Đã thêm món vào đơn hàng', order, item: newItem });
+    res.status(201).json({ message: 'Đã thêm món vào đơn hàng', order, item: newItem });
   } catch (err) {
-    console.error(" Lỗi khi thêm món lẻ:", err);
+    console.error("Lỗi khi thêm món lẻ:", err);
     res.status(500).json({ error: 'Không thể thêm món vào đơn hàng', details: err.message });
   }
 };
 
+// Lấy thống kê doanh thu tổng
 exports.getRevenueStatistics = async (req, res, next) => {
   try {
     const { period, startDate, endDate } = req.query;
 
-    // Xác định khoảng thời gian
     let dateFilter = {};
     const now = new Date();
 
     if (period) {
       switch (period) {
         case 'today':
-          const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          dateFilter = { orderTime: { $gte: startOfDay } };
+          dateFilter = { orderTime: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) } };
           break;
-
         case 'week':
-          const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          dateFilter = { orderTime: { $gte: startOfWeek } };
+          dateFilter = { orderTime: { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) } };
           break;
-
         case 'month':
-          const startOfMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          dateFilter = { orderTime: { $gte: startOfMonth } };
+          dateFilter = { orderTime: { $gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) } };
           break;
-
         case 'year':
-          const startOfYear = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-          dateFilter = { orderTime: { $gte: startOfYear } };
+          dateFilter = { orderTime: { $gte: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000) } };
           break;
-
         default:
-          // Nếu không có period, lấy tất cả
           dateFilter = {};
       }
     }
 
-    // Nếu có startDate và endDate thì ưu tiên
     if (startDate && endDate) {
       dateFilter = {
         orderTime: {
@@ -218,17 +205,8 @@ exports.getRevenueStatistics = async (req, res, next) => {
       };
     }
 
-    console.log('Date filter:', dateFilter);
-
-    // Aggregation pipeline để tính tổng doanh thu
     const pipeline = [
-      // Lọc theo thời gian
       ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
-
-      // Chỉ lấy các order đã hoàn thành hoặc đã thanh toán
-
-
-      // Nhóm và tính tổng
       {
         $group: {
           _id: null,
@@ -243,7 +221,6 @@ exports.getRevenueStatistics = async (req, res, next) => {
 
     const result = await Order.aggregate(pipeline);
 
-    // Nếu không có dữ liệu
     if (!result || result.length === 0) {
       return res.json({
         success: true,
@@ -276,24 +253,27 @@ exports.getRevenueStatistics = async (req, res, next) => {
 
   } catch (err) {
     next(createError(500, 'Không thể lấy thống kê doanh thu', { cause: err }));
-    console.error(' Lỗi lấy thống kê doanh thu:', err);
   }
 };
 
+// Lấy doanh thu từng ngày trong tháng
 exports.getDailyRevenueInMonth = async (req, res) => {
   try {
     const { month, year } = req.query;
 
-    // Mặc định lấy tháng và năm hiện tại
     const currentDate = new Date();
-    const targetMonth = month ? parseInt(month) - 1 : currentDate.getMonth(); // MongoDB month từ 0-11
+    const targetMonth = month ? parseInt(month) - 1 : currentDate.getMonth();
     const targetYear = year ? parseInt(year) : currentDate.getFullYear();
 
     const startOfMonth = new Date(targetYear, targetMonth, 1);
-    const endOfMonth = new Date(targetYear, targetMonth + 1, 0); // Ngày cuối tháng
+    const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
 
     const pipeline = [
-      
+      {
+        $match: {
+          orderTime: { $gte: startOfMonth, $lte: endOfMonth }
+        }
+      },
       {
         $group: {
           _id: {
@@ -305,9 +285,7 @@ exports.getDailyRevenueInMonth = async (req, res) => {
           orderCount: { $sum: 1 }
         }
       },
-      {
-        $sort: { '_id.day': 1 }
-      },
+      { $sort: { '_id.day': 1 } },
       {
         $project: {
           _id: 0,
@@ -329,7 +307,6 @@ exports.getDailyRevenueInMonth = async (req, res) => {
 
     const dailyStats = await Order.aggregate(pipeline);
 
-    // Tính tổng doanh thu trong tháng
     const totalMonthlyRevenue = dailyStats.reduce((sum, day) => sum + day.dailyRevenue, 0);
     const totalOrders = dailyStats.reduce((sum, day) => sum + day.orderCount, 0);
 
@@ -351,5 +328,37 @@ exports.getDailyRevenueInMonth = async (req, res) => {
       message: 'Không thể lấy doanh thu theo ngày',
       error: err.message
     });
+  }
+};
+
+// ✅ Đã đưa ra ngoài đúng cách
+exports.markAsPaidByCash = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    if (order.paymentStatus === 'paid') {
+      return res.status(400).json({ success: false, message: 'This order has already been paid.' });
+    }
+
+    order.paymentStatus = 'paid';
+    order.status = 'served';
+
+    const updatedOrder = await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Successfully updated payment status.',
+      data: updatedOrder
+    });
+
+  } catch (error) {
+    console.error("Error during cash payment:", error);
+    next(error);
   }
 };

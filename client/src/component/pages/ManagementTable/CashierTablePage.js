@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import QRCodeComponent from './QRCodeGenerator';
 import AdminHeader from '../../Header/AdminHeader';
 import './AdminTableQRPage.css';
+import CashierHeader from '../../Header/CashierHeader';
 
-function AdminTableQRPage() {
+function CashierTablePage() {
     const [tables, setTables] = useState([]);
     const [selectedSessionId, setSelectedSessionId] = useState(null);
     const [loadingTableId, setLoadingTableId] = useState(null);
@@ -62,8 +63,8 @@ function AdminTableQRPage() {
 
     return (
         <>
-            <AdminHeader />
-            <div className="cashier-table-container">
+            <CashierHeader />
+            <div className="admin-table-container">
                 <h2>🍽️ Table Management</h2>
                 <ul className="table-grid">
                     {tables.map(table => {
@@ -139,4 +140,4 @@ function AdminTableQRPage() {
         </>
     );
 }
-export default AdminTableQRPage;
+export default CashierTablePage;

@@ -25,14 +25,14 @@ const AdminHeader = () => {
                 <Navbar.Toggle aria-controls="admin-navbar-nav" />
                 <Navbar.Collapse id="admin-navbar-nav">                    <Nav className="ms-auto">
                     <Nav.Link as={Link} to="/admin/dashboard" className="nav-link">Dashboard</Nav.Link>
-                    <Nav.Link as={Link} to="/admin/tables" className="nav-link">Manage Tables</Nav.Link>
-                    <Nav.Link as={Link} to="/admin/reservation" className="nav-link">Manage Bookings</Nav.Link>
+                    <Nav.Link as={Link} to="/admin/tables" className="nav-link">Tables</Nav.Link>
+                    <Nav.Link as={Link} to="/admin/reservation" className="nav-link">Bookings</Nav.Link>
                     <Nav.Link as={Link} to="/admin/users" className="nav-link">
                         <FontAwesomeIcon icon={faUsers} className="me-1" />
-                        User Management
+                        User
                     </Nav.Link>
-                    <Nav.Link as={Link} to="/admin/category" className="nav-link">Category Management</Nav.Link>
-                    <Nav.Link as={Link} to="/admin/item" className="nav-link">MenuItem Management</Nav.Link>
+                    <Nav.Link as={Link} to="/admin/category" className="nav-link">Category</Nav.Link>
+                    <Nav.Link as={Link} to="/admin/item" className="nav-link">Menu</Nav.Link>
                     <NavDropdown
                         title={<span><FaUserCircle className="me-1" />Admin</span>}
                         id="admin-dropdown"

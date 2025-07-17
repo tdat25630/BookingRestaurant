@@ -1,0 +1,66 @@
+.gateway-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f7f6;
+    padding: 2rem;
+}
+
+.gateway-card {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+}
+
+.gateway-card h2 {
+    margin-top: 0;
+    color: #005baa; /* ZaloPay color */
+    font-size: 1.8rem;
+}
+
+.gateway-amount {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.gateway-amount span {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #d71f26; /* Highlight color */
+}
+
+.qr-section {
+    margin-top: 1.5rem;
+}
+
+.qr-code-wrapper {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    display: inline-block;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.waiting-text {
+    font-style: italic;
+    color: #666;
+}
+
+.loader {
+    font-size: 1.2rem;
+    padding: 2rem 0;
+}
+
+.error-message {
+    color: #d9534f;
+    background-color: #f2dede;
+    border: 1px solid #ebccd1;
+    padding: 1rem;
+    border-radius: 8px;
+}
