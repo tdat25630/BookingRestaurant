@@ -3,7 +3,7 @@ import AdminDashboard from '../component/pages/Dashboard/AdminDashboard';
 import AdminTableQRPage from '../component/pages/ManagementTable/AdminTableQRPage';
 
 import AdminReservation from '../component/pages/Reservation/AdminReservation';
-import AdminCheckoutPage from "../component/pages/Checkout/AdminCheckoutPage";
+// import AdminCheckoutPage from "../component/pages/Checkout/AdminCheckoutPage";
 import AdminMenuCategory from '../component/pages/Menu/AdminmenuCategory';
 import AdminMEnuItem from '../component/pages/Menu/AdminmenuItem';
 import UserManagement from '../component/pages/UserManagement/UserManagement';
@@ -23,7 +23,7 @@ const AdminRoutes = () => {
           <Route path="users" element={<UserManagement />} /> */}
           <Route path="reservation" element={<AdminReservation />} />
           <Route path="tables" element={<AdminTableQRPage />} />
-          <Route path="checkout" element={<AdminCheckoutPage />} />
+          {/* <Route path="checkout" element={<AdminCheckoutPage />} /> */}
           <Route path="category" element={<AdminMenuCategory />} />
           <Route path="item" element={<AdminMEnuItem />} />
           <Route path="/admin/users" element={<UserManagement />} />

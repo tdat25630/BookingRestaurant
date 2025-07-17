@@ -20,7 +20,6 @@ function CheckoutPage() {
     const fetchOrder = async () => {
       try {
         const res = await axios.get(`http://localhost:8080/api/orders/session/${sessionId}`);
-        // Tìm đơn hàng đầu tiên chưa thanh toán trong phiên
         const orderToPay = Array.isArray(res.data) 
           ? res.data.find(order => order.paymentStatus === 'unpaid') 
           : null;
@@ -37,7 +36,6 @@ function CheckoutPage() {
 
   const handleNavigateToPayment = () => {
     if (pendingOrder) {
-      // Điều hướng sang trang cổng thanh toán và truyền thông tin đơn hàng
       navigate('/payment-gateway', { 
         state: { 
           orderId: pendingOrder._id, 
@@ -98,8 +96,18 @@ function CheckoutPage() {
           <button onClick={() => navigate(`/menu?sessionId=${sessionId}`)} className="btn-action">
             ➕ Gọi thêm món
           </button>
-          <button onClick={handleNavigateToPayment} className="btn-payment">
-            💳 Tiến hành thanh toán
+          <button 
+            onClick={() => alert('Chức năng thanh toán bằng tiền mặt đang được phát triển.')} 
+            className="btn-payment btn-cash"
+            title="Chức năng đang phát triển"
+          >
+            💵 Thanh toán tiền mặt
+          </button>
+          <button 
+            onClick={handleNavigateToPayment} 
+            className="btn-payment btn-zalo"
+          >
+            📲 Thanh toán qua QR
           </button>
         </div>
       </div>
