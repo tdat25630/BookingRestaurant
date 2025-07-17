@@ -170,4 +170,35 @@ exports.addItemToOrder = async (req, res) => {
       res.status(500).json({ error: 'Không thể thêm món vào đơn hàng', details: err.message });
     }
   };
-  
+
+exports.markAsPaidByCash = async (req, res, next) => {
+  try {
+      const { orderId } = req.params;
+
+      const order = await Order.findById(orderId);
+
+      if (!order) {
+          return res.status(404).json({ success: false, message: 'Order not found.' });
+      }
+
+      if (order.paymentStatus === 'paid') {
+          return res.status(400).json({ success: false, message: 'This order has already been paid.' });
+      }
+
+      // Update the payment status and the order status
+      order.paymentStatus = 'paid';
+      order.status = 'served'; // Move to served status upon payment
+      
+      const updatedOrder = await order.save();
+
+      res.status(200).json({
+          success: true,
+          message: 'Successfully updated payment status.',
+          data: updatedOrder
+      });
+
+  } catch (error) {
+      console.error("Error during cash payment:", error);
+      next(error);
+  }
+};

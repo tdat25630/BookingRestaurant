@@ -5,5 +5,5 @@ router.post('/', orderController.createOrUpdateOrder);
 router.get('/session/:sessionId', orderController.getOrdersBySession);
 router.put('/:id/status', orderController.updateOrderStatus);
 router.get('/', orderController.getAllOrders);
-
+router.put('/:orderId/pay-by-cash', orderController.markAsPaidByCash);
 module.exports = router;
