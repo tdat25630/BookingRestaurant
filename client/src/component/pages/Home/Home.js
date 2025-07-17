@@ -414,14 +414,7 @@ const Home = () => {
                     </p>
                     <p className="dish-description">{dish.description}</p>
 
-                    <div className="dish-rating">
-                      <div className="stars">
-                        {renderStars(dish.rating || 4.5)}
-                      </div>
-                      <span className="rating-text">
-                        {dish.rating || 4.5} ({dish.reviews || 0} đánh giá)
-                      </span>
-                    </div>
+
 
                     <div className="dish-info">
                       <p className="cooking-time">
