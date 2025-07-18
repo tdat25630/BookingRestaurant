@@ -62,8 +62,6 @@ const Login = () => {
           // Lưu token vào localStorage để dễ truy cập
           localStorage.setItem('token', userData.token);
 
-          // Đối với một số trường hợp, bạn có thể muốn lưu token vào cookie
-          // để nó tự động được gửi với mỗi request
           document.cookie = `access_token=${userData.token}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax`;
         }
 
@@ -74,8 +72,10 @@ const Login = () => {
           navigate('/admin');
         } else if (role === 'chef') {
           navigate('/chef');
-        } else if (role === 'cashier') {
+          } else if (role === 'cashier') {
           navigate('/cashier');
+          } else if (role === 'staff') {
+          navigate('/staff');
         } else {
           navigate('/home');
         }

@@ -14,6 +14,7 @@ const orderItemRoutes = require('./routes/orderItemRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const chefRoutes = require('./routes/chefRoutes');
 const promotionRoutes = require('./routes/promotionRoute');
+const staffRoutes = require('./routes/staffRoutes');
 
 
 const app = express();
@@ -65,6 +66,7 @@ app.use('/api/chef', chefRoutes);
 
 // middlewares
 app.use(errorMiddleware);
+app.use('/api/staff', staffRoutes);
 
 const PORT = process.env.PORT || 8080;
 

@@ -11,11 +11,11 @@ const userSchema = new Schema({
   points: { type: Number, default: 0, min: 0 },
   role: {
     type: String,
-    enum: ['admin', 'user', 'manager', 'chef', 'cashier'],
+    enum: ['admin', 'user', 'manager', 'chef', 'cashier', 'staff'],
     default: 'user'
   },
-
-}, {
+  
+},{
   timestamps: true
 });
 
