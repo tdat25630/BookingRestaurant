@@ -24,6 +24,7 @@ import UserManagement from './component/pages/UserManagement/UserManagement';
 import AdminLayout from './component/LayoutAdmin/AdminLayout';
 import UserProfile from './component/pages/UserProfile/UserProfile';
 import AdminDashboard from './component/pages/Dashboard/AdminDashboard';
+import PromotionManagement from './component/pages/PromotionManagement/PromotionManagement';
 
 function App() {
     return (
@@ -53,6 +54,7 @@ function App() {
                                 <UserProfile />
 
                             } />
+                            <Route path="/admin/promotions" element={<PromotionManagement />} />
                             <Route path="/admin" element={
 
                                 <AdminDashboard />

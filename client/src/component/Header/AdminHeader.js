@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils, faUserShield, faSignOutAlt, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, Link } from 'react-router-dom';
 import './AdminHeader.css';
-import { FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { FaGift, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
 
 const AdminHeader = () => {
     const navigate = useNavigate();
@@ -30,6 +30,10 @@ const AdminHeader = () => {
                     <Nav.Link as={Link} to="/admin/users" className="nav-link">
                         <FontAwesomeIcon icon={faUsers} className="me-1" />
                         User
+                    </Nav.Link>
+                    <Nav.Link href="/admin/promotions">
+                        <FaGift className="me-2" />
+                        Promotions
                     </Nav.Link>
                     <Nav.Link as={Link} to="/admin/category" className="nav-link">Category</Nav.Link>
                     <Nav.Link as={Link} to="/admin/item" className="nav-link">Menu</Nav.Link>
