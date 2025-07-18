@@ -6,6 +6,7 @@ function MenuItemCard({ item }) {
   const { addToCart } = useOrder();
 
   const handleAdd = () => {
+    if (!item.isAvailable) return;
     addToCart(
       {
         _id: item._id,
@@ -32,7 +33,13 @@ function MenuItemCard({ item }) {
         </div>
         <div className="menu-card-footer">
           <div className="menu-card-price">{item.price.toLocaleString()}₫</div>
-          <button onClick={handleAdd}>Add to Cart</button>
+          <button 
+            onClick={handleAdd}
+            disabled={!item.isAvailable}
+            className={!item.isAvailable ? 'disabled' : ''}
+          >
+            {item.isAvailable ? 'Add to Cart' : 'Hết món'}
+          </button>
         </div>
       </div>
     </div>

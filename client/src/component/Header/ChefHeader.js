@@ -89,6 +89,9 @@ const ChefHeader = () => {
                         <Nav.Link href="/chef/dashboard" className="chef-nav-link">
                             Dashboard
                         </Nav.Link>
+                        <Nav.Link href="/chef/item" className="chef-nav-link">
+                           Menu
+                        </Nav.Link>
                     </Nav>
 
                     {/* Quick Stats */}
@@ -122,9 +125,9 @@ const ChefHeader = () => {
 
                     {/* Actions */}
                     <Nav className="ms-auto">
-                        <Nav.Link onClick={handleRefresh} className="action-btn" title="Refresh">
+                        {/* <Nav.Link onClick={handleRefresh} className="action-btn" title="Refresh">
                             <FontAwesomeIcon icon={faRefresh} />
-                        </Nav.Link>
+                        </Nav.Link> */}
 
                         <NavDropdown
                             title={
@@ -138,7 +141,7 @@ const ChefHeader = () => {
                         >
                             <NavDropdown.Item href="/chef/profile">
                                 <FontAwesomeIcon icon={faCog} className="me-1" />
-                                Cài đặt
+                                Profile
                             </NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item onClick={handleLogout}>
