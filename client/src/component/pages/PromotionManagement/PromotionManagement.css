@@ -1,0 +1,346 @@
+/* Promotions table - Fixed contrast issues */
+.promotions-table {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    border: 2px solid rgba(255, 193, 7, 0.8);
+    border-radius: 16px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+}
+
+.promotions-table .card-body {
+    padding: 0;
+    background: transparent;
+}
+
+.promotion-table {
+    margin: 0;
+    color: #ffffff;
+    background: transparent;
+}
+
+.promotion-table thead {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    position: relative;
+}
+
+.promotion-table thead::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #ff8f00, transparent);
+}
+
+.promotion-table th {
+    background: transparent !important;
+    color: #000000 !important;
+    font-weight: 900 !important;
+    padding: 24px 16px;
+    text-align: center;
+    border: none;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Table body rows with better contrast */
+.promotion-table tbody tr {
+    border-bottom: 1px solid rgba(255, 193, 7, 0.5);
+    transition: all 0.3s ease;
+    background: rgba(45, 45, 45, 0.95) !important;
+}
+
+.promotion-table tbody tr:nth-child(even) {
+    background: rgba(35, 35, 35, 0.95) !important;
+}
+
+.promotion-table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.3) 0%, rgba(255, 193, 7, 0.2) 100%) !important;
+    transform: scale(1.01);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.5);
+}
+
+/* Table cells with enhanced contrast */
+.promotion-table td {
+    padding: 20px 16px;
+    text-align: center;
+    color: #ffffff !important;
+    font-size: 1rem;
+    font-weight: 700 !important;
+    border: none;
+    vertical-align: middle;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+    background: transparent !important;
+}
+
+/* Promotion code styling - Enhanced visibility */
+.promotion-code {
+    text-align: left;
+}
+
+.promotion-code strong {
+    color: #ffc107 !important;
+    font-size: 1.4rem !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 25px rgba(255, 193, 7, 0.9), 0 3px 6px rgba(0, 0, 0, 0.9);
+    display: block;
+    margin-bottom: 4px;
+    filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.7));
+    background: transparent !important;
+}
+
+/* Promotion description - Better readability */
+.promotion-description {
+    text-align: left;
+    max-width: 280px;
+    color: #ffffff !important;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    font-weight: 600 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+    opacity: 1;
+    background: transparent !important;
+}
+
+/* Badge styling with better contrast */
+.badge {
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 10px 18px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.badge.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(0, 123, 255, 0.5);
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(40, 167, 69, 0.5);
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(23, 162, 184, 0.5);
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+    color: #000000 !important;
+    box-shadow: 0 3px 10px rgba(255, 193, 7, 0.5);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.badge.bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.5);
+}
+
+.badge.bg-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(108, 117, 125, 0.5);
+}
+
+/* Discount display with enhanced visibility */
+.discount-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.discount-value {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+    color: #000000 !important;
+    padding: 14px 22px;
+    border-radius: 25px;
+    font-weight: 900 !important;
+    font-size: 1.2rem !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 5px 20px rgba(255, 193, 7, 0.6);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 193, 7, 0.9);
+}
+
+/* Date range styling with better contrast */
+.date-range {
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.start-date,
+.end-date {
+    margin: 4px 0;
+    padding: 4px 8px;
+    font-weight: 700;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.start-date {
+    color: #00ff88 !important;
+    text-shadow: 0 0 15px rgba(0, 255, 136, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.end-date {
+    color: #ff4757 !important;
+    text-shadow: 0 0 15px rgba(255, 71, 87, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.date-range small {
+    color: #ffc107 !important;
+    font-weight: 800;
+    text-shadow: 0 0 12px rgba(255, 193, 7, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* Usage info with better visibility */
+.usage-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.usage-count {
+    color: #ffc107 !important;
+    font-weight: 900 !important;
+    font-size: 1.2rem !important;
+    text-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.usage-bar {
+    width: 80px;
+    height: 10px;
+    background: rgba(255, 193, 7, 0.4);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 193, 7, 0.7);
+}
+
+.usage-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.8);
+}
+
+/* Action buttons with better contrast */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.action-buttons .btn {
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    transition: all 0.3s ease;
+    border: 2px solid;
+    min-width: 55px;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-buttons .btn-outline-info {
+    color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.action-buttons .btn-outline-info:hover {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+    border-color: #ffc107 !important;
+    color: #000000 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 193, 7, 0.6);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.action-buttons .btn-outline-danger {
+    color: #ff4757 !important;
+    border-color: #ff4757 !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.action-buttons .btn-outline-danger:hover {
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%) !important;
+    border-color: #ff4757 !important;
+    color: #ffffff !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 71, 87, 0.6);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Override any inherited styles that might cause conflicts */
+.promotion-table tbody tr td * {
+    color: inherit !important;
+    background: transparent !important;
+}
+
+/* Ensure specific elements maintain their colors */
+.promotion-table tbody tr td .badge {
+    color: inherit !important;
+}
+
+.promotion-table tbody tr td .discount-value {
+    color: #000000 !important;
+}
+
+.promotion-table tbody tr td .start-date {
+    color: #00ff88 !important;
+}
+
+.promotion-table tbody tr td .end-date {
+    color: #ff4757 !important;
+}
+
+.promotion-table tbody tr td .usage-count {
+    color: #ffc107 !important;
+}
+
+.promotion-table tbody tr td .promotion-code strong {
+    color: #ffc107 !important;
+}
+
+/* Remove any conflicting table styles */
+.table-responsive {
+    background: transparent !important;
+}
+
+.table {
+    background: transparent !important;
+}
+
+/* Ensure Bootstrap overrides don't interfere */
+.table > tbody > tr > td {
+    background: transparent !important;
+    color: #ffffff !important;
+}
+
+.table > thead > tr > th {
+    background: transparent !important;
+    color: #000000 !important;
+}

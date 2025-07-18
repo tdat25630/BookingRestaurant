@@ -9,7 +9,11 @@ const ReservationSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: true
+    required: false
+  },
+  email: {
+    type: String,
+    required: false
   },
   name: {
     type: String,
@@ -31,7 +35,7 @@ const ReservationSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'cancelled'],
+    enum: ['pending', 'confirmed', 'cancelled', 'expired'],
     default: 'pending'
   },
   specialRequest: {
@@ -41,6 +45,14 @@ const ReservationSchema = new mongoose.Schema({
   guestCount: {
     type: Number,
     required: true
+  },
+  preOrders: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'MenuItem' }],
+    required: false,
+  },
+  accountId: {
+    type: Schema.Types.ObjectId, ref: 'User',
+    required: false,
   }
 }, {
   timestamps: true

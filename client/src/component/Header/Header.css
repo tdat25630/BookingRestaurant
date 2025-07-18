@@ -38,3 +38,7 @@
 .dropdown-divider {
     border-top: 1px solid #444444;
 }
+
+.navbar-dark .navbar-nav .nav-link.active {
+    color: #ffc107 !important;
+}

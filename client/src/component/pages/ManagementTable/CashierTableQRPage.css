@@ -1,0 +1,217 @@
+/* Existing styles... */
+
+.create-section {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .create-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    z-index: 1000;
+    min-width: 180px;
+    margin-top: 5px;
+  }
+  
+  .option-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: #2a2a2a;
+    color: #ffffff;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    border-radius: 0;
+  }
+  
+  .option-btn:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  
+  .option-btn:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+  
+  .option-btn:hover {
+    /* Loại bỏ animation/transition có thể gây nhấp nháy */
+    transition: none;
+}
+  
+  .new-customer:hover {
+    background-color: #28a745;
+    color: #ffffff;
+  }
+  
+  .reserved-customer:hover {
+    background-color: #17a2b8;
+    color: #ffffff;
+  }
+  
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+  }
+  
+  /* Reservation Modal Styles */
+  .reservation-modal {
+    max-width: 600px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .reservation-modal h3 {
+    margin: 0 0 20px 0;
+    color: #ffcc00;
+    text-align: center;
+  }
+  
+  .reservation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .reservation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    background: #333333;
+    transition: all 0.2s;
+  }
+  
+  .reservation-item:hover {
+    background: #3a3a3a;
+    border-color: #17a2b8;
+    transform: translateY(-2px);
+  }
+  
+  .reservation-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+  }
+  
+  .reservation-info strong {
+    font-size: 16px;
+    color: #ffcc00;
+    margin-bottom: 5px;
+  }
+  
+  .reservation-info span {
+    font-size: 14px;
+    color: #cccccc;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .special-request {
+    font-style: italic;
+    color: #aaaaaa !important;
+    background: #404040;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+  
+  .select-reservation-btn {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .select-reservation-btn:hover {
+    background: #138496;
+  }
+  
+  /* Modal overlay improvements */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+  
+  .modal-content {
+    background: #2a2a2a;
+    color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #444;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .create-options {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 250px;
+    }
+    
+    .reservation-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .select-reservation-btn {
+      align-self: stretch;
+    }
+  }
+  /* Thêm vào cuối file CSS */
+.upcoming-soon {
+    color: #ffcc00 !important;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.table-warning {
+    color: #ff9800 !important;
+    background: #4a3c00;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}

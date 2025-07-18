@@ -83,7 +83,7 @@ const Register = () => {
                 <Form noValidate validated={validated} onSubmit={handleSubmit}>
                     <Input
                         label="Username"
-                        type="text"
+                        type="input"
                         placeholder="Enter your username"
                         value={username}
                         required

@@ -1,0 +1,30 @@
+.user-profile-container {
+    max-width: 900px;
+}
+
+.profile-card {
+    border: none;
+}
+
+.profile-row {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.password-change-section {
+    background-color: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+
+    .profile-label,
+    .profile-value {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+}

@@ -45,13 +45,29 @@ const login = async (req, res, next) => {
       return next(createError(400, "Wrong password !"));
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
+    // Tạo token với id và role
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
-    const formatedResponse = res.cookie("access_token", token, {
+    // Loại bỏ password từ user object trước khi trả về client
+    const userWithoutPassword = { ...user._doc };
+    delete userWithoutPassword.password;
+
+    // Đặt cookie và trả về response
+    res.cookie("access_token", token, {
       httpOnly: true,
-    }).status(200).json(user)
+      secure: process.env.NODE_ENV === 'production', // true trong production
+      sameSite: 'lax', // hoặc 'none' nếu API và client ở domain khác nhau
+      maxAge: 24 * 60 * 60 * 1000 // 24 giờ
+    }).status(200).json({
+      ...userWithoutPassword,
+      token // Gửi thêm token trong response body để frontend có thể lưu
+    });
   } catch (err) {
-    next(err);
+    next(createError(500, "Login failed!"));
   }
 }
 

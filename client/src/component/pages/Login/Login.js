@@ -2,26 +2,37 @@ import React, { useState } from 'react';
 import { Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
+
 import './Login.css';
 import Button from '../../Button/Button';
 import Input from '../../Input/Input';
-import { useAuth } from '../../../context/AuthContext';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const navigate = useNavigate();
-
-  const { login } = useAuth();
+  // const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [validated, setValidated] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const handleSubmit = async (e) => {
-    const form = e.currentTarget;
-    e.preventDefault();
+  const navigate = useNavigate();
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+
+    //   if (form.checkValidity() === false) {
+    //     e.stopPropagation();
+    //   } else {
+    //     // Add login logic here
+    //     console.log("Login attempt with:", username);
+    //     // Redirect to home on success
+    //     // history.push('/home');
+    //   }
+
+    //   setValidated(true);
+    // };
     if (form.checkValidity() === false) {
       e.stopPropagation();
       setValidated(true);
@@ -29,50 +40,53 @@ const Login = () => {
     }
 
     try {
-      setLoading(true);
-      console.log('Sending login data:', { email, password });
+      // const response = await axios.post('/api/login', {
+      //   username,
+      //   password,
+      // });
+      const response = await axios.post(
+        'http://localhost:8080/api/auth/login',
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      ); if (response.status === 200) {
+        const userData = response.data;
 
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
-        email,
-        password
-      }, {
-        withCredentials: true
-      });
+        // Lưu thông tin người dùng và token vào localStorage
+        localStorage.setItem('user', JSON.stringify(userData));
 
-      console.log('Login response:', response);
+        // Nếu token được trả về trong response, lưu vào localStorage
+        if (userData.token) {
+          // Lưu token vào localStorage để dễ truy cập
+          localStorage.setItem('token', userData.token);
 
-      if (response.data) {
-        login(response.data);
+          document.cookie = `access_token=${userData.token}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax`;
+        }
 
-        // Redirect based on user role
-        if (response.data.role === 'admin') {
+        const role = response.data.role;
+        // hoặc lấy mảng roles
+
+        if (role === 'admin') {
           navigate('/admin');
+        } else if (role === 'chef') {
+          navigate('/chef');
+          } else if (role === 'cashier') {
+          navigate('/cashier');
+          } else if (role === 'staff') {
+          navigate('/staff');
         } else {
           navigate('/home');
         }
-      } else {
-        setError('Invalid response from server');
       }
     } catch (err) {
-      console.error('Login failed - Error object:', err);
-      console.error('Error type:', typeof err);
-      console.error('Error toString:', String(err));
-      console.error('Response available:', err.response ? 'Yes' : 'No');
-
-      let errorMessage = "Login failed. Please try again.";
-
-      if (err.response && err.response.data) {
-        errorMessage = err.response.data.message || errorMessage;
-      }
-
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+      console.error('Login error:', err);
+      setError('Invalid username or password.');
     }
 
     setValidated(true);
   };
-
   return (
     <div className="login-page">
       <div className="login-card">
@@ -81,17 +95,21 @@ const Login = () => {
           <h2 className="login-title">Restaurant Booking</h2>
         </div>
 
-        {error && (
-          <div className="alert alert-danger" role="alert">
-            {error}
-          </div>
-        )}
+        {/* <Form noValidate validated={validated} onSubmit={handleSubmit}>
+          <Input
+            label="Username"
+            type="text"
+            placeholder="Enter your username"
+            value={username}
+            required
+            onChange={(e) => setUsername(e.target.value)}
+          /> */}
 
         <Form noValidate validated={validated} onSubmit={handleSubmit}>
           <Input
             label="Email"
-            type="text"
-            placeholder="Enter your Email"
+            type="email"
+            placeholder="Enter your email"
             value={email}
             required
             onChange={(e) => setEmail(e.target.value)}
@@ -105,6 +123,7 @@ const Login = () => {
             required
             onChange={(e) => setPassword(e.target.value)}
           />
+          {error && <p className="text-danger text-center">{error}</p>}
 
           <div className="d-grid gap-2 mt-4">
             <Button type="submit" fullWidth>
@@ -113,7 +132,7 @@ const Login = () => {
           </div>
 
           <div className="text-center mt-3">
-            <p className="mb-0">Don't have an account? <Link to="/register" className='register-link'>Register</Link></p>
+            <p className="mb-0">Don't have an account? <a href="/register" className="register-link">Register</a></p>
           </div>
         </Form>
       </div>
