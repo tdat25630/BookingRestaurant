@@ -55,6 +55,9 @@ const UserForm = ({ formData, handleInputChange, showPassword, setShowPassword, 
                 >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
+                    <option value="manager">Manager</option>
+                    <option value="chef">Chef</option>
+                    <option value="cashier">Cashier</option>
                 </Form.Select>
             </Form.Group>
 
