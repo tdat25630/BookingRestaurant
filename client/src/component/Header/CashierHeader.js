@@ -27,7 +27,7 @@ const CashierHeader = () => {
                     <Nav className="ms-auto">
                         <Nav.Link as={Link} to="/cashier/tables" className="nav-link">Manage Tables</Nav.Link>
                         <Nav.Link as={Link} to="/cashier/reservation" className="nav-link">Manage Bookings</Nav.Link>
-                        <Nav.Link as={Link} to="/cashier/category" className="nav-link">Category Management</Nav.Link>
+                        {/* <Nav.Link as={Link} to="/cashier/category" className="nav-link">Category Management</Nav.Link> */}
                         <Nav.Link as={Link} to="/cashier/item" className="nav-link">MenuItem Management</Nav.Link>
                         <NavDropdown
                             title={<span><FaUserCircle className="me-1" />Cashier</span>}
