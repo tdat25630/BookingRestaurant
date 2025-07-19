@@ -56,8 +56,8 @@ a:hover {
 
 input,
 .form-control {
-    display: block !important;
-    visibility: visible !important;
+    display: block;
+    visibility: visible;
 }
 
 .input-field:focus {

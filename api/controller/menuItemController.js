@@ -1,4 +1,5 @@
 const MenuItem = require('../models/MenuItem');
+const { uploadImageBuffer, deleteImage } = require('../services/cloudinary.service');
 
 // GET: Lấy tất cả menu item
 // exports.getAllMenuItems = async (req, res) => {
@@ -37,20 +38,64 @@ exports.getMenuItemById = async (req, res) => {
 // POST: Tạo menu item mới
 exports.createMenuItem = async (req, res) => {
   try {
-    const { name, description, image, price, isAvailable, category } = req.body;
-    const newItem = new MenuItem({ name, description, image, price, isAvailable, category });
+    console.log('Hello;')
+    const { name, description, price, isAvailable, category } = req.body;
+
+    let imageUrl = null;
+    console.log(req.file.buffer)
+    if (req.file) {
+      const result = await uploadImageBuffer(req.file.buffer);
+      imageUrl = result.secure_url;
+    }
+    console.log(imageUrl)
+
+    const newItem = new MenuItem({
+      name,
+      description,
+      image: imageUrl, // store the Cloudinary image URL here
+      price,
+      isAvailable,
+      category
+    });
+
     await newItem.save();
     res.status(201).json(newItem);
   } catch (err) {
+    console.log(err)
     res.status(400).json({ error: err.message });
   }
 };
 
+
 // PUT: Cập nhật menu item
 exports.updateMenuItem = async (req, res) => {
   try {
-    const updated = await MenuItem.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ message: 'Not found' });
+    const item = await MenuItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: 'Not found' });
+
+    // If there's a new image file, upload it
+    let imageUrl = item.image;
+    if (req.file) {
+      const result = await uploadImageBuffer(req.file.buffer);
+      imageUrl = result.secure_url;
+
+      // Delete old image if exists
+      if (item.image) {
+        const publicId = extractPublicId(item.image);
+        if (publicId) await deleteImage(publicId);
+      }
+    }
+
+    // Update fields
+    const updated = await MenuItem.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        image: imageUrl,
+      },
+      { new: true }
+    );
+
     res.json(updated);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -61,9 +106,19 @@ exports.updateMenuItem = async (req, res) => {
 exports.deleteMenuItem = async (req, res) => {
   try {
     const deleted = await MenuItem.findByIdAndDelete(req.params.id);
+    if (deleted.image) {
+      const publicId = extractPublicId(deleted.image)
+      deleteImage(publicId) //fire and forget, not sure if this's good tho
+    }
     if (!deleted) return res.status(404).json({ message: 'Not found' });
     res.json({ message: 'Deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Helper function to extract public id from cloudinary url
+const extractPublicId = (url) => {
+  const matches = url.match(/\/upload\/(?:v\d+\/)?([^\.\/]+)(?:\.[a-zA-Z]+)?$/);
+  return matches ? matches[1] : null;
+}
