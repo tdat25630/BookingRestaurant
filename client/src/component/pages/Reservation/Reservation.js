@@ -5,6 +5,8 @@ import {
 import Header from '../../Header/Header';
 import './Reservation.css';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import DishSelectionModal from './DishSelectionModal';
 
 function Reservation() {
   const [showDishModal, setShowDishModal] = useState(false); const [showOtpModal, setShowOtpModal] = useState(false);
@@ -35,7 +37,7 @@ function Reservation() {
         const storedUser = JSON.parse(localStorage.getItem('user'));
 
         if (!storedUser || !storedUser._id) {
-          throw new Error('User information not found');
+          console.log('User information not found');
         }
 
         const token = localStorage.getItem('token');
@@ -91,17 +93,49 @@ function Reservation() {
     if (formData.phone && !phoneRegex.test(formData.phone)) errs.phone = 'Số điện thoại không hợp lệ';
     if (!formData.name.trim()) errs.name = 'Tên là bắt buộc';
 
-    if (!formData.reservationDate) errs.reservationDate = 'Ngày là bắt buộc';
-    else {
+    if (!formData.reservationDate) {
+      errs.reservationDate = 'Ngày là bắt buộc';
+    } else {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Set to midnight for accurate comparison
+      today.setHours(0, 0, 0, 0);
       const selectedDate = new Date(formData.reservationDate);
+      selectedDate.setHours(0, 0, 0, 0);
+
       if (selectedDate < today) {
         errs.reservationDate = 'Ngày không hợp lệ';
       }
     }
 
-    if (!timeRegex.test(formData.reservationTime)) errs.reservationTime = 'Giờ không hợp lệ (HH:mm)';
+    if (!timeRegex.test(formData.reservationTime)) {
+      errs.reservationTime = 'Giờ không hợp lệ (HH:mm)';
+    } else {
+      const [hours, minutes] = formData.reservationTime.split(':').map(Number);
+
+      // Enforce 9AM to 9PM time slot
+      if (hours < 9 || (hours === 21 && minutes > 0) || hours > 21) {
+        errs.reservationTime = 'Giờ chỉ được phép từ 09:00 đến 21:00';
+      } else {
+        const selectedDate = new Date(formData.reservationDate);
+        const reservationDateTime = new Date(selectedDate);
+        reservationDateTime.setHours(hours, minutes, 0, 0);
+
+        const now = new Date();
+        const requiredTime = 3
+        const fiveHoursLater = new Date(now.getTime() + requiredTime * 60 * 60 * 1000);
+
+        // If selected date is today, check the time rule
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        if (selectedDate.getTime() === today.getTime()) {
+          if (reservationDateTime < fiveHoursLater) {
+            errs.reservationTime = `Thời gian phải ít nhất ${requiredTime} tiếng kể từ bây giờ`;
+          }
+        }
+      }
+    }
+
     if (formData.guestCount < 1) errs.guestCount = 'Tối thiểu 1 khách';
 
     setErrors(errs);
@@ -123,10 +157,8 @@ function Reservation() {
 
   const sendOtp = async () => {
     const target = otpTarget === 'phone' ? formData.phone.trim() : formData.email.trim();
-    console.log(formData)
-    console.log(otpTarget)
     if (!target) {
-      setOtpStatus(`Thiếu ${otpTarget}`);
+      setOtpStatus(`Thiếu ${otpTarget === 'phone' ? 'số điện thoại' : 'email'}`);
       return;
     }
     setOtpStatus('Đang gửi...');
@@ -142,7 +174,7 @@ function Reservation() {
       });
 
       if (res.ok) {
-        setOtpStatus(`OTP đã gửi qua ${otpTarget}`);
+        setOtpStatus(`OTP đã gửi qua ${otpTarget === 'phone' ? 'số điện thoại' : 'email'}`);
         setOtpSent(true);
         setResendTimer(60);
       } else {
@@ -170,15 +202,16 @@ function Reservation() {
           preOrders: selectedDishes,
           otp: inputOtp,
           otpTarget: otpTarget,
-          accountId: storedUser._id
+          accountId: storedUser?._id || null
         }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        setSuccess('Đặt bàn thành công!');
-        setFormData({ phone: '' || storedUser.phone, name: '', reservationDate: '', reservationTime: '', guestCount: 1, email: '' || storedUser._id});
+        //setSuccess('Đặt bàn thành công!');
+        toast.success("Đặt bàn thành công!");
+        setFormData({ phone: storedUser?.phone ?? '', name: '', reservationDate: '', reservationTime: '', guestCount: 1, email: storedUser?.email ?? '' });
         setSelectedDishes([]);
         setErrors({});
         setShowOtpModal(false);
@@ -186,10 +219,12 @@ function Reservation() {
         setInputOtp('');
         setOtpStatus('');
       } else {
-        setOtpStatus(data.error || 'OTP sai hoặc có lỗi');
+        //setOtpStatus(data.error || 'OTP sai hoặc có lỗi');
+        toast.error(data.error || 'OTP sai hoặc có lỗi');
       }
     } catch (err) {
-      setOtpStatus(err.message || 'Lỗi gửi yêu cầu');
+      //setOtpStatus(err.message || 'Lỗi gửi yêu cầu');
+      toast.error('Lỗi gửi yêu cầu');
     }
   };
 
@@ -304,51 +339,16 @@ function Reservation() {
           </Form>
         </Modal.Body>
       </Modal>
-      <Modal
+      <DishSelectionModal
         show={showDishModal}
         onHide={() => setShowDishModal(false)}
-        size="lg"
-        centered
-      >
-        {/* /MENU MODAL */}
-        <Modal.Header closeButton>
-          <Modal.Title>Chọn món đặt trước</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="dish-grid">
-            {menuItems.map(item => {
-              const isSelected = selectedDishes.includes(item._id);
-              return (
-                <div
-                  key={item._id}
-                  className={`dish-card ${isSelected ? 'selected' : ''}`}
-                  onClick={() => {
-                    setSelectedDishes(prev =>
-                      prev.includes(item._id)
-                        ? prev.filter(id => id !== item._id)
-                        : [...prev, item._id]
-                    );
-                  }}
-                >
-                  <img src={item.image} alt={item.name} className="dish-image" />
-                  <div className="dish-info">
-                    <strong>{item.name}</strong>
-                    <p>{item.price.toLocaleString()}₫</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDishModal(false)}>
-            Đóng
-          </Button>
-          <Button variant="primary" onClick={() => setShowDishModal(false)}>
-            Xong
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        menuItems={menuItems}
+        selectedDishes={selectedDishes}
+        setSelectedDishes={setSelectedDishes}
+      />
+      <div>
+        <ToastContainer />
+      </div>
     </>
   );
 }

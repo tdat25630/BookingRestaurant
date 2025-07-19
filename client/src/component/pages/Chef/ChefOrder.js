@@ -275,8 +275,8 @@ const ChefOrder = () => {
         {/* Header */}
         <div className="chef-header">
           <div className="header-left">
-            <h1>🧑‍🍳 Bếp - Quản lý đơn hàng</h1>
-            <p>Theo dõi và xử lý đơn hàng • Cập nhật {formatTime(new Date())}</p>
+          <h1>🧑‍🍳 Chef – Xem đơn hàng</h1>
+          {/* <p>Theo dõi và xử lý đơn hàng • Cập nhật {formatTime(new Date())}</p> */}
           </div>
           
           <button
@@ -288,7 +288,7 @@ const ChefOrder = () => {
             disabled={refreshing}
             className="refresh-btn"
           >
-            {refreshing ? '🔄' : '↻'} Làm mới
+            {refreshing ? '🔄' : '↻'} Refresh
           </button>
         </div>
 

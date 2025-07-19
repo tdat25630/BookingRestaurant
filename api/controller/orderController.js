@@ -1,5 +1,6 @@
 const Order = require('../models/order');
 const OrderItem = require('../models/orderItem');
+const Promotion = require('../models/promotion');
 const createError = require('../util/errorHandle');
 
 // Tạo đơn hàng mới hoặc thêm vào đơn pending
@@ -331,7 +332,6 @@ exports.getDailyRevenueInMonth = async (req, res) => {
   }
 };
 
-// ✅ Đã đưa ra ngoài đúng cách
 exports.markAsPaidByCash = async (req, res, next) => {
   try {
     const { orderId } = req.params;
@@ -360,5 +360,71 @@ exports.markAsPaidByCash = async (req, res, next) => {
   } catch (error) {
     console.error("Error during cash payment:", error);
     next(error);
+  }
+};
+//Apply promotion to order
+exports.applyVoucher = async (req, res, next) => {
+  try {
+      const { orderId } = req.params;
+      const { voucherCode } = req.body;
+
+      if (!voucherCode) {
+          return res.status(400).json({ success: false, message: 'Vui lòng nhập mã voucher.' });
+      }
+
+      const order = await Order.findById(orderId);
+      if (!order) {
+          return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
+      }
+      if (order.promotion_id) {
+          return res.status(400).json({ success: false, message: 'Đơn hàng này đã được áp dụng khuyến mãi.' });
+      }
+
+      const promotion = await Promotion.findOne({ 
+          code: voucherCode.toUpperCase(), 
+          is_active: true,
+          start_date: { $lte: new Date() }, 
+          end_date: { $gte: new Date() }
+      });
+
+      if (!promotion) {
+          return res.status(404).json({ success: false, message: 'Mã voucher không hợp lệ hoặc đã hết hạn.' });
+      }
+
+      // Tính toán lại tổng tiền từ các món ăn để đảm bảo chính xác
+      const items = await OrderItem.find({ orderId: orderId });
+      const subTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      // Kiểm tra điều kiện tối thiểu (nếu có)
+      if (subTotal < promotion.min_order_amount) {
+          return res.status(400).json({ success: false, message: `Đơn hàng phải có giá trị tối thiểu ${promotion.min_order_amount.toLocaleString('vi-VN')}₫ để áp dụng mã này.` });
+      }
+
+      let discountAmount = 0;
+      if (promotion.discount_type === 'percentage') {
+          discountAmount = subTotal * (promotion.discount_value / 100);
+      } else { // fixed_amount
+          discountAmount = promotion.discount_value;
+      }
+
+      // Cập nhật lại tổng tiền của đơn hàng
+      order.totalAmount = subTotal - discountAmount;
+      order.promotion_id = promotion._id; // Lưu lại ID của promotion đã áp dụng
+      
+      await order.save();
+
+      res.status(200).json({
+          success: true,
+          message: 'Áp dụng voucher thành công!',
+          data: {
+              orderId: order._id,
+              subTotal: subTotal,
+              discount: discountAmount,
+              newTotalAmount: order.totalAmount
+          }
+      });
+
+  } catch (error) {
+      next(error);
   }
 };

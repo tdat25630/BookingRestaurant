@@ -7,8 +7,10 @@ import './AdminmenuItem.css';
 const API_URL = 'http://localhost:8080/api/menu-items';
 
 function AdminMenuItem() {
+  const [errors, setErrors] = useState({});
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -57,18 +59,36 @@ function AdminMenuItem() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      if (editingId) {
-        await axios.put(`${API_URL}/${editingId}`, form);
-      } else {
-        await axios.post(API_URL, form);
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('description', form.description);
+      formData.append('price', form.price);
+      formData.append('isAvailable', form.isAvailable);
+      formData.append('category', form.category);
+      if (form.image instanceof File) {
+        formData.append('image', form.image);
       }
+
+      if (editingId) {
+        await axios.put(`${API_URL}/${editingId}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        await axios.post(API_URL, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
       setForm({ name: '', description: '', image: '', price: '', isAvailable: true, category: '' });
       setEditingId(null);
       setShowForm(false);
       fetchItems();
     } catch (err) {
       console.error('Submit error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -124,7 +144,7 @@ function AdminMenuItem() {
               <input
                 className="search-input"
                 type="text"
-                placeholder="Search menu item..."
+                placeholder="Tìm kiếm..."
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -150,12 +170,12 @@ function AdminMenuItem() {
             <table className="menu-table">
               <thead>
                 <tr>
-                  <th>Image</th>
-                  <th>Name</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Available</th>
-                  <th>Actions</th>
+                  <th>Ảnh</th>
+                  <th>Tên</th>
+                  <th>Phân loại</th>
+                  <th>Giá</th>
+                  <th>Trạng thái</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -164,11 +184,11 @@ function AdminMenuItem() {
                     <td><img src={item.image} alt={item.name} className="item-img" /></td>
                     <td>{item.name}</td>
                     <td>{item.category?.name || 'No Category'}</td>
-                    <td>{item.price}</td>
-                    <td>{item.isAvailable ? 'Yes' : 'No'}</td>
+                    <td>{Number(item.price).toLocaleString()}</td>
+                    <td>{item.isAvailable ? 'Phục vụ' : 'Không phục vụ'}</td>
                     <td>
-                      <button onClick={() => handleEdit(item)}>Edit</button>
-                      <button onClick={() => handleDelete(item._id)}>Delete</button>
+                      <button onClick={() => handleEdit(item)}>Sửa</button>
+                      <button className='danger' onClick={() => handleDelete(item._id)}>Xóa</button>
                     </td>
                   </tr>
                 ))}
@@ -191,22 +211,81 @@ function AdminMenuItem() {
           {/* RIGHT SIDE */}
           {showForm && (
             <div className="menu-form">
-              <h4>{editingId ? 'Edit Item' : 'Add New Item'}</h4>
+              <h4>{editingId ? 'Sửa món ăn' : 'Tạo món ăn'}</h4>
               <form onSubmit={handleSubmit}>
-                <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required />
-                <input name="description" value={form.description} onChange={handleChange} placeholder="Description" />
-                <input name="image" value={form.image} onChange={handleChange} placeholder="Image URL" />
-                <input name="price" type="number" value={form.price} onChange={handleChange} placeholder="Price" />
+                <div className="mb-3">
+                  <label htmlFor="imageUpload" className="btn btn-primary">
+                    <i className="" /> Đăng ảnh
+                  </label>
+                  <input
+                    id="imageUpload"
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
+                  />
+                  {form.image && (
+                    <div className="mt-2">
+                      <small >Đã tải lên: {form.image.name}</small>
+                    </div>
+                  )}
+                </div>
+                <input name="name" value={form.name} onChange={handleChange} placeholder="Tên" required />
+                <input name="description" value={form.description} onChange={handleChange} placeholder="Giới thiệu" />
+
+                <input
+                  name="price"
+                  type="input"
+                  value={form.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/,/g, '');
+                    if (!isNaN(raw)) {
+                      setForm({ ...form, price: raw });
+                    }
+                  }}
+                  placeholder="Giá"
+                />
                 <select name="category" value={form.category} onChange={handleChange} required>
-                  <option value="">-- Select Category --</option>
+                  <option value="">-- Chọn loại  --</option>
                   {categories.map((cat) => (
                     <option key={cat._id} value={cat._id}>{cat.name}</option>
                   ))}
                 </select>
-                <label>
-                  <input type="checkbox" name="isAvailable" checked={form.isAvailable} onChange={handleChange} /> Available
-                </label>
-                <button type="submit">{editingId ? 'Update' : 'Create'}</button>
+                <div className="form-check d-flex align-items-center" style={{ marginLeft: '30px', maxWidth: '400px', margin: '10px auto' }}>
+                  <input
+                    style={{ width: '20px' }}
+                    className="form-check-input"
+                    type="checkbox"
+                    id="isAvailable"
+                    name="isAvailable"
+                    checked={form.isAvailable}
+                    onChange={handleChange}
+                  />
+                  <label className="form-check-label ms-2" htmlFor="isAvailable">
+                    Đang còn
+                  </label>
+                </div>
+
+                <button
+                  className="submit-button"
+                  type="submit"
+                  disabled={loading}
+                  style={{ backgroundColor: !loading ? '' : 'gray' }}
+                >
+                  {loading && <span className="spinner-border spinner-border-sm me-2" role="status" />}
+                  {editingId ? 'Cập nhật' : 'Tạo'}
+                </button>
+
+                <button
+                  className="mx-2"
+                  type="button"
+                  style={{ backgroundColor: !loading ? '#ff6666' : 'gray' }}
+                  disabled={loading}
+                >
+                  {loading && <span className="spinner-border spinner-border-sm me-2" role="status" />}
+                  Hủy
+                </button>
+
               </form>
             </div>
           )}

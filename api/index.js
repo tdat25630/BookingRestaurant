@@ -13,8 +13,12 @@ const tableRoutes = require('./routes/tableRoutes');
 const orderItemRoutes = require('./routes/orderItemRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const chefRoutes = require('./routes/chefRoutes');
+<<<<<<< Updated upstream
 const promotionRoutes = require('./routes/promotionRoute');
 const staffRoutes = require('./routes/staffRoutes');
+=======
+const promotion = require('./routes/promotionRoutes');
+>>>>>>> Stashed changes
 
 
 const app = express();
@@ -53,7 +57,7 @@ app.use('/api/zalopay', require('./routes/zaloPayRoutes'));
 // app.use('/api/admin', require('./routes/AdminRoute'));
 app.use('/api/menu-categories', menuCategoryRoutes);
 app.use('/api/menu-items', menuItemRoutes);
-
+app.use('/api/promotions', promotion);
 app.use('/api/dining-sessions', diningSessionRoutes);
 app.use('/api/tables', tableRoutes);
 

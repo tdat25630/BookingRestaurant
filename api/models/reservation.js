@@ -46,10 +46,19 @@ const ReservationSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  preOrders: {
-    type: [{ type: Schema.Types.ObjectId, ref: 'MenuItem' }],
-    required: false,
-  },
+
+  preOrders: [{
+    itemId: {
+      type: Schema.Types.ObjectId,
+      ref: 'MenuItem',
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    }
+  }],
+
   accountId: {
     type: Schema.Types.ObjectId, ref: 'User',
     required: false,
