@@ -1,58 +1,34 @@
-/**
- * Created by duongdx on 4/30/18.
- */
-var http = require('http');
-var https = require('https');
-const ACCESS_TOKEN = process.env.SPEED_SMS_KEY;
+const axios = require('axios');
 
-exports.sendSMS = async function(phones, content, type, sender) {
-  console.log(type, sender)
-  var url = 'api.speedsms.vn';
-  var params = JSON.stringify({
-    to: phones,
-    content: content,
-    sms_type: type,
-    sender: sender
-  });
-  console.log(params)
+exports.sendEsms = async ({ phone, code, requestId }) => {
+  const apiKey = process.env.ESMS_API_KEY;
+  const secretKey = process.env.ESMS_SECRET_KEY;
+  const url = 'https://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json/';
 
-  var buf = new Buffer.from(ACCESS_TOKEN + ':x');
-  var auth = "Basic " + buf.toString('base64');
-  const options = {
-    hostname: url,
-    port: 443,
-    path: '/index.php/sms/send',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': auth
-    }
+  const data = {
+    ApiKey: apiKey,
+    SecretKey: secretKey,
+    Phone: phone,
+    Content: `${code} la ma xac minh dang ky Baotrixemay cua ban`,
+    Brandname: 'Baotrixemay',
+    SmsType: '2',
+    IsUnicode: '0',
+    campaignid: 'dat ban',
+    RequestId: requestId,
+    CallbackUrl: 'https://esms.vn/webhook/'
   };
 
-  const req = https.request(options, function(res) {
-    res.setEncoding('utf8');
-    var body = '';
-    res.on('data', function(d) {
-      body += d;
-    });
-    res.on('end', function() {
-      var json = JSON.parse(body);
-      if (json.status == 'success') {
-        console.log("send sms success")
-      }
-      else {
-        console.log("send sms failed " + body);
+  try {
+    const response = await axios.post(url, data, {
+      headers: {
+        'Content-Type': 'application/json'
       }
     });
-  });
 
-  req.on('error', function(e) {
-    console.log("send sms failed: " + e);
-  });
-
-  req.write(params);
-  req.end();
+    console.log('SMS Sent:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error sending SMS:', error.response?.data || error.message);
+    throw error;
+  }
 }
-
-//send test sms
-//sendSMS(['your phone number'], "test ná»™i dung sms", 2, '');

@@ -5,6 +5,7 @@ const emailService = require('../services/email.service');
 const sms = require("../services/sms.service");
 const cache = require('../util/cache');
 const crypto = require('crypto');
+const mongoose = require('mongoose');
 
 const OTP_TTL_SECONDS = 300; // 5 minutes
 const OTP_LENGTH = 6;
@@ -46,23 +47,37 @@ exports.bookingOtpPhone = async (req, res) => {
   try {
     const { phone } = req.body;
 
-    //const selector = crypto.randomBytes(4).toString('hex');
-    const otp = generateOTP(OTP_LENGTH);
-    const key = phone;
-    cache.set(key, otp, OTP_TTL_SECONDS);
-
-    const checkCache = cache.get(key);
-    if (!checkCache) {
-      throw new Error("Cache failed to store OTP.");
+    // Basic validation
+    if (!phone || typeof phone !== 'string' || !/^\d{9,15}$/.test(phone)) {
+      return res.status(400).json({ message: 'Số điện thoại không hợp lệ.' });
     }
 
-    console.log(checkCache)
-    //await sms.sendSMS(["84364119018"], "Your OTP is 123456", 2, "");
+    // Generate OTP
+    const otp = generateOTP(OTP_LENGTH);
 
-    return res.status(201).json({ success: true });
+    // Save to cache
+    cache.set(phone, otp, OTP_TTL_SECONDS);
+
+    const checkCache = cache.get(phone);
+    if (!checkCache) {
+      throw new Error('Lưu OTP vào bộ nhớ đệm thất bại.');
+    }
+
+    console.log(`OTP for ${phone}: ${otp}`);
+
+    const requestId = crypto.randomBytes(4).toString('hex');
+
+    //await sms.sendEsms({
+    //  phone,
+    //  code: otp,
+    //  requestId
+    //});
+
+    return res.status(201).json({ success: true, message: 'OTP đã được gửi.' });
+
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error." });
+    console.error('Error sending OTP:', error.message);
+    return res.status(500).json({ message: 'Lỗi máy chủ khi gửi OTP.' });
   }
 };
 
@@ -110,8 +125,11 @@ exports.createReservation = async (req, res) => {
       reservationTime,
       specialRequest,
       preOrders,
-      accountId
     });
+    if (accountId && mongoose.Types.ObjectId.isValid(accountId.trim())) {
+      reservation.accountId = accountId;
+    }
+
     const newReservation = await reservation.save();
 
     return res.status(201).json(newReservation);
