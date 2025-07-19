@@ -39,7 +39,7 @@ function CashierCheckout() {
       alert("No order available to pay.");
       return;
     }
-    const isConfirmed = window.confirm("Are you sure you want to confirm cash payment for this order?");
+    const isConfirmed = window.confirm(`Confirm cash payment of ${pendingOrder.totalAmount.toLocaleString("en-US")}₫?`);
     if (isConfirmed) {
       try {
         await axios.put(`http://localhost:8080/api/orders/${pendingOrder._id}/pay-by-cash`);
