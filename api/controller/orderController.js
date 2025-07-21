@@ -2,7 +2,7 @@ const Order = require('../models/order');
 const OrderItem = require('../models/orderItem');
 const Promotion = require('../models/promotion');
 const createError = require('../util/errorHandle');
-
+const mongoose = require('mongoose');
 // Tạo đơn hàng mới hoặc thêm vào đơn pending
 exports.createOrUpdateOrder = async (req, res) => {
   try {
@@ -426,5 +426,46 @@ exports.applyVoucher = async (req, res, next) => {
 
   } catch (error) {
       next(error);
+  }
+};
+exports.linkUserToOrder = async (req, res, next) => {
+  const { orderId } = req.params;
+  const { userId } = req.body;
+
+  // 1. Kiểm tra dữ liệu đầu vào cơ bản
+  if (!userId) {
+    return next(createError(400, "User ID is required."));
+  }
+
+  // 2. KIỂM TRA QUAN TRỌNG: Đảm bảo userId là một ObjectId hợp lệ
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(createError(400, "Invalid User ID format."));
+  }
+  
+  // Tương tự, bạn cũng nên kiểm tra orderId
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    return next(createError(400, "Invalid Order ID format."));
+  }
+
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { userId: userId },
+      { new: true }
+    ).populate('userId', 'username points');
+
+    if (!updatedOrder) {
+      return next(createError(404, "Order not found."));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User linked to order successfully.",
+      order: updatedOrder
+    });
+
+  } catch (error) {
+    console.error("ERROR LINKING USER TO ORDER:", error);
+    next(createError(500, "Failed to link user to order."));
   }
 };

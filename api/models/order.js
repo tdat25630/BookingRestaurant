@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const OrderSchema = new mongoose.Schema({
   sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'DiningSession', required: true },
   staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff' }, // optional
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   orderTime: { type: Date, default: Date.now },
   status: {
     type: String,
