@@ -1,22 +1,63 @@
-import { createContext, useContext, useState } from "react";
+// src/context/SessionContext.js
+
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const SessionContext = createContext();
 
 export const SessionProvider = ({ children }) => {
-  const [sessionId, setSessionId] = useState(localStorage.getItem("sessionId") || null);
+  const [user, setUser] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
 
-  const saveSession = (id) => {
-    setSessionId(id);
-    localStorage.setItem("sessionId", id); 
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      const storedSessionId = localStorage.getItem('sessionId');
+
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+      if (storedSessionId) {
+        setSessionId(storedSessionId);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải session từ localStorage:", error);
+      localStorage.clear();
+    }
+  }, []);
+
+  const login = (userData, newSessionId) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+    localStorage.setItem('sessionId', newSessionId);
+    setSessionId(newSessionId);
+  };
+  
+  const startDiningSession = (newSessionId) => {
+    localStorage.setItem('sessionId', newSessionId);
+    setSessionId(newSessionId);
+  };
+  
+  const saveSession = startDiningSession;
+
+  const logout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    localStorage.removeItem('sessionId');
+    setSessionId(null);
   };
 
-  const clearSession = () => {
-    setSessionId(null);
-    localStorage.removeItem("sessionId");
+  const value = { 
+    user, 
+    sessionId, 
+    login, 
+    logout, 
+    setUser, 
+    startDiningSession,
+    saveSession 
   };
 
   return (
-    <SessionContext.Provider value={{ sessionId, saveSession, clearSession }}>
+    <SessionContext.Provider value={value}>
       {children}
     </SessionContext.Provider>
   );

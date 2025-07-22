@@ -16,4 +16,9 @@ router.get('/', diningSessionController.getAllSessions);
 // Lấy session theo ID (cho MenuPage)
 router.get('/:id', diningSessionController.getSessionById);
 
+router.get('/reservation/:reservationId/user', diningSessionController.getUserFromReservation);
+router.put('/:sessionId/change-table', diningSessionController.changeTable);
+router.get('/:sessionId/with-user', diningSessionController.getSessionWithUserInfo);
+
+
 module.exports = router;

@@ -1,7 +1,8 @@
 const Order = require('../models/order');
 const OrderItem = require('../models/orderItem');
+const Promotion = require('../models/promotion');
 const createError = require('../util/errorHandle');
-
+const mongoose = require('mongoose');
 // Tạo đơn hàng mới hoặc thêm vào đơn pending
 exports.createOrUpdateOrder = async (req, res) => {
   try {
@@ -331,7 +332,6 @@ exports.getDailyRevenueInMonth = async (req, res) => {
   }
 };
 
-// ✅ Đã đưa ra ngoài đúng cách
 exports.markAsPaidByCash = async (req, res, next) => {
   try {
     const { orderId } = req.params;
@@ -360,5 +360,103 @@ exports.markAsPaidByCash = async (req, res, next) => {
   } catch (error) {
     console.error("Error during cash payment:", error);
     next(error);
+  }
+};
+exports.applyVoucher = async (req, res, next) => {
+  try {
+      const { orderId } = req.params;
+      const { voucherCode } = req.body;
+
+      if (!voucherCode) {
+          return res.status(400).json({ success: false, message: 'Vui lòng nhập mã voucher.' });
+      }
+
+      const order = await Order.findById(orderId);
+      if (!order) {
+          return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
+      }
+      if (order.promotion_id) {
+          return res.status(400).json({ success: false, message: 'Đơn hàng này đã được áp dụng khuyến mãi.' });
+      }
+
+      const promotion = await Promotion.findOne({ 
+          code: voucherCode.toUpperCase(), 
+          is_active: true,
+          start_date: { $lte: new Date() }, 
+          end_date: { $gte: new Date() }
+      });
+
+      if (!promotion) {
+          return res.status(404).json({ success: false, message: 'Mã voucher không hợp lệ hoặc đã hết hạn.' });
+      }
+
+      const items = await OrderItem.find({ orderId: orderId });
+      const subTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      if (subTotal < promotion.min_order_amount) {
+          return res.status(400).json({ success: false, message: `Đơn hàng phải có giá trị tối thiểu ${promotion.min_order_amount.toLocaleString('vi-VN')}₫ để áp dụng mã này.` });
+      }
+
+      let discountAmount = 0;
+      if (promotion.discount_type === 'percentage') {
+          discountAmount = subTotal * (promotion.discount_value / 100);
+      } else { 
+          discountAmount = promotion.discount_value;
+      }
+
+      order.totalAmount = subTotal - discountAmount;
+      order.promotion_id = promotion._id; 
+      
+      await order.save();
+
+      res.status(200).json({
+          success: true,
+          message: 'Áp dụng voucher thành công!',
+          data: {
+              orderId: order._id,
+              subTotal: subTotal,
+              discount: discountAmount,
+              newTotalAmount: order.totalAmount
+          }
+      });
+
+  } catch (error) {
+      next(error);
+  }
+};
+exports.linkUserToOrder = async (req, res, next) => {
+  const { orderId } = req.params;
+  const { userId } = req.body;
+
+  // Kiểm tra định dạng ID
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(orderId)) {
+    return next(createError(400, "Invalid ID format."));
+  }
+
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { userId: userId }, 
+      { new: true }      
+    )
+    .populate('userId', 'username points')
+    .populate({
+        path: 'items.menuItemId', 
+        select: 'name'            
+    });
+
+    if (!updatedOrder) {
+      return next(createError(404, "Order not found."));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User linked to order successfully.",
+      order: updatedOrder
+    });
+
+  } catch (error) {
+    console.error("ERROR LINKING USER TO ORDER:", error);
+    next(createError(500, "Failed to link user to order."));
   }
 };

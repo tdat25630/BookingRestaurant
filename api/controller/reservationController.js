@@ -116,6 +116,19 @@ exports.createReservation = async (req, res) => {
 
     cache.del(key);
 
+    const newReservation = new Reservation({
+      name,
+      phone: phone || null,
+      email: email || null,
+      reservationDate,
+      reservationTime,
+      guestCount,
+      specialRequest,
+      userId: accountId || null, // Lưu userId nếu có
+      preOrders: preOrders || [],
+      status: 'pending'
+    });
+
     const reservation = new Reservation({
       guestCount,
       name,
@@ -130,7 +143,7 @@ exports.createReservation = async (req, res) => {
       reservation.accountId = accountId;
     }
 
-    const newReservation = await reservation.save();
+     await newReservation.save();
 
     return res.status(201).json(newReservation);
   } catch (err) {
