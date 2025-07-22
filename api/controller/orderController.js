@@ -362,7 +362,6 @@ exports.markAsPaidByCash = async (req, res, next) => {
     next(error);
   }
 };
-//Apply promotion to order
 exports.applyVoucher = async (req, res, next) => {
   try {
       const { orderId } = req.params;
@@ -391,11 +390,9 @@ exports.applyVoucher = async (req, res, next) => {
           return res.status(404).json({ success: false, message: 'Mã voucher không hợp lệ hoặc đã hết hạn.' });
       }
 
-      // Tính toán lại tổng tiền từ các món ăn để đảm bảo chính xác
       const items = await OrderItem.find({ orderId: orderId });
       const subTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-      // Kiểm tra điều kiện tối thiểu (nếu có)
       if (subTotal < promotion.min_order_amount) {
           return res.status(400).json({ success: false, message: `Đơn hàng phải có giá trị tối thiểu ${promotion.min_order_amount.toLocaleString('vi-VN')}₫ để áp dụng mã này.` });
       }
@@ -403,13 +400,12 @@ exports.applyVoucher = async (req, res, next) => {
       let discountAmount = 0;
       if (promotion.discount_type === 'percentage') {
           discountAmount = subTotal * (promotion.discount_value / 100);
-      } else { // fixed_amount
+      } else { 
           discountAmount = promotion.discount_value;
       }
 
-      // Cập nhật lại tổng tiền của đơn hàng
       order.totalAmount = subTotal - discountAmount;
-      order.promotion_id = promotion._id; // Lưu lại ID của promotion đã áp dụng
+      order.promotion_id = promotion._id; 
       
       await order.save();
 
@@ -432,27 +428,22 @@ exports.linkUserToOrder = async (req, res, next) => {
   const { orderId } = req.params;
   const { userId } = req.body;
 
-  // 1. Kiểm tra dữ liệu đầu vào cơ bản
-  if (!userId) {
-    return next(createError(400, "User ID is required."));
-  }
-
-  // 2. KIỂM TRA QUAN TRỌNG: Đảm bảo userId là một ObjectId hợp lệ
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(createError(400, "Invalid User ID format."));
-  }
-  
-  // Tương tự, bạn cũng nên kiểm tra orderId
-  if (!mongoose.Types.ObjectId.isValid(orderId)) {
-    return next(createError(400, "Invalid Order ID format."));
+  // Kiểm tra định dạng ID
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(orderId)) {
+    return next(createError(400, "Invalid ID format."));
   }
 
   try {
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
-      { userId: userId },
-      { new: true }
-    ).populate('userId', 'username points');
+      { userId: userId }, 
+      { new: true }      
+    )
+    .populate('userId', 'username points')
+    .populate({
+        path: 'items.menuItemId', 
+        select: 'name'            
+    });
 
     if (!updatedOrder) {
       return next(createError(404, "Order not found."));

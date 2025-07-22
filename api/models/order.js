@@ -5,6 +5,7 @@ const OrderSchema = new mongoose.Schema({
   staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff' }, // optional
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   orderTime: { type: Date, default: Date.now },
+  items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'OrderItem' }],
   status: {
     type: String,
     enum: ['pending', 'preparing', 'served', 'cancelled'],

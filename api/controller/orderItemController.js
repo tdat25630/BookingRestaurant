@@ -33,48 +33,44 @@ exports.getBestSellerItems = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
 
-    
-    const basicPipeline = [
+    const topItems = await OrderItem.aggregate([
       {
         $group: {
-          _id: '$menuItemId', // Hoặc menuItem tùy theo schema của bạn
+          _id: '$menuItemId',
           totalQuantity: { $sum: '$quantity' },
           totalRevenue: { $sum: { $multiply: ['$price', '$quantity'] } }
         }
       },
       { $sort: { totalQuantity: -1 } },
       { $limit: limit }
-    ];
+    ]);
 
-    const topItems = await OrderItem.aggregate(basicPipeline);
+    const enrichedItems = await Promise.all(
+      topItems.map(async (item) => {
+        try {
+          const menuItem = await MenuItem.findById(item._id).lean(); // dùng lean() để trả về plain JS object
 
-    
-    const enrichedItems = await Promise.all(topItems.map(async (item) => {
-      try {
-        // Tìm thông tin món ăn từ menu item collection
-        const menuItem = await MenuItem.findById(item._id);
-        console.log(menuItem)
-
-        return {
-          id: item._id,
-          name: menuItem?.name || 'Unknown Item',
-          image: menuItem?.image || '',
-          price: menuItem?.price || 0,
-          description: menuItem?.description || '',
-          category: 'Uncategorized', // Bạn có thể thêm lookup category riêng nếu cần
-          totalQuantity: item.totalQuantity,
-          totalRevenue: item.totalRevenue
-        };
-      } catch (err) {
-        console.error(`Error enriching menu item ${item._id}:`, err);
-        return {
-          id: item._id,
-          name: 'Error retrieving item',
-          totalQuantity: item.totalQuantity,
-          totalRevenue: item.totalRevenue
-        };
-      }
-    }));
+          return {
+            id: item._id,
+            name: menuItem?.name || 'Unknown Item',
+            image: menuItem?.image || '',
+            price: menuItem?.price || 0,
+            description: menuItem?.description || '',
+            category: menuItem?.category || 'Uncategorized',
+            totalQuantity: item.totalQuantity,
+            totalRevenue: item.totalRevenue
+          };
+        } catch (error) {
+          console.error(`❌ Error retrieving menu item ${item._id}:`, error);
+          return {
+            id: item._id,
+            name: 'Error retrieving item',
+            totalQuantity: item.totalQuantity,
+            totalRevenue: item.totalRevenue
+          };
+        }
+      })
+    );
 
     return res.status(200).json({
       success: true,
@@ -82,8 +78,7 @@ exports.getBestSellerItems = async (req, res, next) => {
       data: enrichedItems
     });
   } catch (err) {
-    next(createError(500, 'Không thể lấy danh sách món ăn bán chạy', { cause: err }));
-    console.error(' Lỗi lấy danh sách món ăn bán chạy:', err);
+    console.error('🔥 Lỗi lấy danh sách món ăn bán chạy:', err);
+    return next(createError(500, 'Không thể lấy danh sách món ăn bán chạy', { cause: err }));
   }
 };
-
