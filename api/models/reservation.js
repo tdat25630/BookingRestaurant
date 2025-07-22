@@ -62,7 +62,13 @@ const ReservationSchema = new mongoose.Schema({
   accountId: {
     type: Schema.Types.ObjectId, ref: 'User',
     required: false,
-  }
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+
 }, {
   timestamps: true
 });

@@ -17,8 +17,26 @@ router.post('/', async (req, res) => {
 // (Tùy chọn) Lấy danh sách bàn
 router.get('/', async (req, res) => {
   try {
+    const DiningSession = require('../models/diningSession');
+    
     const tables = await Table.find();
-    res.json(tables);
+    
+    // Populate active sessions for each table
+    const tablesWithSessions = await Promise.all(
+      tables.map(async (table) => {
+        const activeSession = await DiningSession.findOne({
+          table: table._id,
+          status: 'active'
+        }).populate('table');
+        
+        return {
+          ...table.toObject(),
+          activeSession: activeSession
+        };
+      })
+    );
+    
+    res.json(tablesWithSessions);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

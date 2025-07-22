@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import QRCodeComponent from './QRCodeGenerator';
 import './CashierTableQRPage.css';
 import CashierHeader from '../../Header/CashierHeader';
+import ChangeTableModal from './ChangeTableModal';
 
 function CashierTablePage() {
     const [tables, setTables] = useState([]);
@@ -21,6 +22,10 @@ function CashierTablePage() {
         guestCount: 1
     });
 
+    const [showChangeTableModal, setShowChangeTableModal] = useState(false);
+    const [selectedSessionForChange, setSelectedSessionForChange] = useState(null);
+    const [sessionUserInfo, setSessionUserInfo] = useState({});
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,11 +35,25 @@ function CashierTablePage() {
 
     const fetchTables = async () => {
         try {
-            const res = await axios.get('http://localhost:8080/api/tables');
-            setTables(res.data);
-        } catch (err) {
-            console.error('Error fetching tables:', err);
+            const response = await axios.get('http://localhost:8080/api/tables');
+            setTables(response.data);
+
+            // Fetch user info cho các session active
+            const activeSessions = response.data
+                .filter(table => table.activeSession)
+                .map(table => table.activeSession._id);
+
+            activeSessions.forEach(sessionId => {
+                fetchSessionUserInfo(sessionId);
+            });
+        } catch (error) {
+            console.error('Error fetching tables:', error);
         }
+    };
+
+    const handleChangeTable = (session) => {
+        setSelectedSessionForChange(session);
+        setShowChangeTableModal(true);
     };
 
     // const fetchPendingReservations = async () => {
@@ -51,20 +70,32 @@ function CashierTablePage() {
             let allReservations = [];
             let currentPage = 1;
             let totalPages = 1;
-            
+
             do {
                 const res = await axios.get(`http://localhost:8080/api/reservation?status=pending&page=${currentPage}&pageSize=10`);
-                
+
                 allReservations = [...allReservations, ...(res.data.reservations || [])];
                 totalPages = res.data.totalPages || 1;
                 currentPage++;
-                
+
             } while (currentPage <= totalPages);
-            
+
             console.log(`Fetched ${allReservations.length} total reservations from ${totalPages} pages`);
             setPendingReservations(allReservations);
         } catch (err) {
             console.error('Error fetching pending reservations:', err);
+        }
+    };
+
+    const fetchSessionUserInfo = async (sessionId) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/api/dining-sessions/${sessionId}/with-user`);
+            setSessionUserInfo(prev => ({
+                ...prev,
+                [sessionId]: response.data
+            }));
+        } catch (err) {
+            console.error('Error fetching session user info:', err);
         }
     };
 
@@ -110,17 +141,17 @@ function CashierTablePage() {
     //     }
     // };
 
-   // UPDATED: Sửa hàm createSessionForTable để lưu thông tin khách
+    // UPDATED: Sửa hàm createSessionForTable để lưu thông tin khách
     const createSessionForTable = async (tableId, reservationId = null) => {
         try {
             setLoadingTableId(tableId);
-            
-            let sessionData = { tableId: tableId }; 
-            
+
+            let sessionData = { tableId: tableId };
+
             // Nếu có reservationId, lấy thông tin khách từ reservation
             if (reservationId) {
                 const reservation = pendingReservations.find(r => r._id === reservationId);
-                
+
                 if (reservation) {
                     sessionData = {
                         tableId: tableId,
@@ -131,7 +162,7 @@ function CashierTablePage() {
                         specialRequest: reservation.specialRequest || ''
                     };
                 }
-                
+
                 // Cập nhật reservation status thành confirmed
                 await axios.put(`http://localhost:8080/api/reservation/${reservationId}`, {
                     status: 'confirmed'
@@ -156,7 +187,7 @@ function CashierTablePage() {
     // const createSessionForTable = async (tableId, reservationId = null) => {
     //     try {
     //         setLoadingTableId(tableId);
-            
+
     //         let sessionData = { 
     //             tableId: tableId,
     //             customerName: '',
@@ -164,11 +195,11 @@ function CashierTablePage() {
     //             guestCount: 1,
     //             specialRequest: ''
     //         }; 
-            
+
     //         // Nếu có reservationId, lấy thông tin khách từ reservation
     //         if (reservationId) {
     //             const reservation = pendingReservations.find(r => r._id === reservationId);
-                
+
     //             if (reservation) {
     //                 sessionData = {
     //                     tableId: tableId, // Đảm bảo consistent với field name
@@ -178,7 +209,7 @@ function CashierTablePage() {
     //                     reservationId: reservationId,
     //                     specialRequest: reservation.specialRequest || ''
     //                 };
-                    
+
     //                 // Cập nhật reservation status thành confirmed
     //                 try {
     //                     await axios.put(`http://localhost:8080/api/reservation/${reservationId}`, {
@@ -193,36 +224,36 @@ function CashierTablePage() {
     //                 console.warn(`Reservation with ID ${reservationId} not found in pending reservations`);
     //             }
     //         }
-    
+
     //         console.log('Creating session with data:', sessionData);
-            
+
     //         const res = await axios.post('http://localhost:8080/api/dining-sessions', sessionData);
-            
+
     //         if (res.data && res.data._id) {
     //             setSelectedSessionId(res.data._id);
-                
+
     //             // Refresh data
     //             await Promise.all([
     //                 fetchTables(),
     //                 fetchPendingReservations()
     //             ]);
-                
+
     //             // Close modals
     //             setShowCreateOptions(null);
     //             setShowReservationModal(false);
-                
+
     //             console.log('Session created successfully:', res.data);
     //         } else {
     //             throw new Error('Invalid response from server');
     //         }
-            
+
     //     } catch (err) {
     //         console.error('Error creating session:', err);
-            
+
     //         // Hiển thị error message chi tiết hơn
     //         const errorMessage = err.response?.data?.message || err.message || 'Unknown error occurred';
     //         alert(`Failed to create new session: ${errorMessage}`);
-            
+
     //         // Nếu có lỗi, có thể rollback reservation status
     //         if (reservationId) {
     //             try {
@@ -266,7 +297,7 @@ function CashierTablePage() {
 
 
     const getMatchingReservations = () => {
-        return pendingReservations; 
+        return pendingReservations;
     };
 
     // Hàm helper để format thời gian hiển thị
@@ -289,12 +320,65 @@ function CashierTablePage() {
                 <h2>🍽️ Table Management</h2>
                 <ul className="table-grid">
                     {tables.map(table => {
+                        const userInfo = table.activeSession ? sessionUserInfo[table.activeSession._id] : null;
                         const currentSessionId = activeSessions[table._id];
                         return (
-                            <li key={table._id}>
-                                <strong>Table {table.tableNumber}</strong>
-                                <span>Seats: {table.capacity} | Status: {table.status}</span>
+                            <li key={table._id} className={`table-item ${table.status}`}>
+                                <div className="table-info">
+                                    <h3>Bàn {table.tableNumber}</h3>
+                                    <p>Sức chứa: {table.capacity} người</p>
+                                    <span className={`status ${table.status}`}>
+                                        {table.status === 'available' ? 'Trống' : 'Có khách'}
+                                    </span>
+                                </div>
+                                {table.status === 'occupied' && table.activeSession && (
+                                    <div className="session-info">
+                                        <p><strong>Khách:</strong> {table.activeSession.customerName}</p>
+                                        <p><strong>SĐT:</strong> {table.activeSession.customerPhone}</p>
+                                        <p><strong>Số khách:</strong> {table.activeSession.guestCount}</p>
 
+                                        {/* Hiển thị thông tin user nếu có */}
+                                        {userInfo?.reservationId?.userId && (
+                                            <div className="user-info">
+                                                <p><strong>Tài khoản:</strong> {userInfo.reservationId.userId.username}</p>
+                                                <p><strong>Email:</strong> {userInfo.reservationId.userId.email}</p>
+                                            </div>
+                                        )}
+
+                                        <p><strong>Bắt đầu:</strong> {new Date(table.activeSession.startTime).toLocaleString('vi-VN')}</p>
+
+                                        <div className="session-actions">
+                                            <button
+                                                className="btn btn-warning btn-sm"
+                                                onClick={() => handleChangeTable(table.activeSession)}
+                                            >
+                                                Đổi bàn
+                                            </button>
+                                            <button
+                                                className="btn btn-primary btn-sm"
+                                                onClick={() => setSelectedSessionId(table.activeSession._id)}
+                                            >
+                                                QR Code
+                                            </button>
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={async () => {
+                                                    const confirmEnd = window.confirm('Bạn có chắc muốn kết thúc phiên này?');
+                                                    if (!confirmEnd) return;
+
+                                                    try {
+                                                        await axios.put(`http://localhost:8080/api/dining-sessions/${table.activeSession._id}/complete`);
+                                                        fetchTables();
+                                                    } catch (err) {
+                                                        alert('Lỗi khi kết thúc phiên');
+                                                    }
+                                                }}
+                                            >
+                                                Kết thúc
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                                 {currentSessionId ? (
                                     <button className="view-btn" onClick={() => setSelectedSessionId(currentSessionId)}>
                                         📷 View QR
@@ -312,7 +396,7 @@ function CashierTablePage() {
                                         {showCreateOptions === table._id && (
                                             <div className="create-options" onClick={e => e.stopPropagation()}>
                                                 <button onClick={() => handleNewCustomer(table._id)}>
-                                                  Khách mới
+                                                    Khách mới
                                                 </button>
                                                 <button onClick={() => handleReservedCustomer(table._id)}>
                                                     Khách đã đặt bàn
@@ -376,7 +460,7 @@ function CashierTablePage() {
                             {getMatchingReservations().length === 0 ? (
                                 <div>
                                     <p>Không có đặt bàn pending nào</p>
-                                    <p style={{fontSize: '12px', color: '#666'}}>
+                                    <p style={{ fontSize: '12px', color: '#666' }}>
                                         Debug: Tổng {pendingReservations.length} reservations được tải
                                     </p>
                                 </div>
@@ -419,6 +503,23 @@ function CashierTablePage() {
             {showCreateOptions && (
                 <div className="overlay" onClick={closeCreateOptions}></div>
             )}
+
+            <ChangeTableModal
+                show={showChangeTableModal}
+                onHide={() => {
+                    setShowChangeTableModal(false);
+                    setSelectedSessionForChange(null);
+                }}
+                currentSession={selectedSessionForChange}
+                onSuccess={() => {
+                    fetchTables(); // Refresh tables data
+                    setSelectedSessionForChange(null);
+                    // Refresh user info for all active sessions
+                    setTimeout(() => {
+                        fetchTables();
+                    }, 500); // Delay để đảm bảo backend đã cập nhật xong
+                }}
+            />
         </>
     );
 }
