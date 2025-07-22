@@ -1,217 +1,366 @@
-/* Existing styles... */
-
+/* Dropdown container */
 .create-section {
-    position: relative;
-    display: inline-block;
-  }
-  
-  .create-options {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: #2a2a2a;
-    border: 1px solid #444;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    z-index: 1000;
-    min-width: 180px;
-    margin-top: 5px;
-  }
-  
-  .option-btn {
-    display: block;
-    width: 100%;
-    padding: 12px 16px;
-    border: none;
-    background: #2a2a2a;
-    color: #ffffff;
-    text-align: left;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s;
-    border-radius: 0;
-  }
-  
-  .option-btn:first-child {
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-  }
-  
-  .option-btn:last-child {
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-  
-  .option-btn:hover {
-    /* Loại bỏ animation/transition có thể gây nhấp nháy */
-    transition: none;
+  position: relative;
+  display: inline-block;
 }
-  
-  .new-customer:hover {
-    background-color: #28a745;
-    color: #ffffff;
-  }
-  
-  .reserved-customer:hover {
-    background-color: #17a2b8;
-    color: #ffffff;
-  }
-  
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 999;
-  }
-  
-  /* Reservation Modal Styles */
-  .reservation-modal {
-    max-width: 600px;
-    max-height: 70vh;
-    overflow-y: auto;
-  }
-  
-  .reservation-modal h3 {
-    margin: 0 0 20px 0;
-    color: #ffcc00;
-    text-align: center;
-  }
-  
-  .reservation-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  
-  .reservation-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    border: 1px solid #444;
-    border-radius: 8px;
-    background: #333333;
-    transition: all 0.2s;
-  }
-  
-  .reservation-item:hover {
-    background: #3a3a3a;
-    border-color: #17a2b8;
-    transform: translateY(-2px);
-  }
-  
-  .reservation-info {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    flex: 1;
-  }
-  
-  .reservation-info strong {
-    font-size: 16px;
-    color: #ffcc00;
-    margin-bottom: 5px;
-  }
-  
-  .reservation-info span {
-    font-size: 14px;
-    color: #cccccc;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  
-  .special-request {
-    font-style: italic;
-    color: #aaaaaa !important;
-    background: #404040;
-    padding: 5px 8px;
-    border-radius: 4px;
-    margin-top: 5px;
-  }
-  
-  .select-reservation-btn {
-    background: #17a2b8;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s;
-  }
-  
-  .select-reservation-btn:hover {
-    background: #138496;
-  }
-  
-  /* Modal overlay improvements */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-  }
-  
-  .modal-content {
-    background: #2a2a2a;
-    color: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    border: 1px solid #444;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
-    overflow: auto;
-  }
-  
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .create-options {
+
+/* Dropdown menu */
+.create-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 9999; /* Tăng z-index cao hơn overlay */
+  min-width: 180px;
+  margin-top: 5px;
+  /* Đảm bảo dropdown không bị ảnh hưởng */
+  pointer-events: auto;
+  isolation: isolate; /* Tạo stacking context riêng */
+}
+
+/* Dropdown buttons */
+.create-options button {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: #2a2a2a;
+  color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  /* KHÔNG dùng CSS transitions - dùng JavaScript */
+  transition: none;
+  border-radius: 0;
+  user-select: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.create-options button:first-child {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.create-options button:last-child {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* Loại bỏ hoàn toàn CSS hover - dùng JavaScript thay thế */
+/* .create-options button:hover {
+  background-color: #404040;
+} */
+
+/* Existing modal styles... */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: #2a2a2a;
+  color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #444;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+/* Reservation Modal Styles */
+.reservation-modal {
+  max-width: 600px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.reservation-modal h3 {
+  margin: 0 0 20px 0;
+  color: #ffcc00;
+  text-align: center;
+}
+
+.reservation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.reservation-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: #333333;
+  transition: all 0.2s ease;
+}
+
+.reservation-item:hover {
+  background: #3a3a3a;
+  border-color: #17a2b8;
+  transform: translateY(-2px);
+}
+
+.reservation-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.reservation-info strong {
+  font-size: 16px;
+  color: #ffcc00;
+  margin-bottom: 5px;
+}
+
+.reservation-info span {
+  font-size: 14px;
+  color: #cccccc;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.special-request {
+  font-style: italic;
+  color: #aaaaaa !important;
+  background: #404040;
+  padding: 5px 8px;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.select-reservation-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.select-reservation-btn:hover {
+  background: #138496;
+}
+
+.table-warning {
+  color: #ff9800 !important;
+  background: #4a3c00;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .create-options {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       width: 250px;
-    }
-    
-    .reservation-item {
+      z-index: 9999;
+  }
+  
+  .reservation-item {
       flex-direction: column;
       align-items: flex-start;
       gap: 10px;
-    }
-    
-    .select-reservation-btn {
-      align-self: stretch;
-    }
   }
-  /* Thêm vào cuối file CSS */
-.upcoming-soon {
-    color: #ffcc00 !important;
-    font-weight: bold;
-    animation: pulse 2s infinite;
+  
+  .select-reservation-btn {
+      align-self: stretch;
+  }
 }
 
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.7; }
-    100% { opacity: 1; }
+/* Customer Info Modal Styles - Simple Version */
+.customer-info-modal {
+  max-width: 400px;
+  width: 90%;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
-.table-warning {
-    color: #ff9800 !important;
-    background: #4a3c00;
-    padding: 3px 6px;
-    border-radius: 3px;
-    font-size: 12px;
+.customer-info-modal h3 {
+  background: #f8f9fa;
+  margin: 0;
+  padding: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50 !important;
+  text-align: center;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Form Container */
+.customer-info-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Input Styles */
+.customer-info-form input,
+.customer-info-form select,
+.customer-info-form textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff !important;
+  color: #333333 !important;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.customer-info-form input:focus,
+.customer-info-form select:focus,
+.customer-info-form textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.customer-info-form select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 35px;
+}
+
+.customer-info-form textarea {
+  min-height: 70px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Placeholder Styles */
+.customer-info-form input::placeholder,
+.customer-info-form textarea::placeholder {
+  color: #999 !important;
+}
+
+/* Select options */
+.customer-info-form select option {
+  color: #333333 !important;
+  background: #ffffff !important;
+}
+
+/* Button Group */
+.customer-info-modal .button-group {
+  padding: 0 20px 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.customer-info-modal .confirm-btn {
+  flex: 1;
+  padding: 12px 20px;
+  background: #007bff !important;
+  color: white !important;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.customer-info-modal .confirm-btn:hover {
+  background: #0056b3 !important;
+}
+
+.customer-info-modal .confirm-btn:disabled {
+  background: #ccc !important;
+  cursor: not-allowed;
+}
+
+.customer-info-modal .close-btn {
+  flex: 0.8;
+  padding: 12px 20px;
+  background: #6c757d !important;
+  color: white !important;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.customer-info-modal .close-btn:hover {
+  background: #545b62 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .customer-info-modal {
+      max-width: 95%;
+      margin: 10px auto;
+  }
+  
+  .customer-info-modal h3 {
+      padding: 15px;
+      font-size: 16px;
+  }
+  
+  .customer-info-form {
+      padding: 15px;
+      gap: 12px;
+  }
+  
+  .customer-info-form input,
+  .customer-info-form select,
+  .customer-info-form textarea {
+      padding: 10px 12px;
+      font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .customer-info-modal .button-group {
+      padding: 0 15px 15px;
+  }
+}
+
+/* Loading State */
+.customer-info-modal .confirm-btn.loading::after {
+  content: '...';
+  animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: '...'; }
+  40% { content: ''; }
+  60% { content: '.'; }
+  80% { content: '..'; }
 }

@@ -1,7 +1,7 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const createError = require("http-errors");
-
+const DiningSession = require("../models/diningSession");
 const getUsers = async (req, res, next) => {
   try {
     const users = await User.find().select("-password -__v");
@@ -111,12 +111,80 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+const getUserBySessionId = async (req, res, next) => {
+  try {
+      const { sessionId } = req.params;
+
+      const diningSession = await DiningSession.findById(sessionId);
+
+      if (!diningSession) {
+          return res.status(404).json({ success: false, message: "Dining session not found." });
+      }
+
+      const userId = diningSession.user;
+      if (!userId) {
+          return res.status(200).json({ success: true, data: null, message: "This is a guest session." });
+      }
+
+      const user = await User.findById(userId).select("username points");
+
+      if (!user) {
+          return res.status(404).json({ success: false, message: "User associated with this session not found." });
+      }
+
+      res.status(200).json({ success: true, data: user });
+
+  } catch (err) {
+      next(err);
+  }
+};
 
 
+const searchUser = async (req, res, next) => {
+  console.log("--- Bắt đầu quy trình tìm kiếm User ---");
+  
+  const query = req.query.q;
+  console.log(`1. Query nhận được từ frontend: "${query}"`);
+
+  if (!query) {
+    return next(createError(400, "Search query is required."));
+  }
+
+  try {
+    const lowercasedQuery = query.toLowerCase();
+    console.log(`2. Query sau khi chuyển thành chữ thường: "${lowercasedQuery}"`);
+
+    const mongoQuery = {
+      $or: [
+        { username: { $regex: query, $options: 'i' } },
+        { email: lowercasedQuery }
+      ]
+    };
+    console.log("3. Query sẽ gửi đến MongoDB:", JSON.stringify(mongoQuery, null, 2));
+
+    const user = await User.findOne(mongoQuery).select('-password');
+    
+    console.log("4. Kết quả tìm thấy từ database:", user); // Log quan trọng nhất
+    // --- DEBUG KẾT THÚC ---
+
+    if (!user) {
+      console.log("=> KẾT LUẬN: Không tìm thấy user.");
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    console.log("=> KẾT LUẬN: Đã tìm thấy user!");
+    res.status(200).json({ success: true, user });
+
+  } catch (error) {
+    next(createError(500, "Error while searching for user."));
+  }
+};
 module.exports = {
   getUsers,
   getUserById,
   createUser,
   updateUser,
-  deleteUser
+  getUserBySessionId, 
+  deleteUser,
+  searchUser
 }

@@ -49,7 +49,7 @@ exports.createDiningSession = async (req, res) => {
 exports.getActiveSessionByTable = async (req, res) => {
   try {
     const { tableId } = req.params;
-    const session = await DiningSession.findOne({ table: tableId, status: 'active' }).populate('table');
+    const session = await DiningSession.findOne({ table: tableId, status: 'active' }).populate('table').populate('reservationId');
     if (!session) return res.status(404).json({ message: 'No active session for this table.' });
 
     res.json(session);
@@ -94,7 +94,10 @@ exports.endDiningSession = async (req, res) => {
 
 exports.getAllSessions = async (req, res) => {
   try {
-    const sessions = await DiningSession.find();
+    const sessions = await DiningSession.find()
+    .populate('table')
+    .populate('reservationId')
+    .sort({ createdAt: -1 });
     res.json(sessions);
   } catch (err) {
     res.status(500).json({ error: 'Lỗi khi lấy danh sách sessions' });
@@ -104,7 +107,9 @@ exports.getAllSessions = async (req, res) => {
 
 exports.getSessionById = async (req, res) => {
   try {
-    const session = await DiningSession.findById(req.params.id);
+    const session = await DiningSession.findById(req.params.id)
+    .populate('table')
+    .populate('reservationId');
     if (!session) {
       return res.status(404).json({ message: 'Session không tồn tại' });
     }

@@ -9,6 +9,7 @@ import Home from './component/pages/Home/Home';
 import Login from './component/pages/Login/Login';
 import Register from './component/pages/Register/Register';
 import Reservation from "./component/pages/Reservation/Reservation";
+import AboutUs from "./component/pages/AboutUs/AboutUs";
 
 import MenuPage from "./component/pages/Menu/MenuPage";
 import ConfirmOrderPage from "./component/pages/Order/ConfirmOrderPage";
@@ -39,6 +40,7 @@ function App() {
                         <Route path="/" element={<Navigate to="/home" />} />
 
                         <Route path="/booking" element={<Reservation />} />
+                        <Route path="/aboutus" element={<AboutUs />} />
 
                         <Route path="/menu" element={<MenuPage />} />
                         <Route path="/confirm" element={<ConfirmOrderPage />} />

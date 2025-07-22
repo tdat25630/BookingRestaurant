@@ -71,14 +71,18 @@ function CashierTablePage() {
             let currentPage = 1;
             let totalPages = 1;
 
+
             do {
                 const res = await axios.get(`http://localhost:8080/api/reservation?status=pending&page=${currentPage}&pageSize=10`);
+
 
                 allReservations = [...allReservations, ...(res.data.reservations || [])];
                 totalPages = res.data.totalPages || 1;
                 currentPage++;
 
+
             } while (currentPage <= totalPages);
+
 
             console.log(`Fetched ${allReservations.length} total reservations from ${totalPages} pages`);
             setPendingReservations(allReservations);
@@ -148,9 +152,13 @@ function CashierTablePage() {
 
             let sessionData = { tableId: tableId };
 
+
+            let sessionData = { tableId: tableId };
+
             // Nếu có reservationId, lấy thông tin khách từ reservation
             if (reservationId) {
                 const reservation = pendingReservations.find(r => r._id === reservationId);
+
 
                 if (reservation) {
                     sessionData = {
@@ -162,6 +170,7 @@ function CashierTablePage() {
                         specialRequest: reservation.specialRequest || ''
                     };
                 }
+
 
                 // Cập nhật reservation status thành confirmed
                 await axios.put(`http://localhost:8080/api/reservation/${reservationId}`, {
@@ -271,17 +280,31 @@ function CashierTablePage() {
 
     const handleCreateClick = (tableId, e) => {
         e.stopPropagation();
-        setShowCreateOptions(tableId);
+        e.preventDefault();
+        setShowCreateOptions(prev => prev === tableId ? null : tableId);
     };
 
     const handleNewCustomer = (tableId) => {
-        createSessionForTable(tableId);
-    };
+        setShowCreateOptions(null);
+        setSelectedTableForReservation(tableId);
+        setShowCustomerInfoModal(true); 
+    
+
+     // Set default guest count dựa trên capacity của bàn
+     const selectedTable = tables.find(t => t._id === tableId);
+     if (selectedTable) {
+         setCustomerInfo(prev => ({
+             ...prev,
+             guestCount: Math.min(prev.guestCount, selectedTable.capacity)
+         }));
+     }
+ };
+
 
     const handleReservedCustomer = (tableId) => {
+        setShowCreateOptions(null);
         setSelectedTableForReservation(tableId);
         setShowReservationModal(true);
-        setShowCreateOptions(null);
     };
 
     const handleSelectReservation = (reservationId) => {
@@ -294,9 +317,19 @@ function CashierTablePage() {
         setShowReservationModal(false);
         setSelectedTableForReservation(null);
     };
-
+    const closeCustomerInfoModal = () => {
+        setShowCustomerInfoModal(false);
+        setSelectedTableForReservation(null);
+        setCustomerInfo({
+            name: '',
+            phone: '',
+            guestCount: 1,
+            specialRequest: ''
+        });
+    };
 
     const getMatchingReservations = () => {
+        return pendingReservations;
         return pendingReservations;
     };
 
@@ -311,6 +344,26 @@ function CashierTablePage() {
             return `${new Date(date).toLocaleDateString('vi-VN')} ${time}`;
         }
     };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+           
+            if (!event.target.closest('.create-section')) {
+                setShowCreateOptions(null);
+            }
+        };
+
+        if (showCreateOptions) {
+         
+            setTimeout(() => {
+                document.addEventListener('mousedown', handleClickOutside);
+            }, 0);
+
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }
+    }, [showCreateOptions]);
 
 
     return (
@@ -398,7 +451,17 @@ function CashierTablePage() {
                                                 <button onClick={() => handleNewCustomer(table._id)}>
                                                     Khách mới
                                                 </button>
-                                                <button onClick={() => handleReservedCustomer(table._id)}>
+                                                <button
+                                                    onClick={() => handleReservedCustomer(table._id)}
+                                                    onMouseEnter={(e) => {
+                                                        e.target.style.backgroundColor = '#17a2b8';
+                                                        e.target.style.color = '#ffffff';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.target.style.backgroundColor = '#2a2a2a';
+                                                        e.target.style.color = '#ffffff';
+                                                    }}
+                                                >
                                                     Khách đã đặt bàn
                                                 </button>
                                             </div>
@@ -411,10 +474,61 @@ function CashierTablePage() {
                 </ul>
             </div>
 
+           {/* Customer Info Modal */}
+           {showCustomerInfoModal && (
+                <div className="modal-overlay" onClick={closeCustomerInfoModal}>
+                    <div className="modal-content customer-info-modal" onClick={e => e.stopPropagation()}>
+                        <h3>Thông tin khách hàng</h3>
+                        <div className="customer-info-form">
+                            <input 
+                                type="text" 
+                                placeholder="Tên khách hàng *"
+                                value={customerInfo.name}
+                                onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
+                                required 
+                            />
+                            <input 
+                                type="tel" 
+                                placeholder="Số điện thoại "
+                                value={customerInfo.phone}
+                                onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
+                                
+                            />
+                            <select 
+                                value={customerInfo.guestCount}
+                                onChange={(e) => setCustomerInfo({...customerInfo, guestCount: parseInt(e.target.value)})}
+                            >
+                                {[1,2,3,4,5,6,7,8].map(num => (
+                                    <option key={num} value={num}>{num} người</option>
+                                ))}
+                            </select>
+                            {/* <textarea 
+                                placeholder="Yêu cầu đặc biệt (tùy chọn)"
+                                value={customerInfo.specialRequest}
+                                onChange={(e) => setCustomerInfo({...customerInfo, specialRequest: e.target.value})}
+                            /> */}
+                        </div>
+                        <div className="button-group">
+                            <button 
+                                onClick={createSessionWithCustomerInfo}
+                                className="confirm-btn"
+                                disabled={loadingTableId}
+                            >
+                                {loadingTableId ? 'Đang tạo...' : 'Tạo session'}
+                            </button>
+                            <button onClick={closeCustomerInfoModal} className="close-btn">
+                                Hủy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* QR Modal */}
             {selectedSessionId && (
                 <div className="modal-overlay" onClick={closeQRModal}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
+                    
                         <QRCodeComponent sessionId={selectedSessionId} />
 
                         <div className="button-group">
@@ -460,6 +574,7 @@ function CashierTablePage() {
                             {getMatchingReservations().length === 0 ? (
                                 <div>
                                     <p>Không có đặt bàn pending nào</p>
+                                    <p style={{ fontSize: '12px', color: '#666' }}>
                                     <p style={{ fontSize: '12px', color: '#666' }}>
                                         Debug: Tổng {pendingReservations.length} reservations được tải
                                     </p>
@@ -522,6 +637,12 @@ function CashierTablePage() {
             />
         </>
     );
+
+
+
+
+
+
 }
 
 export default CashierTablePage;
