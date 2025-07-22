@@ -60,7 +60,7 @@ function Reservation() {
     };
     fetchUserProfile()
 
-    fetch('http://localhost:8080/api/menu-items')
+    fetch('http://localhost:8080/api/menu-items?needPreOrder=true')
       .then(res => res.json())
       .then(data => setMenuItems(data))
       .catch(err => console.error('Error fetching menu items:', err));
@@ -86,7 +86,7 @@ function Reservation() {
 
   const validate = () => {
     const errs = {};
-    const phoneRegex = /^0\d{9}$/;
+    const phoneRegex = /^0(3|5|7|8|9)[0-9]{9,10}$/;
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
     if (!formData.phone && !formData.email) errs.contact = 'Cần cung cấp số điện thoại hoặc email';

@@ -129,7 +129,7 @@ function Reservation() {
             <Col md={3}>
               <FloatingLabel label="Phone">
                 <Form.Control
-                  type="text"
+                  type="input"
                   value={filters.phone}
                   onChange={(e) => setFilters(prev => ({ ...prev, phone: e.target.value, page: 1 }))}
                   style={{ backgroundColor: '#ffffff', color: '#000000' }}
@@ -139,7 +139,7 @@ function Reservation() {
             <Col md={3}>
               <FloatingLabel label="Name">
                 <Form.Control
-                  type="text"
+                  type="input"
                   value={filters.name}
                   onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value, page: 1 }))}
                   style={{ backgroundColor: '#ffffff', color: '#000000' }}
@@ -175,7 +175,7 @@ function Reservation() {
           <>
             <table className="table table-dark table-striped table-hover mt-3">
               <thead>
-                <tr>
+                <tr style={{color: 'white'}}>
                   <th>Phone</th>
                   <th>Email</th>
                   <th>Name</th>
@@ -205,7 +205,7 @@ function Reservation() {
                         </span>
                       </td>
                       <td className="text-center">
-                        <Button size="sm" variant="warning" onClick={() => { setSelectedReservation(r); setShowModal(true); }}>View</Button>
+                        <Button size="sm" variant="warning" onClick={() => { setSelectedReservation(r); setShowModal(true); }}>Chi tiết</Button>
                       </td>
                     </tr>
                   )
@@ -242,21 +242,21 @@ function Reservation() {
             <Modal.Title>Reservation Detail</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <p><strong>Name:</strong> {selectedReservation.name}</p>
-            <p><strong>Phone:</strong> {selectedReservation.phone}</p>
+            <p><strong>Tên:</strong> {selectedReservation.name}</p>
+            <p><strong>SĐT:</strong> {selectedReservation.phone}</p>
             <p><strong>Email:</strong> {selectedReservation.email}</p>
-            <p><strong>Date:</strong> {formatDate(selectedReservation.reservationDate)}</p>
-            <p><strong>Time:</strong> {selectedReservation.reservationTime}</p>
-            <p><strong>Guests:</strong> {selectedReservation.guestCount}</p>
-            <p><strong>Status:</strong> {selectedReservation.status}</p>
+            <p><strong>Ngày đặt:</strong> {formatDate(selectedReservation.reservationDate)}</p>
+            <p><strong>Thời gian:</strong> {selectedReservation.reservationTime}</p>
+            <p><strong>Số khách:</strong> {selectedReservation.guestCount}</p>
+            <p><strong>Trạng thái:</strong> {selectedReservation.status}</p>
             <Form.Select
               className="mt-3"
               value={selectedReservation.status}
               onChange={(e) => handleUpdateStatus(selectedReservation._id, e.target.value)}
             >
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="pending">Chưa đến</option>
+              <option value="confirmed">Đã nhận</option>
+              <option value="cancelled">Hủy</option>
             </Form.Select>
           </Modal.Body>
         </Modal>

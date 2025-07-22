@@ -11,7 +11,7 @@ const UserFilters = ({ searchTerm, setSearchTerm, filterRole, setFilterRole }) =
                         <FaSearch />
                     </InputGroup.Text>
                     <Form.Control
-                        type="text"
+                        type="input"
                         placeholder="Search by name, email, or phone"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}

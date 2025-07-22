@@ -16,6 +16,12 @@ exports.getAllMenuItems = async (req, res) => {
     if (req.query.category) {
       filter.category = req.query.category;
     }
+    if (req.query.needPreOrder) {
+      filter.needPreOrder = req.query.needPreOrder;
+    }
+    if (req.query.isAvailable) {
+      filter.isAvailable = req.query.isAvailable;
+    }
 
     const items = await MenuItem.find(filter).populate('category');
     res.json(items);

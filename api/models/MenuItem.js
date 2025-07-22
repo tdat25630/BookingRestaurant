@@ -6,6 +6,7 @@ const MenuItemSchema = new mongoose.Schema({
   image: { type: String },                  
   price: Number,
   isAvailable: { type: Boolean, default: true },
+  needPreOrder: { type: Boolean, default: false },
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuCategory' }
 });
 

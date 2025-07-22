@@ -232,8 +232,7 @@
     background: rgba(255, 193, 7, 0.4);
     border-radius: 6px;
     overflow: hidden;
-    border: 2px solid rgba(255, 193, 7, 0.7);
-}
+    border: 2px solid rgba(255, 193, 7, 0.7); }
 
 .usage-fill {
     height: 100%;
@@ -306,7 +305,6 @@
 }
 
 .promotion-table tbody tr td .discount-value {
-    color: #000000 !important;
 }
 
 .promotion-table tbody tr td .start-date {
@@ -342,5 +340,4 @@
 
 .table > thead > tr > th {
     background: transparent !important;
-    color: #000000 !important;
 }
