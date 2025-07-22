@@ -18,9 +18,9 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const DiningSession = require('../models/diningSession');
-    
+
     const tables = await Table.find();
-    
+
     // Populate active sessions for each table
     const tablesWithSessions = await Promise.all(
       tables.map(async (table) => {
@@ -28,14 +28,14 @@ router.get('/', async (req, res) => {
           table: table._id,
           status: 'active'
         }).populate('table');
-        
+
         return {
           ...table.toObject(),
           activeSession: activeSession
         };
       })
     );
-    
+
     res.json(tablesWithSessions);
   } catch (err) {
     res.status(500).json({ message: err.message });

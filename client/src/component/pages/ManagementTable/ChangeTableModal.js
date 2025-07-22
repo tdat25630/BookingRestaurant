@@ -21,8 +21,8 @@ const ChangeTableModal = ({ show, onHide, currentSession, onSuccess }) => {
     try {
       const response = await axios.get('http://localhost:8080/api/tables');
       // Lọc ra những bàn available và khác bàn hiện tại
-      const available = response.data.filter(table => 
-        table.status === 'available' && 
+      const available = response.data.filter(table =>
+        table.status === 'available' &&
         table._id !== currentSession?.table?._id
       );
       setAvailableTables(available);
@@ -49,11 +49,11 @@ const ChangeTableModal = ({ show, onHide, currentSession, onSuccess }) => {
 
       // Đóng modal trước
       onHide();
-      
+
       // Hiển thị thông báo thành công
       alert('Đổi bàn thành công!');
       console.log('Table changed successfully:', response.data);
-      
+
       // Refresh data
       onSuccess();
     } catch (err) {
@@ -82,8 +82,8 @@ const ChangeTableModal = ({ show, onHide, currentSession, onSuccess }) => {
 
         <Form.Group className="mb-3">
           <Form.Label>Chọn bàn mới:</Form.Label>
-          <Form.Select 
-            value={selectedTableId} 
+          <Form.Select
+            value={selectedTableId}
             onChange={(e) => setSelectedTableId(e.target.value)}
           >
             <option value="">-- Chọn bàn --</option>
@@ -91,7 +91,7 @@ const ChangeTableModal = ({ show, onHide, currentSession, onSuccess }) => {
               const isTooSmall = table.capacity < currentSession?.guestCount;
               const capacityWarning = isTooSmall ? ' (⚠️ Nhỏ hơn số khách)' : '';
               const capacityStatus = table.capacity >= currentSession?.guestCount ? ' ✓' : '';
-              
+
               return (
                 <option key={table._id} value={table._id}>
                   Bàn {table.tableNumber} - {table.capacity} chỗ{capacityStatus}{capacityWarning}
@@ -114,8 +114,8 @@ const ChangeTableModal = ({ show, onHide, currentSession, onSuccess }) => {
         <Button variant="secondary" onClick={onHide}>
           Hủy
         </Button>
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           onClick={handleChangeTable}
           disabled={loading || !selectedTableId}
         >

@@ -19,7 +19,8 @@ function CashierTablePage() {
     const [customerInfo, setCustomerInfo] = useState({
         name: '',
         phone: '',
-        guestCount: 1
+        guestCount: 1,
+        specialRequest: ''
     });
 
     const [showChangeTableModal, setShowChangeTableModal] = useState(false);
@@ -56,33 +57,18 @@ function CashierTablePage() {
         setShowChangeTableModal(true);
     };
 
-    // const fetchPendingReservations = async () => {
-    //     try {
-    //         const res = await axios.get('http://localhost:8080/api/reservation?status=pending');
-    //         console.log('Pending reservations response:', res.data); 
-    //         setPendingReservations(res.data.reservations || res.data || []); 
-    //     } catch (err) {
-    //         console.error('Error fetching pending reservations:', err);
-    //     }
-    // };
     const fetchPendingReservations = async () => {
         try {
             let allReservations = [];
             let currentPage = 1;
             let totalPages = 1;
 
-
             do {
                 const res = await axios.get(`http://localhost:8080/api/reservation?status=pending&page=${currentPage}&pageSize=10`);
-
-
                 allReservations = [...allReservations, ...(res.data.reservations || [])];
                 totalPages = res.data.totalPages || 1;
                 currentPage++;
-
-
             } while (currentPage <= totalPages);
-
 
             console.log(`Fetched ${allReservations.length} total reservations from ${totalPages} pages`);
             setPendingReservations(allReservations);
@@ -120,45 +106,14 @@ function CashierTablePage() {
         if (tables.length) fetchActiveSessions();
     }, [tables]);
 
-    // const createSessionForTable = async (tableId, reservationId = null) => {
-    //     try {
-    //         setLoadingTableId(tableId);
-    //         const sessionData = { tableId: tableId };
-
-    //         if (reservationId) {
-    //             await axios.put(`http://localhost:8080/api/reservation/${reservationId}`, {
-    //                 status: 'confirmed'
-    //             });
-    //         }
-
-    //         const res = await axios.post('http://localhost:8080/api/dining-sessions', sessionData);
-    //         setSelectedSessionId(res.data._id);
-    //         await fetchTables();
-    //         await fetchPendingReservations();
-    //         setShowCreateOptions(null);
-    //         setShowReservationModal(false);
-    //     } catch (err) {
-    //         console.error('Error creating session:', err);
-    //         alert('Failed to create new session');
-    //     } finally {
-    //         setLoadingTableId(null);
-    //     }
-    // };
-
-    // UPDATED: Sửa hàm createSessionForTable để lưu thông tin khách
     const createSessionForTable = async (tableId, reservationId = null) => {
         try {
             setLoadingTableId(tableId);
-
             let sessionData = { tableId: tableId };
-
-
-
 
             // Nếu có reservationId, lấy thông tin khách từ reservation
             if (reservationId) {
                 const reservation = pendingReservations.find(r => r._id === reservationId);
-
 
                 if (reservation) {
                     sessionData = {
@@ -170,7 +125,6 @@ function CashierTablePage() {
                         specialRequest: reservation.specialRequest || ''
                     };
                 }
-
 
                 // Cập nhật reservation status thành confirmed
                 await axios.put(`http://localhost:8080/api/reservation/${reservationId}`, {
@@ -193,91 +147,6 @@ function CashierTablePage() {
         }
     };
 
-    // const createSessionForTable = async (tableId, reservationId = null) => {
-    //     try {
-    //         setLoadingTableId(tableId);
-
-    //         let sessionData = { 
-    //             tableId: tableId,
-    //             customerName: '',
-    //             customerPhone: '',
-    //             guestCount: 1,
-    //             specialRequest: ''
-    //         }; 
-
-    //         // Nếu có reservationId, lấy thông tin khách từ reservation
-    //         if (reservationId) {
-    //             const reservation = pendingReservations.find(r => r._id === reservationId);
-
-    //             if (reservation) {
-    //                 sessionData = {
-    //                     tableId: tableId, // Đảm bảo consistent với field name
-    //                     customerName: reservation.name || '',
-    //                     customerPhone: reservation.phone || '',
-    //                     guestCount: reservation.guestCount || 1,
-    //                     reservationId: reservationId,
-    //                     specialRequest: reservation.specialRequest || ''
-    //                 };
-
-    //                 // Cập nhật reservation status thành confirmed
-    //                 try {
-    //                     await axios.put(`http://localhost:8080/api/reservation/${reservationId}`, {
-    //                         status: 'confirmed'
-    //                     });
-    //                     console.log('Reservation confirmed successfully');
-    //                 } catch (updateError) {
-    //                     console.error('Error updating reservation status:', updateError);
-    //                     // Có thể tiếp tục tạo session mà không dừng lại
-    //                 }
-    //             } else {
-    //                 console.warn(`Reservation with ID ${reservationId} not found in pending reservations`);
-    //             }
-    //         }
-
-    //         console.log('Creating session with data:', sessionData);
-
-    //         const res = await axios.post('http://localhost:8080/api/dining-sessions', sessionData);
-
-    //         if (res.data && res.data._id) {
-    //             setSelectedSessionId(res.data._id);
-
-    //             // Refresh data
-    //             await Promise.all([
-    //                 fetchTables(),
-    //                 fetchPendingReservations()
-    //             ]);
-
-    //             // Close modals
-    //             setShowCreateOptions(null);
-    //             setShowReservationModal(false);
-
-    //             console.log('Session created successfully:', res.data);
-    //         } else {
-    //             throw new Error('Invalid response from server');
-    //         }
-
-    //     } catch (err) {
-    //         console.error('Error creating session:', err);
-
-    //         // Hiển thị error message chi tiết hơn
-    //         const errorMessage = err.response?.data?.message || err.message || 'Unknown error occurred';
-    //         alert(`Failed to create new session: ${errorMessage}`);
-
-    //         // Nếu có lỗi, có thể rollback reservation status
-    //         if (reservationId) {
-    //             try {
-    //                 await axios.put(`http://localhost:8080/api/reservation/${reservationId}`, {
-    //                     status: 'pending'
-    //                 });
-    //             } catch (rollbackError) {
-    //                 console.error('Error rolling back reservation status:', rollbackError);
-    //             }
-    //         }
-    //     } finally {
-    //         setLoadingTableId(null);
-    //     }
-    // };
-
     const handleCreateClick = (tableId, e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -287,19 +156,17 @@ function CashierTablePage() {
     const handleNewCustomer = (tableId) => {
         setShowCreateOptions(null);
         setSelectedTableForReservation(tableId);
-        setShowCustomerInfoModal(true); 
-    
+        setShowCustomerInfoModal(true);
 
-     // Set default guest count dựa trên capacity của bàn
-     const selectedTable = tables.find(t => t._id === tableId);
-     if (selectedTable) {
-         setCustomerInfo(prev => ({
-             ...prev,
-             guestCount: Math.min(prev.guestCount, selectedTable.capacity)
-         }));
-     }
- };
-
+        // Set default guest count dựa trên capacity của bàn
+        const selectedTable = tables.find(t => t._id === tableId);
+        if (selectedTable) {
+            setCustomerInfo(prev => ({
+                ...prev,
+                guestCount: Math.min(prev.guestCount, selectedTable.capacity)
+            }));
+        }
+    };
 
     const handleReservedCustomer = (tableId) => {
         setShowCreateOptions(null);
@@ -317,6 +184,7 @@ function CashierTablePage() {
         setShowReservationModal(false);
         setSelectedTableForReservation(null);
     };
+
     const closeCustomerInfoModal = () => {
         setShowCustomerInfoModal(false);
         setSelectedTableForReservation(null);
@@ -328,8 +196,37 @@ function CashierTablePage() {
         });
     };
 
+    const createSessionWithCustomerInfo = async () => {
+        if (!customerInfo.name.trim()) {
+            alert('Vui lòng nhập tên khách hàng');
+            return;
+        }
+
+        try {
+            setLoadingTableId(selectedTableForReservation);
+
+            const sessionData = {
+                tableId: selectedTableForReservation,
+                customerName: customerInfo.name,
+                customerPhone: customerInfo.phone,
+                guestCount: customerInfo.guestCount,
+                specialRequest: customerInfo.specialRequest || ''
+            };
+
+            console.log('Creating session with customer info:', sessionData);
+            const res = await axios.post('http://localhost:8080/api/dining-sessions', sessionData);
+            setSelectedSessionId(res.data._id);
+            await fetchTables();
+            closeCustomerInfoModal();
+        } catch (err) {
+            console.error('Error creating session:', err);
+            alert('Lỗi khi tạo session: ' + (err.response?.data?.message || err.message));
+        } finally {
+            setLoadingTableId(null);
+        }
+    };
+
     const getMatchingReservations = () => {
-        return pendingReservations;
         return pendingReservations;
     };
 
@@ -347,14 +244,12 @@ function CashierTablePage() {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-           
             if (!event.target.closest('.create-section')) {
                 setShowCreateOptions(null);
             }
         };
 
         if (showCreateOptions) {
-         
             setTimeout(() => {
                 document.addEventListener('mousedown', handleClickOutside);
             }, 0);
@@ -364,7 +259,6 @@ function CashierTablePage() {
             };
         }
     }, [showCreateOptions]);
-
 
     return (
         <>
@@ -474,42 +368,36 @@ function CashierTablePage() {
                 </ul>
             </div>
 
-           {/* Customer Info Modal */}
-           {showCustomerInfoModal && (
+            {/* Customer Info Modal */}
+            {showCustomerInfoModal && (
                 <div className="modal-overlay" onClick={closeCustomerInfoModal}>
                     <div className="modal-content customer-info-modal" onClick={e => e.stopPropagation()}>
                         <h3>Thông tin khách hàng</h3>
                         <div className="customer-info-form">
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 placeholder="Tên khách hàng *"
                                 value={customerInfo.name}
-                                onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
-                                required 
+                                onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                                required
                             />
-                            <input 
-                                type="tel" 
-                                placeholder="Số điện thoại "
+                            <input
+                                type="tel"
+                                placeholder="Số điện thoại"
                                 value={customerInfo.phone}
-                                onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
-                                
+                                onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
                             />
-                            <select 
+                            <select
                                 value={customerInfo.guestCount}
-                                onChange={(e) => setCustomerInfo({...customerInfo, guestCount: parseInt(e.target.value)})}
+                                onChange={(e) => setCustomerInfo({ ...customerInfo, guestCount: parseInt(e.target.value) })}
                             >
-                                {[1,2,3,4,5,6,7,8].map(num => (
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
                                     <option key={num} value={num}>{num} người</option>
                                 ))}
                             </select>
-                            {/* <textarea 
-                                placeholder="Yêu cầu đặc biệt (tùy chọn)"
-                                value={customerInfo.specialRequest}
-                                onChange={(e) => setCustomerInfo({...customerInfo, specialRequest: e.target.value})}
-                            /> */}
                         </div>
                         <div className="button-group">
-                            <button 
+                            <button
                                 onClick={createSessionWithCustomerInfo}
                                 className="confirm-btn"
                                 disabled={loadingTableId}
@@ -528,7 +416,6 @@ function CashierTablePage() {
             {selectedSessionId && (
                 <div className="modal-overlay" onClick={closeQRModal}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
-                    
                         <QRCodeComponent sessionId={selectedSessionId} />
 
                         <div className="button-group">
@@ -574,7 +461,6 @@ function CashierTablePage() {
                             {getMatchingReservations().length === 0 ? (
                                 <div>
                                     <p>Không có đặt bàn pending nào</p>
-                                    <p style={{ fontSize: '12px', color: '#666' }}>
                                     <p style={{ fontSize: '12px', color: '#666' }}>
                                         Debug: Tổng {pendingReservations.length} reservations được tải
                                     </p>
@@ -637,12 +523,6 @@ function CashierTablePage() {
             />
         </>
     );
-
-
-
-
-
-
 }
 
 export default CashierTablePage;
