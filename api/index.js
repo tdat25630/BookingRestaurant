@@ -4,23 +4,23 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
-
 const menuCategoryRoutes = require('./routes/menuCategoryRoutes');
 const menuItemRoutes = require('./routes/menuItemRoutes');
 
 const diningSessionRoutes = require('./routes/diningSessionRoutes');
 const tableRoutes = require('./routes/tableRoutes');
 const orderItemRoutes = require('./routes/orderItemRoutes');
-const orderRoutes = require('./routes/orderRoutes');
 const chefRoutes = require('./routes/chefRoutes');
 const promotionRoutes = require('./routes/promotionRoute');
 const staffRoutes = require('./routes/staffRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 
 
 const app = express();
 
 require('dotenv').config();
+require('./cron-job/expireReservationsJob');
 
 app.use(express.json());
 app.use(cookieParser());

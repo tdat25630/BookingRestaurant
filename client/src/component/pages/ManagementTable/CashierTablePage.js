@@ -264,7 +264,7 @@ function CashierTablePage() {
         <>
             <CashierHeader />
             <div className="admin-table-container">
-                <h2>🍽️ Table Management</h2>
+                <h2>Quản lý bàn</h2>
                 <ul className="table-grid">
                     {tables.map(table => {
                         const userInfo = table.activeSession ? sessionUserInfo[table.activeSession._id] : null;

@@ -237,18 +237,11 @@ function Reservation() {
       </Container>
 
       {selectedReservation && (
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal show={showModal} onHide={() => setShowModal(false)} size='xl'>
           <Modal.Header closeButton>
             <Modal.Title>Reservation Detail</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <p><strong>Tên:</strong> {selectedReservation.name}</p>
-            <p><strong>SĐT:</strong> {selectedReservation.phone}</p>
-            <p><strong>Email:</strong> {selectedReservation.email}</p>
-            <p><strong>Ngày đặt:</strong> {formatDate(selectedReservation.reservationDate)}</p>
-            <p><strong>Thời gian:</strong> {selectedReservation.reservationTime}</p>
-            <p><strong>Số khách:</strong> {selectedReservation.guestCount}</p>
-            <p><strong>Trạng thái:</strong> {selectedReservation.status}</p>
             <Form.Select
               className="mt-3"
               value={selectedReservation.status}

@@ -86,7 +86,7 @@ function Reservation() {
 
   const validate = () => {
     const errs = {};
-    const phoneRegex = /^0(3|5|7|8|9)[0-9]{9,10}$/;
+    const phoneRegex = /^0(3|5|7|8|9)[0-9]{8,9}$/;
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
     if (!formData.phone && !formData.email) errs.contact = 'Cần cung cấp số điện thoại hoặc email';
