@@ -153,7 +153,7 @@ function CashierTablePage() {
             let sessionData = { tableId: tableId };
 
 
-            let sessionData = { tableId: tableId };
+
 
             // Nếu có reservationId, lấy thông tin khách từ reservation
             if (reservationId) {
