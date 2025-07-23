@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import StaffHeader from '../../Header/StaffHeader';
-import OrderHeader from './OrderHeader';
-import OrderStats from './OrderStats';
-import OrderFilters from './OrderFilters';
-import OrderCard from './OrderCard';
+import ChefOrder from '../../../Header/StaffHeader';
+import OrderHeader from '../OrderHeader';
+import OrderStats from '../OrderStats';
+import OrderFilters from '../OrderFilters';
+import OrderCard from '../OrderCard';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ChefHeader from '../../../Header/ChefHeader';
 
-const Order = () => {
+const ChOrder = () => {
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState({});
   const [filter, setFilter] = useState('all');
@@ -18,7 +19,7 @@ const Order = () => {
   const [tableFilter, setTableFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [itemSortOption, setItemSortOption] = useState({});
-  const [defaultStatus, setDefaultStatus] = useState('ordered');
+  const [defaultStatus, setDefaultStatus] = useState('preparing');
 
   const mergeOrdersPreservingEdits = (newOrders, prevOrders) => {
     return newOrders.map(newOrder => {
@@ -86,7 +87,7 @@ const Order = () => {
 
   return (
     <>
-      <StaffHeader />
+      <ChefHeader />
       <div className="chef-order-container">
         <OrderHeader onRefresh={() => { setRefreshing(true); fetchOrders(false); fetchStats(); }} refreshing={refreshing} />
         <OrderStats stats={stats} />
@@ -155,4 +156,5 @@ const Order = () => {
   );
 };
 
-export default Order;
+export default ChOrder;
+

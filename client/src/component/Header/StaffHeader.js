@@ -23,15 +23,9 @@ const StaffHeader = () => {
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="admin-navbar-nav" />
-        <Nav.Link as={Link} to="/staff/order" className="nav-link">Order</Nav.Link>
         <Navbar.Collapse id="admin-navbar-nav">                    <Nav className="ms-auto">
           <Nav.Link as={Link} to="/staff/reservation" className="nav-link">Bookings</Nav.Link>
-          {/* <Nav.Link as={Link} to="/admin/users" className="nav-link">
-                        <FontAwesomeIcon icon={faUsers} className="me-1" />
-                        User
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/admin/category" className="nav-link">Category</Nav.Link>
-                    <Nav.Link as={Link} to="/admin/item" className="nav-link">Menu</Nav.Link> */}
+          <Nav.Link as={Link} to="/staff/order" className="nav-link">Order</Nav.Link>
           <NavDropdown
             title={<span><FaUserCircle className="me-1" />Staff</span>}
             id="staff-dropdown"

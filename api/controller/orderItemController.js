@@ -21,6 +21,16 @@ exports.getItemsByOrder = async (req, res) => {
   }
 };
 
+exports.deleteById = async (req, res) => {
+  try {
+    const { id } = req.params
+    const items = await OrderItem.findOneAndDelete({ _id: id });
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.updateOrderItemStatus = async (req, res) => {
   try {
     const updated = await OrderItem.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });

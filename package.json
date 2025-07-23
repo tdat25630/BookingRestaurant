@@ -3,6 +3,7 @@
     "axios": "^1.10.0",
     "cloudinary": "^2.7.0",
     "multer": "^2.0.2",
-    "node-cron": "^4.2.1"
+    "node-cron": "^4.2.1",
+    "sweetalert2": "^11.22.2"
   }
 }
