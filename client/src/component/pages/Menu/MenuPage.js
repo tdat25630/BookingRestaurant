@@ -17,6 +17,7 @@ function MenuPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sessionValid, setSessionValid] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [order, setOrder] = useState({})
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   const itemsPerPage = 12;
@@ -77,6 +78,8 @@ function MenuPage() {
         try {
           const orderRes = await axios.get(`http://localhost:8080/api/orders/session/${sessionId}`);
           const currentOrder = orderRes.data;
+          setOrder(currentOrder[0])
+          console.log(currentOrder)
 
           if (currentOrder?._id) {
             setOrderId(currentOrder._id);
@@ -135,8 +138,10 @@ function MenuPage() {
     <>
       <Header />
       <div className="menu-page-container">
+        <h4>{order?.sessionId?.customerName ?
+          "Khác hàng: " + order?.sessionId?.customerName : ''
+        }</h4>
         <h2> Menu</h2>
-
 
         <input
           type="text"
