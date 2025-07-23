@@ -113,36 +113,36 @@ const deleteUser = async (req, res, next) => {
 
 const getUserBySessionId = async (req, res, next) => {
   try {
-      const { sessionId } = req.params;
+    const { sessionId } = req.params;
 
-      const diningSession = await DiningSession.findById(sessionId);
+    const diningSession = await DiningSession.findById(sessionId);
 
-      if (!diningSession) {
-          return res.status(404).json({ success: false, message: "Dining session not found." });
-      }
+    if (!diningSession) {
+      return res.status(404).json({ success: false, message: "Dining session not found." });
+    }
 
-      const userId = diningSession.user;
-      if (!userId) {
-          return res.status(200).json({ success: true, data: null, message: "This is a guest session." });
-      }
+    const userId = diningSession.user;
+    if (!userId) {
+      return res.status(200).json({ success: true, data: null, message: "This is a guest session." });
+    }
 
-      const user = await User.findById(userId).select("username points");
+    const user = await User.findById(userId).select("username points");
 
-      if (!user) {
-          return res.status(404).json({ success: false, message: "User associated with this session not found." });
-      }
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User associated with this session not found." });
+    }
 
-      res.status(200).json({ success: true, data: user });
+    res.status(200).json({ success: true, data: user });
 
   } catch (err) {
-      next(err);
+    next(err);
   }
 };
 
 
 const searchUser = async (req, res, next) => {
   console.log("--- Bắt đầu quy trình tìm kiếm User ---");
-  
+
   const query = req.query.q;
   console.log(`1. Query nhận được từ frontend: "${query}"`);
 
@@ -163,7 +163,7 @@ const searchUser = async (req, res, next) => {
     console.log("3. Query sẽ gửi đến MongoDB:", JSON.stringify(mongoQuery, null, 2));
 
     const user = await User.findOne(mongoQuery).select('-password');
-    
+
     console.log("4. Kết quả tìm thấy từ database:", user); // Log quan trọng nhất
     // --- DEBUG KẾT THÚC ---
 
@@ -179,12 +179,55 @@ const searchUser = async (req, res, next) => {
     next(createError(500, "Error while searching for user."));
   }
 };
+
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.params.id;
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current password and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters long' });
+    }
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await User.findByIdAndUpdate(userId, {
+      password: hashedNewPassword
+    });
+
+    res.json({ message: 'Password changed successfully' });
+
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 module.exports = {
   getUsers,
   getUserById,
   createUser,
   updateUser,
-  getUserBySessionId, 
+  getUserBySessionId,
   deleteUser,
-  searchUser
+  searchUser,
+  changePassword
 }

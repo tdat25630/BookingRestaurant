@@ -1,259 +1,422 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Alert, Spinner } from 'react-bootstrap';
-import { FaUserCircle, FaSave, FaKey } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import ProfileForm from './ProfileForm';
 import './UserProfile.css';
 
 const UserProfile = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [showPasswordFields, setShowPasswordFields] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-
+    const [editing, setEditing] = useState(false);
+    const [showPasswordForm, setShowPasswordForm] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         phone: '',
+        fullName: ''
+    });
+    const [passwordData, setPasswordData] = useState({
         currentPassword: '',
         newPassword: '',
-        confirmPassword: '',
-        role: 'user'
+        confirmPassword: ''
     });
+    const [message, setMessage] = useState({ type: '', text: '' });
+    const [updating, setUpdating] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-                const storedUser = JSON.parse(localStorage.getItem('user'));
-
-                if (!storedUser || !storedUser._id) {
-                    throw new Error('User information not found');
-                }
-
-                const token = localStorage.getItem('token');
-
-                const response = await axios.get(`http://localhost:8080/api/user/${storedUser._id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                    withCredentials: true
-                });
-
-                setUser(response.data);
-                setFormData({
-                    username: response.data.username || '',
-                    email: response.data.email || '',
-                    phone: response.data.phone || '',
-                    role: response.data.role || 'user',
-                    currentPassword: '',
-                    newPassword: '',
-                    confirmPassword: ''
-                });
-
-                setError(null);
-            } catch (err) {
-                console.error('Error fetching user profile:', err);
-                setError('Failed to load profile. ' + (err.response?.data?.message || err.message));
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUserProfile();
+        // Lấy thông tin user từ localStorage
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            const parsedUser = JSON.parse(userData);
+            setUser(parsedUser);
+            setFormData({
+                username: parsedUser.username || '',
+                email: parsedUser.email || '',
+                phone: parsedUser.phone || '',
+                fullName: parsedUser.fullName || ''
+            });
+        }
+        setLoading(false);
     }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
+        setFormData(prev => ({
+            ...prev,
             [name]: value
-        });
+        }));
     };
 
-    const handleSaveProfile = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-        setSuccess(null);
+    const handlePasswordChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
-        try {
-            // Form validation
-            if (showPasswordFields) {
-                if (!formData.currentPassword) {
-                    throw new Error('Current password is required');
-                }
-                if (formData.newPassword !== formData.confirmPassword) {
-                    throw new Error('New passwords do not match');
-                }
-            }
+    const showMessage = (type, text) => {
+        setMessage({ type, text });
+        setTimeout(() => {
+            setMessage({ type: '', text: '' });
+        }, 5000);
+    };
 
-            const token = localStorage.getItem('token');
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        navigate('/login');
+    };
 
-            // Prepare update data - only allow username and phone to be updated
-            const updateData = {
-                username: formData.username,
-                phone: formData.phone
-            };
-
-            // Add password fields if changing password
-            if (showPasswordFields && formData.currentPassword) {
-                updateData.currentPassword = formData.currentPassword;
-                updateData.password = formData.newPassword || '';
-            }
-
-            const response = await axios.put(
-                `http://localhost:8080/api/user/updateUser/${user._id}`,
-                updateData,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    withCredentials: true
-                }
-            );
-
-            // Update local user data
-            setUser(response.data);
-
-            // Update localStorage
-            const storedUser = JSON.parse(localStorage.getItem('user'));
-            localStorage.setItem('user', JSON.stringify({
-                ...storedUser,
-                username: response.data.username
-            }));
-
-            setSuccess('Profile updated successfully');
-
-            // Reset password fields
-            setFormData(prev => ({
-                ...prev,
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: ''
-            }));
-
-            setShowPasswordFields(false);
-            setIsEditing(false);
-
-        } catch (err) {
-            console.error('Error updating profile:', err);
-            setError('Failed to update profile: ' + (err.response?.data?.message || err.message));
-        } finally {
-            setLoading(false);
+    const goToHomePage = () => {
+        const userRole = user?.role;
+        switch(userRole) {
+            case 'admin':
+                navigate('/admin/dashboard');
+                break;
+            case 'cashier':
+                navigate('/cashier/tables');
+                break;
+            case 'chef':
+                navigate('/chef/orders');
+                break;
+            case 'staff':
+                navigate('/staff/reservations');
+                break;
+            default:
+                navigate('/home');
         }
     };
 
-    if (loading && !user) {
+    const handleSaveProfile = async () => {
+        try {
+            setUpdating(true);
+            
+            const token = localStorage.getItem('token');
+            await axios.put(
+                `http://localhost:8080/api/user/updateUser/${user._id}`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            // Update localStorage
+            const updatedUser = { ...user, ...formData };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setUser(updatedUser);
+            setEditing(false);
+            
+            showMessage('success', 'Profile updated successfully!');
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            showMessage('error', error.response?.data?.message || 'Error updating profile');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleChangePassword = async () => {
+        // Validate password inputs
+        if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+            showMessage('error', 'Please fill in all password fields');
+            return;
+        }
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            showMessage('error', 'New passwords do not match');
+            return;
+        }
+
+        if (passwordData.newPassword.length < 6) {
+            showMessage('error', 'New password must be at least 6 characters long');
+            return;
+        }
+
+        try {
+            setUpdating(true);
+            
+            const token = localStorage.getItem('token');
+            // Fixed API endpoint for change password
+            await axios.put(
+                `http://localhost:8080/api/user/change-password/${user._id}`,
+                {
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            // Reset password form
+            setPasswordData({
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            });
+            setShowPasswordForm(false);
+            
+            showMessage('success', 'Password changed successfully!');
+        } catch (error) {
+            console.error('Error changing password:', error);
+            showMessage('error', error.response?.data?.message || 'Error changing password');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const resetPasswordForm = () => {
+        setPasswordData({
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        });
+        setShowPasswordForm(false);
+    };
+
+    if (loading) {
         return (
-            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "60vh" }}>
-                <Spinner animation="border" />
-                <span className="ms-2">Loading profile...</span>
-            </Container>
+            <div className="profile-container">
+                <div className="loading">Loading...</div>
+            </div>
         );
     }
 
     return (
-        <Container className="my-5 user-profile-container">
-            <Row className="justify-content-center">
-                <Col md={8}>
-                    <Card className="profile-card shadow-sm">
-                        <Card.Header className="bg-dark text-white">
-                            <div className="d-flex align-items-center">
-                                <FaUserCircle size={24} className="me-2" />
-                                <h3 className="mb-0">My Profile</h3>
+        <div className="profile-container">
+            {/* Navigation Header */}
+            <div className="profile-nav-header">
+                <div className="nav-left">
+                    <button 
+                        className="nav-btn back-btn"
+                        onClick={goToHomePage}
+                    >
+                        ← Back to Dashboard
+                    </button>
+                </div>
+                
+                <div className="nav-center">
+                    <h1 className="nav-title">👤 User Profile</h1>
+                </div>
+                
+                <div className="nav-right">
+                    <span className="user-info">
+                        {user?.username} ({user?.role})
+                    </span>
+                    <button 
+                        className="nav-btn logout-btn"
+                        onClick={handleLogout}
+                    >
+                        🚪 Logout
+                    </button>
+                </div>
+            </div>
+
+            <div className="profile-header">
+                <p>Manage your account information and security</p>
+            </div>
+
+            {/* Message Alert */}
+            {message.text && (
+                <div className={`alert alert-${message.type}`}>
+                    {message.text}
+                </div>
+            )}
+
+            <div className="profile-content">
+                <div className="profile-card">
+                    <div className="profile-avatar">
+                        <div className="avatar-circle">
+                            {user?.username?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <h2>{user?.username || 'User'}</h2>
+                        <span className="user-role">{user?.role || 'User'}</span>
+                    </div>
+
+                    <div className="profile-tabs">
+                        <button 
+                            className={`tab-btn ${!showPasswordForm ? 'active' : ''}`}
+                            onClick={() => setShowPasswordForm(false)}
+                        >
+                            📝 Profile Information
+                        </button>
+                        <button 
+                            className={`tab-btn ${showPasswordForm ? 'active' : ''}`}
+                            onClick={() => setShowPasswordForm(true)}
+                        >
+                            🔒 Change Password
+                        </button>
+                    </div>
+
+                    {!showPasswordForm ? (
+                        // Profile Information Form
+                        <div className="profile-form">
+                            <div className="form-group">
+                                <label>Username</label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    value={formData.username}
+                                    onChange={handleInputChange}
+                                    disabled={!editing}
+                                    className={editing ? 'editable' : 'readonly'}
+                                />
                             </div>
-                        </Card.Header>
-                        <Card.Body>
-                            {error && <Alert variant="danger">{error}</Alert>}
-                            {success && <Alert variant="success">{success}</Alert>}
 
-                            {!isEditing ? (
-                                <div className="profile-info">
-                                    <Row className="mb-3 profile-row">
-                                        <Col md={4} className="profile-label">Username:</Col>
-                                        <Col md={8}>{user?.username}</Col>
-                                    </Row>
-                                    <Row className="mb-3 profile-row">
-                                        <Col md={4} className="profile-label">Email:</Col>
-                                        <Col md={8}>{user?.email}</Col>
-                                    </Row>
-                                    <Row className="mb-3 profile-row">
-                                        <Col md={4} className="profile-label">Role:</Col>
-                                        <Col md={8}>
-                                            <span className={`badge ${user?.role === 'admin' ? 'bg-danger' : 'bg-primary'}`}>
-                                                {user?.role}
-                                            </span>
-                                        </Col>
-                                    </Row>
-                                    <Row className="mb-3 profile-row">
-                                        <Col md={4} className="profile-label">Phone:</Col>
-                                        <Col md={8}>{user?.phone || 'Not provided'}</Col>
-                                    </Row>
+                            <div className="form-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    disabled={!editing}
+                                    className={editing ? 'editable' : 'readonly'}
+                                />
+                            </div>
 
-                                    <Button
-                                        variant="primary"
-                                        onClick={() => setIsEditing(true)}
-                                        className="mt-3"
+                            <div className="form-group">
+                                <label>Phone</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    disabled={!editing}
+                                    className={editing ? 'editable' : 'readonly'}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Full Name</label>
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={formData.fullName}
+                                    onChange={handleInputChange}
+                                    disabled={!editing}
+                                    className={editing ? 'editable' : 'readonly'}
+                                />
+                            </div>
+
+                            <div className="form-actions">
+                                {!editing ? (
+                                    <button 
+                                        className="btn btn-primary"
+                                        onClick={() => setEditing(true)}
                                     >
-                                        Edit Profile
-                                    </Button>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleSaveProfile}>
-                                    <ProfileForm
-                                        formData={formData}
-                                        handleInputChange={handleInputChange}
-                                        showPasswordFields={showPasswordFields}
-                                        setShowPasswordFields={setShowPasswordFields}
-                                        showPassword={showPassword}
-                                        setShowPassword={setShowPassword}
-                                    />
-
-                                    <div className="mt-4 d-flex justify-content-between">
-                                        <Button
-                                            variant="primary"
-                                            type="submit"
-                                            disabled={loading}
+                                        ✏️ Edit Profile
+                                    </button>
+                                ) : (
+                                    <div className="edit-actions">
+                                        <button 
+                                            className="btn btn-success"
+                                            onClick={handleSaveProfile}
+                                            disabled={updating}
                                         >
-                                            {loading ? (
-                                                <>
-                                                    <Spinner animation="border" size="sm" className="me-1" />
-                                                    Saving...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <FaSave className="me-1" /> Save Changes
-                                                </>
-                                            )}
-                                        </Button>
-
-                                        <Button
-                                            variant="secondary"
+                                            {updating ? '💾 Saving...' : '💾 Save Changes'}
+                                        </button>
+                                        <button 
+                                            className="btn btn-secondary"
                                             onClick={() => {
-                                                setIsEditing(false);
-                                                setShowPasswordFields(false);
-                                                // Reset form to original values
+                                                setEditing(false);
+                                                // Reset form data
                                                 setFormData({
-                                                    username: user.username,
-                                                    email: user.email,
-                                                    phone: user.phone || '',
-                                                    role: user.role,
-                                                    currentPassword: '',
-                                                    newPassword: '',
-                                                    confirmPassword: ''
+                                                    username: user?.username || '',
+                                                    email: user?.email || '',
+                                                    phone: user?.phone || '',
+                                                    fullName: user?.fullName || ''
                                                 });
                                             }}
-                                            type="button"
+                                            disabled={updating}
                                         >
-                                            Cancel
-                                        </Button>
+                                            ❌ Cancel
+                                        </button>
                                     </div>
-                                </form>
-                            )}
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-        </Container>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        // Change Password Form
+                        <div className="password-form">
+                            <div className="form-group">
+                                <label>Current Password</label>
+                                <input
+                                    type="password"
+                                    name="currentPassword"
+                                    value={passwordData.currentPassword}
+                                    onChange={handlePasswordChange}
+                                    placeholder="Enter your current password"
+                                    className="editable"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>New Password</label>
+                                <input
+                                    type="password"
+                                    name="newPassword"
+                                    value={passwordData.newPassword}
+                                    onChange={handlePasswordChange}
+                                    placeholder="Enter new password (min 6 characters)"
+                                    className="editable"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Confirm New Password</label>
+                                <input
+                                    type="password"
+                                    name="confirmPassword"
+                                    value={passwordData.confirmPassword}
+                                    onChange={handlePasswordChange}
+                                    placeholder="Confirm your new password"
+                                    className="editable"
+                                />
+                            </div>
+
+                            <div className="password-requirements">
+                                <h4>Password Requirements:</h4>
+                                <ul>
+                                    <li className={passwordData.newPassword.length >= 6 ? 'valid' : 'invalid'}>
+                                        At least 6 characters long
+                                    </li>
+                                    <li className={passwordData.newPassword === passwordData.confirmPassword && passwordData.newPassword ? 'valid' : 'invalid'}>
+                                        Passwords match
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div className="form-actions">
+                                <div className="edit-actions">
+                                    <button 
+                                        className="btn btn-warning"
+                                        onClick={handleChangePassword}
+                                        disabled={updating || !passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword}
+                                    >
+                                        {updating ? '🔒 Changing...' : '🔒 Change Password'}
+                                    </button>
+                                    <button 
+                                        className="btn btn-secondary"
+                                        onClick={resetPasswordForm}
+                                        disabled={updating}
+                                    >
+                                        ❌ Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 };
 
