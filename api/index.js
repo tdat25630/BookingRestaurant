@@ -14,6 +14,7 @@ const chefRoutes = require('./routes/chefRoutes');
 const promotionRoutes = require('./routes/promotionRoute');
 const staffRoutes = require('./routes/staffRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
 
 
 
@@ -57,6 +58,7 @@ app.use('/api/menu-items', menuItemRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/dining-sessions', diningSessionRoutes);
 app.use('/api/tables', tableRoutes);
+app.use('/api/invoices', invoiceRoutes);
 
 app.use('/api/promotions', promotionRoutes);
 

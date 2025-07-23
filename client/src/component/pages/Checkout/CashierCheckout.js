@@ -71,16 +71,6 @@ function CashierCheckout() {
         }
       );
   
-      // --- DEBUG TẠI ĐÂY ---
-      console.log("API Response (sau khi gán user):", res.data);
-  
-      // Kiểm tra xem res.data.order có tồn tại và có userId không
-      if (res.data && res.data.order && res.data.order.userId) {
-          console.log("THÀNH CÔNG: Dữ liệu trả về có chứa userId:", res.data.order.userId);
-      } else {
-          console.error("LỖI: Dữ liệu trả về từ server bị thiếu object 'order' hoặc 'userId'!");
-      }
-      // --- KẾT THÚC DEBUG ---
   
       setPendingOrder(res.data.order);
       setLinkingMessage({

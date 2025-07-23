@@ -27,6 +27,7 @@ import AdminLayout from './component/LayoutAdmin/AdminLayout';
 import UserProfile from './component/pages/UserProfile/UserProfile';
 import AdminDashboard from './component/pages/Dashboard/AdminDashboard';
 import PromotionManagement from './component/pages/PromotionManagement/PromotionManagement';
+import InvoiceList from './component/pages/Invoice/InvoiceList';
 
 function App() {
     return (
@@ -41,6 +42,7 @@ function App() {
 
                         <Route path="/booking" element={<Reservation />} />
                         <Route path="/aboutus" element={<AboutUs />} />
+                        <Route path="/invoices" element={<InvoiceList />} />
 
                         <Route path="/menu" element={<MenuPage />} />
                         <Route path="/confirm" element={<ConfirmOrderPage />} />

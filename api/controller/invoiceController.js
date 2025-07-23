@@ -1,8 +1,9 @@
 const axios = require('axios').default;
 const CryptoJS = require('crypto-js');
 const moment = require('moment');
-const qs = require('qs'); // Thư viện để format data cho status check
+const qs = require('qs'); 
 const Order = require('../models/order');
+const Invoice = require('../models/invoice');
 const OrderItem = require('../models/orderItem');
 
 // Cấu hình ZaloPay, lấy thông tin từ file .env
@@ -56,7 +57,7 @@ exports.createZaloPayOrder = async (req, res, next) => {
             app_trans_id: app_trans_id,
             app_user: 'user123',
             app_time: Date.now(),
-            item: JSON.stringify([]), // Theo mẫu ZaloPay, trường này có thể rỗng
+            item: JSON.stringify([]), 
             embed_data: JSON.stringify(embed_data),
             amount: amount,
             description: `Thanh toán cho đơn hàng #${orderId}`,
@@ -101,10 +102,26 @@ exports.handleZaloPayCallback = async (req, res, next) => {
 
             const order = await Order.findById(orderId);
             if (order && order.paymentStatus !== 'paid') {
-                await Order.findByIdAndUpdate(orderId, {
-                    paymentStatus: 'paid',
-                    status: 'served',
-                });
+                order.paymentStatus = 'paid';
+                order.status = 'served';
+                await order.save();
+
+          
+                const existingInvoice = await Invoice.findOne({ order_id: orderId });
+                if (!existingInvoice) {
+                    const newInvoice = new Invoice({
+                        order_id: orderId,
+                      
+                        customer_id: order.customerId || order.userId || null,
+                        total_amount: order.totalAmount,
+                        discount: 0, 
+                        tax_amount: 0,
+                        payment_method: 'zalopay_qr',
+                        payment_status: 'paid'
+                    });
+                    await newInvoice.save();
+                    console.log(`Đã tạo Invoice thành công cho Order ID: ${orderId}`);
+                }
             }
             
             result.return_code = 1;
@@ -138,7 +155,6 @@ exports.checkZaloPayOrderStatus = async (req, res, next) => {
         const data = `${config.app_id}|${postData.app_trans_id}|${config.key1}`;
         postData.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
 
-        // CẬP NHẬT: Sử dụng đúng cấu hình request như trong code mẫu
         const postConfig = {
             method: 'post',
             url: config.endpoint_query,
@@ -150,7 +166,6 @@ exports.checkZaloPayOrderStatus = async (req, res, next) => {
 
         const result = await axios(postConfig);
 
-        // Giữ lại logic kiểm tra trong DB của mình
         const orderId = app_trans_id.split('_')[1];
         const ourOrder = await Order.findById(orderId).select('paymentStatus');
 
@@ -185,3 +200,88 @@ exports.getListBanks = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc    Get a list of all invoices
+ * @route   GET /api/invoices
+ * @access  Private (Admin/Cashier)
+ */
+exports.getAllInvoices = async (req, res, next) => {
+    try {
+        const invoices = await Invoice.find({}).populate({
+            path: 'order_id',
+            select: 'sessionId totalAmount' 
+        }).sort({ invoice_date: -1 }); 
+
+        res.status(200).json({
+            success: true,
+            count: invoices.length,
+            data: invoices
+        });
+    } catch (error) {
+        console.error("Error fetching invoices:", error);
+        next(error);
+    }
+};
+
+/**
+ * @desc    Get details of a single invoice
+ * @route   GET /api/invoices/:id
+ * @access  Private (Admin/Cashier)
+ */
+exports.getInvoiceDetails = async (req, res, next) => {
+    try {
+        const invoice = await Invoice.findById(req.params.id).populate('order_id');
+
+        if (!invoice) {
+            return res.status(404).json({ success: false, message: `Invoice not found with id ${req.params.id}` });
+        }
+
+        const orderItems = await OrderItem.find({ orderId: invoice.order_id._id }).populate('menuItemId', 'name price');
+
+        res.status(200).json({
+            success: true,
+            data: {
+                invoice,
+                items: orderItems
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching invoice details:", error);
+        next(error);
+    }
+};
+
+/**
+ * @desc    Cancel an invoice (and update the related order)
+ * @route   PUT /api/invoices/:id/cancel
+ * @access  Private (Admin)
+ */
+exports.cancelInvoice = async (req, res, next) => {
+    try {
+        const invoice = await Invoice.findById(req.params.id);
+
+        if (!invoice) {
+            return res.status(404).json({ success: false, message: `Invoice not found with id ${req.params.id}` });
+        }
+
+        if (invoice.payment_status === 'cancelled') {
+            return res.status(400).json({ success: false, message: 'This invoice has already been cancelled.' });
+        }
+
+        invoice.payment_status = 'cancelled';
+        await invoice.save();
+
+        await Order.findByIdAndUpdate(invoice.order_id, {
+            paymentStatus: 'unpaid'
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Invoice has been cancelled successfully.',
+            data: invoice
+        });
+    } catch (error) {
+        console.error("Error cancelling invoice:", error);
+        next(error);
+    }
+};

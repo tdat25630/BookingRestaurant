@@ -34,7 +34,6 @@ function ZaloPayGateway() {
           setAppTransId(res.data.app_trans_id);
           setError('');
         } else {
-          // Cải tiến: Ưu tiên hiển thị lỗi chi tiết từ ZaloPay
           const ZaloPayResponse = res.data.zaloPayResponse;
           const subMessage = ZaloPayResponse?.sub_return_message;
           const mainMessage = ZaloPayResponse?.return_message || res.data.message;

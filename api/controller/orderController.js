@@ -1,4 +1,5 @@
 const Order = require('../models/order');
+const Invoice = require('../models/invoice');
 const OrderItem = require('../models/orderItem');
 const Promotion = require('../models/promotion');
 const createError = require('../util/errorHandle');
@@ -334,34 +335,47 @@ exports.getDailyRevenueInMonth = async (req, res) => {
 
 exports.markAsPaidByCash = async (req, res, next) => {
   try {
-    const { orderId } = req.params;
+      const { orderId } = req.params;
+      const order = await Order.findById(orderId);
 
-    const order = await Order.findById(orderId);
+      if (!order) {
+          return res.status(404).json({ success: false, message: 'Order not found.' });
+      }
+      if (order.paymentStatus === 'paid') {
+          return res.status(400).json({ success: false, message: 'This order has already been paid.' });
+      }
 
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found.' });
-    }
+      order.paymentStatus = 'paid';
+      order.status = 'served';
+      const updatedOrder = await order.save();
+      const existingInvoice = await Invoice.findOne({ order_id: orderId });
+      if (!existingInvoice) {
+          const newInvoice = new Invoice({
+              order_id: orderId,
+              customer_id: updatedOrder.customerId || updatedOrder.userId || null,
+              total_amount: updatedOrder.totalAmount,
+              discount: 0,
+              tax_amount: 0,
+              payment_method: 'cash', 
+              payment_status: 'paid'
+          });
+          await newInvoice.save();
+          console.log(`Đã tạo Invoice (tiền mặt) thành công cho Order ID: ${orderId}`);
+      }
+      // ========================================================
 
-    if (order.paymentStatus === 'paid') {
-      return res.status(400).json({ success: false, message: 'This order has already been paid.' });
-    }
-
-    order.paymentStatus = 'paid';
-    order.status = 'served';
-
-    const updatedOrder = await order.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Successfully updated payment status.',
-      data: updatedOrder
-    });
+      res.status(200).json({
+          success: true,
+          message: 'Successfully updated payment status.',
+          data: updatedOrder
+      });
 
   } catch (error) {
-    console.error("Error during cash payment:", error);
-    next(error);
+      console.error("Error during cash payment:", error);
+      next(error);
   }
 };
+
 exports.applyVoucher = async (req, res, next) => {
   try {
       const { orderId } = req.params;
