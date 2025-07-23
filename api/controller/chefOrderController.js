@@ -29,6 +29,7 @@ exports.getOrdersForChef = async (req, res) => {
     // Lấy orders với populate session info VÀ table info
     const orders = await Order.find({
       status: { $in: statusFilter },
+      paymentStatus: 'unpaid',
       ...dateFilter
     })
       .populate({
@@ -111,7 +112,7 @@ exports.updateOrderStatusByChef = async (req, res) => {
     const { status, estimatedTime } = req.body;
 
     // Validate status
-    const validStatuses = ['pending', 'preparing', 'served'];
+    const validStatuses = ['pending', 'preparing', 'cooking', 'served'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         error: 'Trạng thái không hợp lệ',
@@ -177,7 +178,7 @@ exports.updateOrderItemStatusByChef = async (req, res) => {
     const { itemId } = req.params;
     const { status, itemIds } = req.body; // Thêm itemIds cho merged items
 
-    const validStatuses = ['ordered', 'preparing', 'done'];
+    const validStatuses = ['ordered', 'cooking', 'preparing', 'done'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         error: 'Trạng thái món ăn không hợp lệ',

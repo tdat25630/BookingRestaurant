@@ -10,7 +10,8 @@ const OrderItemSchema = new mongoose.Schema({
     type: String,
     enum: ['ordered', 'preparing', 'cooking', 'done'],
     default: 'ordered'
-  }
+  },
+  createdAt: {type: Date, default: Date.now}
 });
 
 module.exports = mongoose.model('OrderItem', OrderItemSchema);

@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import Chef from '../component/pages/Chef/Chef';
 import ChefmenuItem from '../component/pages/Chef/ChefmenuItem';
 import ChefOrder from '../component/pages/Chef/ChefOrder';
 import ChOrder from '../component/pages/staff/ChOrder/ChOrder';
@@ -16,7 +17,7 @@ const ChefRoutes = () => {
       {isChef() ? (
         <>
           {/* Main Chef Order Management Page */}
-          <Route path="/" element={<ChOrder />} />
+          <Route path="/" element={<Chef />} />
           <Route path="/orders" element={<ChOrder />} />
           <Route path="item" element={<ChefmenuItem />} />
           {/* Redirect any unknown chef routes to main order page */}
