@@ -225,12 +225,9 @@ function CheckoutPage() {
           </p>
         </div>
 
-        <div
-          className="user-points-container"
-          style={{ textAlign: "center", margin: "15px 0", fontSize: "1.1em" }}
-        >
+        <div className="user-points-container">
           <p>
-            ✨ <strong>Điểm hiện tại của bạn:</strong> {user?.points || 0}
+            ✨ <strong>Your current points:</strong> {user?.points || 0}
           </p>
         </div>
 
@@ -254,7 +251,7 @@ function CheckoutPage() {
               className="btn-apply-voucher"
               disabled={!selectedVoucher || discount <= 0 || isApplyingVoucher}
             >
-              {isApplyingVoucher ? "Đang xử lý..." : "Apply"}
+              {isApplyingVoucher ? "Applying..." : "Apply"}
             </button>
           </div>
         ) : null}
@@ -272,6 +269,7 @@ function CheckoutPage() {
           >
             ➕ Add More Items
           </button>
+      
         </div>
       </div>
     </>

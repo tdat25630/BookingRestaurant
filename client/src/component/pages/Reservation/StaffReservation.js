@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container, Form, Button, Row, Col, Alert, FloatingLabel, Modal
+  Container, Form, Button, Row, Col, Alert, FloatingLabel, Modal,
+  Card
 } from 'react-bootstrap';
-import Header from '../../Header/StaffHeader';
-import './StaffReservation.css';
+import Header from '../../Header/AdminHeader';
+import StaffHeader from '../../Header/StaffHeader';
+import CashierHeader from '../../Header/CashierHeader';
+import './AdminReservation.css';
 
 function Reservation() {
+  const user = JSON.parse(localStorage.getItem('user'));
+
   const [filters, setFilters] = useState({
     phone: '',
     name: '',
@@ -45,6 +50,7 @@ function Reservation() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch reservations');
 
+      console.log(data.reservations)
       setReservations(data.reservations);
       setTotalPages(data.totalPages);
     } catch (err) {
@@ -120,16 +126,19 @@ function Reservation() {
 
   return (
     <>
-      <Header />
+      {user.role === 'admin' && <Header />}
+      {user.role === 'staff' && <StaffHeader />}
+      {user.role === 'cashier' && <CashierHeader />}
+
       <Container className="mt-4 booking-form-container">
         <h3 className="mb-4 text-center" style={{ color: "#ffc107" }}>Quản lý Đặt bàn</h3>
 
         <Form className="mb-4" onSubmit={(e) => e.preventDefault()}>
           <Row>
             <Col md={3}>
-              <FloatingLabel label="Phone">
+              <FloatingLabel label="SĐT">
                 <Form.Control
-                  type="text"
+                  type="input"
                   value={filters.phone}
                   onChange={(e) => setFilters(prev => ({ ...prev, phone: e.target.value, page: 1 }))}
                   style={{ backgroundColor: '#ffffff', color: '#000000' }}
@@ -137,9 +146,9 @@ function Reservation() {
               </FloatingLabel>
             </Col>
             <Col md={3}>
-              <FloatingLabel label="Name">
+              <FloatingLabel label="Tên người đặt">
                 <Form.Control
-                  type="text"
+                  type="input"
                   value={filters.name}
                   onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value, page: 1 }))}
                   style={{ backgroundColor: '#ffffff', color: '#000000' }}
@@ -147,7 +156,7 @@ function Reservation() {
               </FloatingLabel>
             </Col>
             <Col md={3}>
-              <FloatingLabel label="Reservation Date">
+              <FloatingLabel label="Ngày đặt">
                 <Form.Control
                   type="date"
                   value={filters.reservationDate}
@@ -155,6 +164,7 @@ function Reservation() {
                 />
               </FloatingLabel>
             </Col>
+            {/*
             <Col md={3}>
               <FloatingLabel label="Guest Count">
                 <Form.Control
@@ -162,6 +172,21 @@ function Reservation() {
                   value={filters.guestCount}
                   onChange={(e) => setFilters(prev => ({ ...prev, guestCount: e.target.value, page: 1 }))}
                 />
+              </FloatingLabel>
+            </Col>
+            */}
+            <Col md={2} className='mt-1'>
+              <FloatingLabel label="Trạng thái">
+                <Form.Select
+                  value={filters.status || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value, page: 1 }))}
+                >
+                  <option value="">Tất cả</option>
+                  <option value="pending">Chưa đến</option>
+                  <option value="confirmed">Đã nhận</option>
+                  <option value="cancelled">Đã hủy</option>
+                  <option value="expired">Hết hạn</option>
+                </Form.Select>
               </FloatingLabel>
             </Col>
           </Row>
@@ -175,7 +200,7 @@ function Reservation() {
           <>
             <table className="table table-dark table-striped table-hover mt-3">
               <thead>
-                <tr>
+                <tr style={{ color: 'white' }}>
                   <th>Phone</th>
                   <th>Email</th>
                   <th>Name</th>
@@ -205,7 +230,7 @@ function Reservation() {
                         </span>
                       </td>
                       <td className="text-center">
-                        <Button size="sm" variant="warning" onClick={() => { setSelectedReservation(r); setShowModal(true); }}>View</Button>
+                        <Button size="sm" variant="warning" onClick={() => { setSelectedReservation(r); setShowModal(true); }}>Chi tiết</Button>
                       </td>
                     </tr>
                   )
@@ -219,17 +244,17 @@ function Reservation() {
                 disabled={filters.page <= 1}
                 onClick={() => setFilters(prev => ({ ...prev, page: prev.page - 1 }))}
               >
-                Previous
+                Quay lại
               </Button>
               <span className="mx-3 text-warning align-self-center">
-                Page {filters.page} of {totalPages}
+                Trang {filters.page} của {totalPages}
               </span>
               <Button
                 variant="outline-warning"
                 disabled={filters.page >= totalPages}
                 onClick={() => setFilters(prev => ({ ...prev, page: prev.page + 1 }))}
               >
-                Next
+                Tiếp
               </Button>
             </div>
           </>
@@ -237,28 +262,60 @@ function Reservation() {
       </Container>
 
       {selectedReservation && (
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal show={showModal} onHide={() => setShowModal(false)} size='xl'>
           <Modal.Header closeButton>
             <Modal.Title>Reservation Detail</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <p><strong>Name:</strong> {selectedReservation.name}</p>
-            <p><strong>Phone:</strong> {selectedReservation.phone}</p>
-            <p><strong>Email:</strong> {selectedReservation.email}</p>
-            <p><strong>Date:</strong> {formatDate(selectedReservation.reservationDate)}</p>
-            <p><strong>Time:</strong> {selectedReservation.reservationTime}</p>
-            <p><strong>Guests:</strong> {selectedReservation.guestCount}</p>
-            <p><strong>Status:</strong> {selectedReservation.status}</p>
+            <label className="fw-bold">Cập nhật trạng thái:</label>
             <Form.Select
-              className="mt-3"
+              className="mt-2 mb-4"
               value={selectedReservation.status}
               onChange={(e) => handleUpdateStatus(selectedReservation._id, e.target.value)}
             >
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="cancelled">Cancelled</option>
+              {
+                ['expired'].includes(selectedReservation.status) &&
+                <option selected={true} disabled={true} value="">Hết hạn</option>
+              }
+              {
+                ['confirmed'].includes(selectedReservation.status) &&
+                <>
+                <option selected={true} disabled={true}>Đã nhận</option>
+                </>
+              }
+              {
+                !['expired', 'confirmed'].includes(selectedReservation.status) &&
+                <>
+                  <option value="pending">Chưa đến</option>
+                  <option value="cancelled">Hủy</option>
+                </>
+              }
             </Form.Select>
+
+            <div>
+              <h4 className="mb-3">Các món yêu cầu trước:</h4>
+              <div className="row g-3">
+                {selectedReservation?.preOrders.map((item, index) => (
+                  <div className="col-md-4 col-sm-6" key={index}>
+                    <Card className="h-100 shadow-sm" style={{ backgroundColor: 'white' }}>
+                      <Card.Img
+                        variant="top"
+                        src={item?.itemId?.image}
+                        style={{ height: '180px', objectFit: 'cover' }}
+                      />
+                      <Card.Body>
+                        <Card.Title className="text-truncate">{item?.itemId?.name}</Card.Title>
+                        <Card.Text>
+                          <strong>Số lượng: {item.amount}</strong>
+                        </Card.Text>
+                      </Card.Body>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+            </div>
           </Modal.Body>
+
         </Modal>
       )}
     </>

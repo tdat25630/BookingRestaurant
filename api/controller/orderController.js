@@ -1,4 +1,5 @@
 const Order = require('../models/order');
+const Invoice = require('../models/invoice');
 const OrderItem = require('../models/orderItem');
 const Promotion = require('../models/promotion');
 const createError = require('../util/errorHandle');
@@ -17,6 +18,7 @@ exports.createOrUpdateOrder = async (req, res) => {
 
     if (order) {
       order.totalAmount += newAmount;
+      order.updatedAt = Date.now();
       await order.save();
 
       const newItems = await Promise.all(
@@ -114,7 +116,20 @@ exports.updateOrderStatus = async (req, res) => {
 // Lấy tất cả đơn hàng
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
+    const { date } = req.query; // frontend should send e.g. ?date=2025-07-22
+
+    let dateFilter = {};
+    if (date) {
+      const selectedDate = new Date(date);
+      const startOfDay = new Date(selectedDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(selectedDate.setHours(23, 59, 59, 999));
+
+      dateFilter = {
+        orderTime: { $gte: startOfDay, $lte: endOfDay }
+      };
+    }
+
+    const orders = await Order.find(dateFilter)
       .populate({
         path: 'sessionId',
         populate: {
@@ -124,11 +139,13 @@ exports.getAllOrders = async (req, res) => {
       })
       .sort({ orderTime: -1 })
       .lean();
+
     res.json(orders);
   } catch (err) {
     res.status(500).json({ error: 'Không thể lấy danh sách đơn hàng', details: err.message });
   }
 };
+
 
 // Thêm một món ăn vào đơn hàng theo sessionId
 exports.addItemToOrder = async (req, res) => {
@@ -334,94 +351,107 @@ exports.getDailyRevenueInMonth = async (req, res) => {
 
 exports.markAsPaidByCash = async (req, res, next) => {
   try {
-    const { orderId } = req.params;
-
-    const order = await Order.findById(orderId);
-
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found.' });
-    }
-
-    if (order.paymentStatus === 'paid') {
-      return res.status(400).json({ success: false, message: 'This order has already been paid.' });
-    }
-
-    order.paymentStatus = 'paid';
-    order.status = 'served';
-
-    const updatedOrder = await order.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Successfully updated payment status.',
-      data: updatedOrder
-    });
-
-  } catch (error) {
-    console.error("Error during cash payment:", error);
-    next(error);
-  }
-};
-exports.applyVoucher = async (req, res, next) => {
-  try {
       const { orderId } = req.params;
-      const { voucherCode } = req.body;
-
-      if (!voucherCode) {
-          return res.status(400).json({ success: false, message: 'Vui lòng nhập mã voucher.' });
-      }
-
       const order = await Order.findById(orderId);
+
       if (!order) {
-          return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
+          return res.status(404).json({ success: false, message: 'Order not found.' });
       }
-      if (order.promotion_id) {
-          return res.status(400).json({ success: false, message: 'Đơn hàng này đã được áp dụng khuyến mãi.' });
-      }
-
-      const promotion = await Promotion.findOne({ 
-          code: voucherCode.toUpperCase(), 
-          is_active: true,
-          start_date: { $lte: new Date() }, 
-          end_date: { $gte: new Date() }
-      });
-
-      if (!promotion) {
-          return res.status(404).json({ success: false, message: 'Mã voucher không hợp lệ hoặc đã hết hạn.' });
+      if (order.paymentStatus === 'paid') {
+          return res.status(400).json({ success: false, message: 'This order has already been paid.' });
       }
 
-      const items = await OrderItem.find({ orderId: orderId });
-      const subTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-      if (subTotal < promotion.min_order_amount) {
-          return res.status(400).json({ success: false, message: `Đơn hàng phải có giá trị tối thiểu ${promotion.min_order_amount.toLocaleString('vi-VN')}₫ để áp dụng mã này.` });
+      order.paymentStatus = 'paid';
+      order.status = 'served';
+      const updatedOrder = await order.save();
+      const existingInvoice = await Invoice.findOne({ order_id: orderId });
+      if (!existingInvoice) {
+          const newInvoice = new Invoice({
+              order_id: orderId,
+              customer_id: updatedOrder.customerId || updatedOrder.userId || null,
+              total_amount: updatedOrder.totalAmount,
+              discount: 0,
+              tax_amount: 0,
+              payment_method: 'cash', 
+              payment_status: 'paid'
+          });
+          await newInvoice.save();
+          console.log(`Đã tạo Invoice (tiền mặt) thành công cho Order ID: ${orderId}`);
       }
-
-      let discountAmount = 0;
-      if (promotion.discount_type === 'percentage') {
-          discountAmount = subTotal * (promotion.discount_value / 100);
-      } else { 
-          discountAmount = promotion.discount_value;
-      }
-
-      order.totalAmount = subTotal - discountAmount;
-      order.promotion_id = promotion._id; 
-      
-      await order.save();
+      // ========================================================
 
       res.status(200).json({
           success: true,
-          message: 'Áp dụng voucher thành công!',
-          data: {
-              orderId: order._id,
-              subTotal: subTotal,
-              discount: discountAmount,
-              newTotalAmount: order.totalAmount
-          }
+          message: 'Successfully updated payment status.',
+          data: updatedOrder
       });
 
   } catch (error) {
+      console.error("Error during cash payment:", error);
       next(error);
+  }
+};
+
+exports.applyVoucher = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { voucherCode } = req.body;
+
+    if (!voucherCode) {
+      return res.status(400).json({ success: false, message: 'Vui lòng nhập mã voucher.' });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
+    }
+    if (order.promotion_id) {
+      return res.status(400).json({ success: false, message: 'Đơn hàng này đã được áp dụng khuyến mãi.' });
+    }
+
+    const promotion = await Promotion.findOne({
+      code: voucherCode.toUpperCase(),
+      is_active: true,
+      start_date: { $lte: new Date() },
+      end_date: { $gte: new Date() }
+    });
+
+    if (!promotion) {
+      return res.status(404).json({ success: false, message: 'Mã voucher không hợp lệ hoặc đã hết hạn.' });
+    }
+
+    const items = await OrderItem.find({ orderId: orderId });
+    const subTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    if (subTotal < promotion.min_order_amount) {
+      return res.status(400).json({ success: false, message: `Đơn hàng phải có giá trị tối thiểu ${promotion.min_order_amount.toLocaleString('vi-VN')}₫ để áp dụng mã này.` });
+    }
+
+    let discountAmount = 0;
+    if (promotion.discount_type === 'percentage') {
+      discountAmount = subTotal * (promotion.discount_value / 100);
+    } else {
+      discountAmount = promotion.discount_value;
+    }
+
+    order.totalAmount = subTotal - discountAmount;
+    order.promotion_id = promotion._id;
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Áp dụng voucher thành công!',
+      data: {
+        orderId: order._id,
+        subTotal: subTotal,
+        discount: discountAmount,
+        newTotalAmount: order.totalAmount
+      }
+    });
+
+  } catch (error) {
+    next(error);
   }
 };
 exports.linkUserToOrder = async (req, res, next) => {
@@ -436,14 +466,14 @@ exports.linkUserToOrder = async (req, res, next) => {
   try {
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
-      { userId: userId }, 
-      { new: true }      
+      { userId: userId },
+      { new: true }
     )
-    .populate('userId', 'username points')
-    .populate({
-        path: 'items.menuItemId', 
-        select: 'name'            
-    });
+      .populate('userId', 'username points')
+      .populate({
+        path: 'items.menuItemId',
+        select: 'name'
+      });
 
     if (!updatedOrder) {
       return next(createError(404, "Order not found."));
@@ -460,3 +490,38 @@ exports.linkUserToOrder = async (req, res, next) => {
     next(createError(500, "Failed to link user to order."));
   }
 };
+
+exports.updateManyItems = async (req, res) => {
+  try {
+    const updates = req.body.items;
+    console.log(updates)
+    const result = await updateMultipleOrderItems(updates);
+    res.json({ message: 'Order items updated successfully', result });
+  } catch (err) {
+    console.error('Bulk update error:', err);
+    res.status(500).json({ error: err.message });
+  }
+}
+
+const updateMultipleOrderItems = async (updates) => {
+  if (!Array.isArray(updates) || updates.length === 0) {
+    throw new Error('updates must be a non-empty array');
+  }
+
+  const bulkOperations = updates.map(item => {
+    const { id, ...fieldsToUpdate } = item;
+
+    if (!id) {
+      throw new Error('Each item must include an _id');
+    }
+
+    return {
+      updateOne: {
+        filter: { _id: id },
+        update: { $set: fieldsToUpdate }
+      }
+    };
+  });
+
+  return await OrderItem.bulkWrite(bulkOperations);
+}

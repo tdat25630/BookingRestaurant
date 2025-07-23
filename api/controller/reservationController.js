@@ -194,7 +194,9 @@ exports.getReservations = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const [reservations, total] = await Promise.all([
-      Reservation.find(filters).skip(skip).limit(parseInt(limit)),
+      Reservation.find(filters).skip(skip).limit(parseInt(limit))
+      .sort({reservationDate: -1})
+      .populate('preOrders.itemId'),
       Reservation.countDocuments(filters)
     ]);
 

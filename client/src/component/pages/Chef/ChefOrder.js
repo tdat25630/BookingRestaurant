@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import ChefHeader from '../../Header/ChefHeader';
 import './ChefOrder.css';
+import StaffHeader from '../../Header/StaffHeader';
 
-const ChefOrder = () => {
+const Order = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({});
@@ -270,7 +270,7 @@ const ChefOrder = () => {
 
   return (
     <>
-      <ChefHeader />
+      <StaffHeader />
       <div className="chef-order-container">
         {/* Header */}
         <div className="chef-header">
@@ -459,4 +459,4 @@ const ChefOrder = () => {
   );
 };
 
-export default ChefOrder;
+export default Order;

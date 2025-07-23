@@ -141,10 +141,8 @@ const getUserBySessionId = async (req, res, next) => {
 
 
 const searchUser = async (req, res, next) => {
-  console.log("--- Bắt đầu quy trình tìm kiếm User ---");
 
   const query = req.query.q;
-  console.log(`1. Query nhận được từ frontend: "${query}"`);
 
   if (!query) {
     return next(createError(400, "Search query is required."));
@@ -152,7 +150,6 @@ const searchUser = async (req, res, next) => {
 
   try {
     const lowercasedQuery = query.toLowerCase();
-    console.log(`2. Query sau khi chuyển thành chữ thường: "${lowercasedQuery}"`);
 
     const mongoQuery = {
       $or: [
@@ -160,19 +157,14 @@ const searchUser = async (req, res, next) => {
         { email: lowercasedQuery }
       ]
     };
-    console.log("3. Query sẽ gửi đến MongoDB:", JSON.stringify(mongoQuery, null, 2));
 
     const user = await User.findOne(mongoQuery).select('-password');
 
-    console.log("4. Kết quả tìm thấy từ database:", user); // Log quan trọng nhất
-    // --- DEBUG KẾT THÚC ---
 
     if (!user) {
-      console.log("=> KẾT LUẬN: Không tìm thấy user.");
       return res.status(404).json({ success: false, message: "User not found." });
     }
 
-    console.log("=> KẾT LUẬN: Đã tìm thấy user!");
     res.status(200).json({ success: true, user });
 
   } catch (error) {

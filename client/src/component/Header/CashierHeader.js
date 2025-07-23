@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar, Container, Nav, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUtensils } from '@fortawesome/free-solid-svg-icons';
+import { faUtensils } from '@fortawesome/free-solid-svg-icons'; 
 import { useNavigate, Link } from 'react-router-dom';
 import './AdminHeader.css';
 import { FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
@@ -27,8 +27,12 @@ const CashierHeader = () => {
                     <Nav className="ms-auto">
                         <Nav.Link as={Link} to="/cashier/tables" className="nav-link">Manage Tables</Nav.Link>
                         <Nav.Link as={Link} to="/cashier/reservation" className="nav-link">Manage Bookings</Nav.Link>
-                        {/* <Nav.Link as={Link} to="/cashier/category" className="nav-link">Category Management</Nav.Link> */}
                         <Nav.Link as={Link} to="/cashier/item" className="nav-link">MenuItem Management</Nav.Link>
+{/*                         
+                        <Nav.Link as={Link} to="/cashier/invoices" className="nav-link">
+                            Invoice Management
+                        </Nav.Link> */}
+
                         <NavDropdown
                             title={<span><FaUserCircle className="me-1" />Cashier</span>}
                             id="cashier-dropdown"
