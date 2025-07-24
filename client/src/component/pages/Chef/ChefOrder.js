@@ -16,10 +16,10 @@ const Order = () => {
     try {
       if (showLoading) setLoading(true);
       setError('');
-      
+
       const statusParam = filter !== 'all' ? `?status=${filter}` : '';
       const response = await axios.get(`http://localhost:8080/api/chef/orders${statusParam}`);
-      
+
       setOrders(response.data.orders || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -44,28 +44,28 @@ const Order = () => {
   const updateItemStatus = async (itemId, newStatus) => {
     try {
       setError('');
-      
+
       const response = await axios.put(`http://localhost:8080/api/chef/order-items/${itemId}/status`, {
         status: newStatus
       });
-      
+
       // Hiển thị thông báo với thông tin order status nếu có
       let message = `Đã cập nhật món ăn thành ${newStatus}`;
       if (response.data.orderStatus) {
         const statusLabels = {
           'pending': 'Chờ xử lý',
-          'preparing': 'Đang nấu', 
+          'preparing': 'Đang nấu',
           'served': 'Đã phục vụ'
         };
         message += `. Đơn hàng chuyển sang: ${statusLabels[response.data.orderStatus]}`;
       }
-      
+
       alert(message);
-      
+
       // Refresh dữ liệu
       fetchOrders(false);
       fetchStats();
-      
+
     } catch (error) {
       console.error('Error updating item status:', error);
       setError('Không thể cập nhật trạng thái món ăn');
@@ -77,10 +77,10 @@ const Order = () => {
   const startCookingOrder = async (orderId, items) => {
     try {
       setError('');
-      
+
       // Lọc ra những món có status là 'ordered'
       const itemsToStart = items.filter(item => item.status === 'ordered');
-      
+
       if (itemsToStart.length === 0) {
         alert('Không có món nào cần bắt đầu nấu');
         return;
@@ -88,31 +88,31 @@ const Order = () => {
 
       // Gọi API để bắt đầu nấu order
       const response = await axios.put(`http://localhost:8080/api/chef/orders/${orderId}/start-cooking`);
-      
+
       alert(`Đã bắt đầu nấu ${itemsToStart.length} món`);
       fetchOrders(false);
       fetchStats();
-      
+
     } catch (error) {
       console.error('Error starting cooking order:', error);
-      
+
       // Fallback: nếu không có API start-cooking, dùng cách cũ
       try {
         const updatePromises = items
           .filter(item => item.status === 'ordered')
-          .map(item => 
+          .map(item =>
             axios.put(`http://localhost:8080/api/chef/order-items/${item._id}/status`, {
               status: 'preparing'
             })
           );
 
         await Promise.all(updatePromises);
-        
+
         // Cập nhật trạng thái đơn hàng
         await axios.put(`http://localhost:8080/api/chef/orders/${orderId}/status`, {
           status: 'preparing'
         });
-        
+
         const itemsToStart = items.filter(item => item.status === 'ordered');
         alert(`Đã bắt đầu nấu ${itemsToStart.length} món`);
         fetchOrders(false);
@@ -129,28 +129,28 @@ const Order = () => {
   const completeOrder = async (orderId, items) => {
     try {
       setError('');
-      
+
       // Lọc ra những món có status là 'preparing'
       const itemsToComplete = items.filter(item => item.status === 'preparing');
-      
+
       if (itemsToComplete.length === 0) {
         alert('Không có món nào đang nấu để hoàn thành');
         return;
       }
 
       // Cập nhật từng món một cách song song
-      const updatePromises = itemsToComplete.map(item => 
+      const updatePromises = itemsToComplete.map(item =>
         axios.put(`http://localhost:8080/api/chef/order-items/${item._id}/status`, {
           status: 'done'
         })
       );
 
       await Promise.all(updatePromises);
-      
+
       alert(`Đã hoàn thành ${itemsToComplete.length} món và đơn hàng`);
       fetchOrders(false);
       fetchStats();
-      
+
     } catch (error) {
       console.error('Error completing order:', error);
       setError('Không thể hoàn thành đơn hàng');
@@ -162,12 +162,12 @@ const Order = () => {
   useEffect(() => {
     fetchOrders();
     fetchStats();
-    
+
     const interval = setInterval(() => {
       setRefreshing(true);
-      fetchOrders(false);
+      fetchOrders(false); // still uses current 'filter' state
       fetchStats();
-    }, 30000);
+    }, 10000); // every 10 seconds
 
     return () => clearInterval(interval);
   }, [filter]);
@@ -179,7 +179,7 @@ const Order = () => {
       preparing: { class: 'status-preparing', label: '🔥 Đang nấu' },
       served: { class: 'status-served', label: '✅ Đã phục vụ' }
     };
-    
+
     const config = statusConfig[status] || statusConfig.pending;
     return <span className={`status-badge ${config.class}`}>{config.label}</span>;
   };
@@ -191,7 +191,7 @@ const Order = () => {
       preparing: { class: 'item-status-preparing', label: 'Đang nấu' },
       done: { class: 'item-status-done', label: 'Xong' }
     };
-    
+
     const config = statusConfig[status] || statusConfig.ordered;
     return <span className={`item-status-badge ${config.class}`}>{config.label}</span>;
   };
@@ -213,10 +213,10 @@ const Order = () => {
             onClick={() => startCookingOrder(order._id, order.items)}
             className="btn btn-primary"
           >
-             Bắt đầu nấu ({orderedItemsCount} món)
+            Bắt đầu nấu ({orderedItemsCount} món)
           </button>
         )}
-        
+
         {/* Hiển thị nút "Hoàn thành đơn hàng" khi có món đang nấu */}
         {hasPreparingItems && !hasOrderedItems && (
           <button
@@ -233,7 +233,7 @@ const Order = () => {
             <span className="completed-badge"> Đã hoàn thành tất cả</span>
           </div>
         )}
-        
+
         {/* Hiển thị cả 2 nút nếu có cả món chưa bắt đầu và đang nấu */}
         {hasOrderedItems && hasPreparingItems && (
           <div className="action-group">
@@ -241,7 +241,7 @@ const Order = () => {
               onClick={() => completeOrder(order._id, order.items)}
               className="btn btn-success"
             >
-               Hoàn thành món đang nấu ({preparingItemsCount})
+              Hoàn thành món đang nấu ({preparingItemsCount})
             </button>
           </div>
         )}
@@ -275,10 +275,10 @@ const Order = () => {
         {/* Header */}
         <div className="chef-header">
           <div className="header-left">
-          <h1>🧑‍🍳 Chef – Xem đơn hàng</h1>
-          {/* <p>Theo dõi và xử lý đơn hàng • Cập nhật {formatTime(new Date())}</p> */}
+            <h1>🧑‍🍳 Chef – Xem đơn hàng</h1>
+            {/* <p>Theo dõi và xử lý đơn hàng • Cập nhật {formatTime(new Date())}</p> */}
           </div>
-          
+
           <button
             onClick={() => {
               setRefreshing(true);
@@ -303,7 +303,7 @@ const Order = () => {
               <div className="stat-icon">⏳</div>
             </div>
           </div>
-          
+
           <div className="stat-card preparing">
             <div className="stat-content">
               <div>
@@ -313,7 +313,7 @@ const Order = () => {
               <div className="stat-icon">🔥</div>
             </div>
           </div>
-          
+
           {/* <div className="stat-card completed">
             <div className="stat-content">
               <div>
@@ -323,7 +323,7 @@ const Order = () => {
               <div className="stat-icon">✅</div>
             </div>
           </div> */}
-          
+
           {/* <div className="stat-card revenue">
             <div className="stat-content">
               <div>
@@ -373,9 +373,9 @@ const Order = () => {
                 <div className="order-header">
                   <div className="order-info">
                     <h3>🍽️ Bàn {
-                      order.sessionId?.table?.tableNumber || 
-                      order.sessionId?.tableNumber || 
-                      order.tableNumber || 
+                      order.sessionId?.table?.tableNumber ||
+                      order.sessionId?.tableNumber ||
+                      order.tableNumber ||
                       'N/A'
                     }</h3>
                     {order.sessionId?.customerName && (
@@ -383,15 +383,14 @@ const Order = () => {
                     )}
                     <div className="order-meta">
                       <span className="order-time">🕒 {formatTime(order.orderTime)}</span>
-                      <span className={`waiting-time ${
-                        order.waitingTime > 30 ? 'urgent' : 
+                      <span className={`waiting-time ${order.waitingTime > 30 ? 'urgent' :
                         order.waitingTime > 15 ? 'warning' : 'normal'
-                      }`}>
+                        }`}>
                         ⏱️ {order.waitingTime} phút
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="order-summary">
                     {/*getStatusBadge(order.status) */}
                     <p className="order-total">{order.totalAmount.toLocaleString('vi-VN')}₫</p>
@@ -407,17 +406,17 @@ const Order = () => {
                         <h4>{item.quantity}x {item.menuItemId?.name || 'Món ăn'}</h4>
                         <p className="item-details">
                           {/* {item.menuItemId?.category?.name || item.menuItemId?.categoryName || 'Danh mục'} • {item.price.toLocaleString('vi-VN')}₫ */}
-                          {item.menuItemId?.category?.name || item.menuItemId?.categoryName || 'Danh mục'} 
+                          {item.menuItemId?.category?.name || item.menuItemId?.categoryName || 'Danh mục'}
 
                         </p>
                         {item.notes && (
                           <p className="item-notes">📝 {item.notes}</p>
                         )}
                       </div>
-                      
+
                       <div className="item-actions">
                         {getItemStatusBadge(item.status)}
-                        
+
                         <div className="item-buttons">
                           {item.status === 'ordered' && (
                             <button
@@ -443,7 +442,7 @@ const Order = () => {
 
                 {/* FIXED: Order Actions với logic chính xác */}
                 {renderOrderActions(order)}
-                
+
                 {/* Estimated Time */}
                 {order.estimatedCompleteTime && order.status === 'preparing' && (
                   <div className="estimated-time">

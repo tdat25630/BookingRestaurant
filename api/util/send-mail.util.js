@@ -10,7 +10,7 @@ exports.sendEmail = async ({ to, subject, html }) => {
   });
 
   const mailOptions = {
-    from: `"No Joke Restaurant" <${process.env.EMAIL_USER}>`,
+    from: `"Nhà hàng hải sản" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     html,

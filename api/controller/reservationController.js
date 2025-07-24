@@ -68,9 +68,9 @@ exports.bookingOtpPhone = async (req, res) => {
     const requestId = crypto.randomBytes(4).toString('hex');
 
     await sms.sendEsms({
-     phone,
-     code: otp,
-     requestId
+      phone,
+      code: otp,
+      requestId
     });
 
     return res.status(201).json({ success: true, message: 'OTP đã được gửi.' });
@@ -98,9 +98,6 @@ exports.createReservation = async (req, res) => {
     } = req.body;
 
     const identity = otpTarget == 'email' ? email : phone;
-    //if (!identity || !selector) {
-    //  return res.status(400).json({ message: "Missing identifier or selector." });
-    //}
 
     const key = identity;
     const storedOtp = cache.get(key);
@@ -143,7 +140,7 @@ exports.createReservation = async (req, res) => {
       reservation.accountId = accountId;
     }
 
-     await newReservation.save();
+    await newReservation.save();
 
     return res.status(201).json(newReservation);
   } catch (err) {
@@ -195,8 +192,8 @@ exports.getReservations = async (req, res) => {
 
     const [reservations, total] = await Promise.all([
       Reservation.find(filters).skip(skip).limit(parseInt(limit))
-      .sort({reservationDate: -1})
-      .populate('preOrders.itemId'),
+        .sort({ reservationDate: -1 })
+        .populate('preOrders.itemId'),
       Reservation.countDocuments(filters)
     ]);
 
@@ -244,7 +241,7 @@ exports.deleteReservation = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const err = new Error("Bad request");
-      err.status = 400; // note: use a number, not string
+      err.status = 400;
       err.errors = errors.array();
       throw err;
     }

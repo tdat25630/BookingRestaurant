@@ -154,7 +154,7 @@ const parseBoolean = (value) => {
 exports.getAllMenuItems = async (req, res) => {
   try {
     const filter = {};
-    
+
     // Validate category ObjectId if provided
     if (req.query.category) {
       if (!isValidObjectId(req.query.category)) {
@@ -162,7 +162,7 @@ exports.getAllMenuItems = async (req, res) => {
       }
       filter.category = req.query.category;
     }
-    
+
     // Validate boolean parameters
     if (req.query.needPreOrder !== undefined) {
       const needPreOrder = parseBoolean(req.query.needPreOrder);
@@ -171,7 +171,7 @@ exports.getAllMenuItems = async (req, res) => {
       }
       filter.needPreOrder = needPreOrder;
     }
-    
+
     if (req.query.isAvailable !== undefined) {
       const isAvailable = parseBoolean(req.query.isAvailable);
       if (isAvailable === undefined) {
@@ -199,7 +199,7 @@ exports.getMenuItemById = async (req, res) => {
     if (!item) {
       return res.status(404).json({ message: 'Menu item not found' });
     }
-    
+
     res.json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -211,51 +211,12 @@ exports.createMenuItem = async (req, res) => {
   try {
     const { name, description, price, isAvailable, needPreOrder, category } = req.body;
 
-    // Validate required fields
-    if (!name || name.trim() === '') {
-      return res.status(400).json({ error: 'Name is required' });
-    }
-
-    // Validate price
-    if (price && (isNaN(price) || price < 0)) {
-      return res.status(400).json({ error: 'Price must be a positive number' });
-    }
-
-    // Validate category if provided
-    if (category && !isValidObjectId(category)) {
-      return res.status(400).json({ error: 'Invalid category ID format' });
-    }
-
-    // Validate boolean fields
-    if (isAvailable !== undefined && typeof isAvailable !== 'boolean' && isAvailable !== 'true' && isAvailable !== 'false') {
-      return res.status(400).json({ error: 'isAvailable must be boolean' });
-    }
-
-    if (needPreOrder !== undefined && typeof needPreOrder !== 'boolean' && needPreOrder !== 'true' && needPreOrder !== 'false') {
-      return res.status(400).json({ error: 'needPreOrder must be boolean' });
-    }
-
-    // Handle image upload
     let imageUrl = null;
+    console.log(req.file.buffer)
     if (req.file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-      if (!allowedTypes.includes(req.file.mimetype)) {
-        return res.status(400).json({ error: 'Only JPEG, PNG, and WebP images are allowed' });
-      }
-
-      // Validate file size (e.g., max 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (req.file.size > maxSize) {
-        return res.status(400).json({ error: 'Image size must be less than 5MB' });
-      }
-
-      try {
-        const result = await uploadImageBuffer(req.file.buffer);
-        imageUrl = result.secure_url;
-      } catch (uploadError) {
-        return res.status(500).json({ error: 'Failed to upload image: ' + uploadError.message });
-      }
+      const result = await uploadImageBuffer(req.file.buffer);
+      console.log(result)
+      imageUrl = result.secure_url;
     }
 
     const newItem = new MenuItem({
@@ -269,10 +230,10 @@ exports.createMenuItem = async (req, res) => {
     });
 
     await newItem.save();
-    
+
     // Populate category before returning
     await newItem.populate('category');
-    
+
     res.status(201).json(newItem);
   } catch (err) {
     // Handle Mongoose validation errors
@@ -280,12 +241,12 @@ exports.createMenuItem = async (req, res) => {
       const validationErrors = Object.values(err.errors).map(e => e.message);
       return res.status(400).json({ error: 'Validation failed', details: validationErrors });
     }
-    
+
     // Handle duplicate key error
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Menu item with this name already exists' });
     }
-    
+
     console.error('Create MenuItem Error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -376,7 +337,7 @@ exports.updateMenuItem = async (req, res) => {
       const validationErrors = Object.values(err.errors).map(e => e.message);
       return res.status(400).json({ error: 'Validation failed', details: validationErrors });
     }
-    
+
     console.error('Update MenuItem Error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
