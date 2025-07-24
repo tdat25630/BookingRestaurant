@@ -17,14 +17,14 @@ const AdminHeader = () => {
     return (
         <Navbar expand="lg" className="custom-navbar" variant="dark">
             <Container>
-                <Navbar.Brand href="/admin/dashboard" className="brand">
+                <Navbar.Brand href="/admin" className="brand">
                     <FontAwesomeIcon icon={faUtensils} className="me-2" />
                     Admin Panel
                 </Navbar.Brand>
 
                 <Navbar.Toggle aria-controls="admin-navbar-nav" />
                 <Navbar.Collapse id="admin-navbar-nav">                    <Nav className="ms-auto">
-                    <Nav.Link as={Link} to="/admin/dashboard" className="nav-link">Dashboard</Nav.Link>
+                    <Nav.Link as={Link} to="/admin" className="nav-link">Dashboard</Nav.Link>
                     <Nav.Link as={Link} to="/admin/tables" className="nav-link">Tables</Nav.Link>
                     <Nav.Link as={Link} to="/admin/reservation" className="nav-link">Bookings</Nav.Link>
                     <Nav.Link as={Link} to="/admin/users" className="nav-link">
