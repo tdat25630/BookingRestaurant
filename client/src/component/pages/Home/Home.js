@@ -406,7 +406,7 @@ const Home = () => {
                   <Card.Body>
                     <div className="dish-header">
                       <h5 className="dish-name">{dish.name}</h5>
-                      <span className="dish-category">{dish.category}</span>
+                      {/* <span className="dish-category">{dish.category}</span> */}
                     </div>
                     <p className="dish-restaurant">
                       <FontAwesomeIcon icon={faUtensils} className="me-2" />

@@ -70,9 +70,9 @@ const UserProfile = () => {
 
     const goToHomePage = () => {
         const userRole = user?.role;
-        switch(userRole) {
+        switch (userRole) {
             case 'admin':
-                navigate('/admin/dashboard');
+                navigate('/admin');
                 break;
             case 'cashier':
                 navigate('/cashier/tables');
@@ -91,7 +91,7 @@ const UserProfile = () => {
     const handleSaveProfile = async () => {
         try {
             setUpdating(true);
-            
+
             const token = localStorage.getItem('token');
             await axios.put(
                 `http://localhost:8080/api/user/updateUser/${user._id}`,
@@ -109,7 +109,7 @@ const UserProfile = () => {
             localStorage.setItem('user', JSON.stringify(updatedUser));
             setUser(updatedUser);
             setEditing(false);
-            
+
             showMessage('success', 'Profile updated successfully!');
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -138,7 +138,7 @@ const UserProfile = () => {
 
         try {
             setUpdating(true);
-            
+
             const token = localStorage.getItem('token');
             // Fixed API endpoint for change password
             await axios.put(
@@ -162,7 +162,7 @@ const UserProfile = () => {
                 confirmPassword: ''
             });
             setShowPasswordForm(false);
-            
+
             showMessage('success', 'Password changed successfully!');
         } catch (error) {
             console.error('Error changing password:', error);
@@ -194,23 +194,23 @@ const UserProfile = () => {
             {/* Navigation Header */}
             <div className="profile-nav-header">
                 <div className="nav-left">
-                    <button 
+                    <button
                         className="nav-btn back-btn"
                         onClick={goToHomePage}
                     >
                         ← Back to Dashboard
                     </button>
                 </div>
-                
+
                 <div className="nav-center">
                     <h1 className="nav-title">👤 User Profile</h1>
                 </div>
-                
+
                 <div className="nav-right">
                     <span className="user-info">
                         {user?.username} ({user?.role})
                     </span>
-                    <button 
+                    <button
                         className="nav-btn logout-btn"
                         onClick={handleLogout}
                     >
@@ -241,13 +241,13 @@ const UserProfile = () => {
                     </div>
 
                     <div className="profile-tabs">
-                        <button 
+                        <button
                             className={`tab-btn ${!showPasswordForm ? 'active' : ''}`}
                             onClick={() => setShowPasswordForm(false)}
                         >
                             📝 Profile Information
                         </button>
-                        <button 
+                        <button
                             className={`tab-btn ${showPasswordForm ? 'active' : ''}`}
                             onClick={() => setShowPasswordForm(true)}
                         >
@@ -308,7 +308,7 @@ const UserProfile = () => {
 
                             <div className="form-actions">
                                 {!editing ? (
-                                    <button 
+                                    <button
                                         className="btn btn-primary"
                                         onClick={() => setEditing(true)}
                                     >
@@ -316,14 +316,14 @@ const UserProfile = () => {
                                     </button>
                                 ) : (
                                     <div className="edit-actions">
-                                        <button 
+                                        <button
                                             className="btn btn-success"
                                             onClick={handleSaveProfile}
                                             disabled={updating}
                                         >
                                             {updating ? '💾 Saving...' : '💾 Save Changes'}
                                         </button>
-                                        <button 
+                                        <button
                                             className="btn btn-secondary"
                                             onClick={() => {
                                                 setEditing(false);
@@ -396,14 +396,14 @@ const UserProfile = () => {
 
                             <div className="form-actions">
                                 <div className="edit-actions">
-                                    <button 
+                                    <button
                                         className="btn btn-warning"
                                         onClick={handleChangePassword}
                                         disabled={updating || !passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword}
                                     >
                                         {updating ? '🔒 Changing...' : '🔒 Change Password'}
                                     </button>
-                                    <button 
+                                    <button
                                         className="btn btn-secondary"
                                         onClick={resetPasswordForm}
                                         disabled={updating}

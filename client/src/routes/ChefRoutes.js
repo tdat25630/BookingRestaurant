@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ChefmenuItem from '../component/pages/Chef/ChefmenuItem';
 import ChefOrder from '../component/pages/Chef/ChefOrder';
 import ChOrder from '../component/pages/staff/ChOrder/ChOrder';
+import UserProfile from '../component/pages/UserProfile/UserProfile';
 
 // import ChefDashboard from '../component/pages/Dashboard/ChefDashboard';
 
@@ -21,6 +22,7 @@ const ChefRoutes = () => {
           <Route path="item" element={<ChefmenuItem />} />
           {/* Redirect any unknown chef routes to main order page */}
           <Route path="*" element={<Navigate to="/chef" replace />} />
+           <Route path="profile" element={<UserProfile />} />
         </>
       ) : (
         <Route path="*" element={<Navigate to="/login" replace />} />
