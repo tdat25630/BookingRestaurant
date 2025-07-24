@@ -29,12 +29,12 @@ function QRCodeComponent({ sessionId }) {
   return (
     <div className="qr-popup-content">
       <div ref={qrRef}>
-        <h3 className="qr-title">📱 QR Code for Guests</h3>
+        <h3 className="qr-title">📱 QR Code </h3>
         <QRCodeCanvas value={url} size={200} />
-        <p className="qr-subtitle">Scan to view the menu</p>
-        <p><strong>Session ID:</strong> {sessionId}</p>
-      </div>
-      <button onClick={handlePrint} className="qr-print-button">🖨️ Download QR as PDF</button>
+        <p className="qr-subtitle">Quét để xem thực đơn</p>
+        <p className="session-text"><strong>Session ID:</strong> {sessionId}</p>
+        </div>
+      <button onClick={handlePrint} className="qr-print-button">🖨️ Print QR </button>
     </div>
   );
 }

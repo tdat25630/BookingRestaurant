@@ -180,7 +180,13 @@ function AdminTableQRPage() {
                 toast.success('Bàn đã được thêm!');
               } catch (err) {
                 console.error(err);
-                toast.error('Không thể thêm bàn');
+                if (err.response?.status === 409) {
+                  toast.error(`Bàn ${tableNumber.trim()} đã tồn tại!`);
+                } else if (err.response?.data?.message) {
+                  toast.error(err.response.data.message);
+                } else {
+                  toast.error('Không thể thêm bàn');
+                }
               }
             }}>
               Tạo

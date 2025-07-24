@@ -308,7 +308,7 @@ function CashierTablePage() {
                       >
                         QR Code
                       </button>
-                      <button
+                      {/* <button
                         className="btn btn-danger btn-sm"
                         onClick={async () => {
                           const confirmEnd = window.confirm('Bạn có chắc muốn kết thúc phiên này?');
@@ -323,7 +323,7 @@ function CashierTablePage() {
                         }}
                       >
                         Kết thúc
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 )}
@@ -367,8 +367,8 @@ function CashierTablePage() {
         </ul>
       </div>
 
-      {/* Customer Info Modal */}
-      {showCustomerInfoModal && (
+{/* Customer Info Modal */}
+      {/* {showCustomerInfoModal && (
         <div className="modal-overlay" onClick={closeCustomerInfoModal}>
           <div className="modal-content customer-info-modal" onClick={e => e.stopPropagation()}>
             <h3>Thông tin khách hàng</h3>
@@ -408,11 +408,12 @@ function CashierTablePage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </div> */}
+
+      {/* )} */}
 
       {/* QR Modal */}
-      {selectedSessionId && (
+      {/* {selectedSessionId && (
         <div className="modal-overlay" onClick={closeQRModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <QRCodeComponent sessionId={selectedSessionId} />
@@ -435,23 +436,140 @@ function CashierTablePage() {
                   }
                 }}
               >
-                🔚 End Session
+                Kết thúc phiên
               </button>
 
               <button
                 onClick={() => navigate(`/cashier/checkout?sessionId=${selectedSessionId}`)}
                 className="checkout-btn"
               >
-                💵 Checkout
+                💵 Thanh toán
               </button>
 
-              <button onClick={closeQRModal} className="close-btn">Close</button>
+              <button onClick={closeQRModal} className="close-btn">Đóng</button>
             </div>
           </div>
         </div>
-      )}
+      )} */}
+{/* Customer Info Modal */}
+{showCustomerInfoModal && (
+  <div className="customer-modal-backdrop" onClick={closeCustomerInfoModal}>
+    <div className="customer-modal-container" onClick={e => e.stopPropagation()}>
+      <div className="customer-modal-header">
+        <h3>Thông tin khách hàng</h3>
+        <div className="header-decoration"></div>
+      </div>
+      
+      <div className="customer-form-section">
+        <div className="form-group">
+          <label className="form-label">Tên khách hàng *</label>
+          <input
+            type="text"
+            className="customer-input required"
+            placeholder="Nhập tên khách hàng"
+            value={customerInfo.name}
+            onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+            required
+          />
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Số điện thoại</label>
+          <input
+            type="tel"
+            className="customer-input"
+            placeholder="Nhập số điện thoại"
+            value={customerInfo.phone}
+            onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+          />
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Số lượng khách</label>
+          <select
+            className="customer-select"
+            value={customerInfo.guestCount}
+            onChange={(e) => setCustomerInfo({ ...customerInfo, guestCount: parseInt(e.target.value) })}
+          >
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
+              <option key={num} value={num}>{num} người</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      
+      <div className="customer-action-buttons">
+        <button
+          onClick={createSessionWithCustomerInfo}
+          className="create-session-button"
+          disabled={loadingTableId}
+        >
+          {loadingTableId ? (
+            <>
+              <span className="loading-spinner"></span>
+              Đang tạo...
+            </>
+          ) : (
+            <>
+              <span className="button-icon">✨</span>
+              Tạo session
+            </>
+          )}
+        </button>
+        <button onClick={closeCustomerInfoModal} className="cancel-button">
+          <span className="button-icon">✕</span>
+          Hủy
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
-      {/* Reservation Selection Modal */}
+
+{/* QR Modal */}
+{selectedSessionId && (
+  <div className="qr-modal-backdrop" onClick={closeQRModal}>
+    <div className="qr-modal-container" onClick={e => e.stopPropagation()}>
+      <QRCodeComponent sessionId={selectedSessionId} />
+
+      <div className="qr-action-buttons">
+        <button
+          className="session-end-button"
+          onClick={async () => {
+            const confirmEnd = window.confirm('Are you sure you want to end this session?');
+            if (!confirmEnd) return;
+
+            try {
+              await axios.put(`http://localhost:8080/api/dining-sessions/${selectedSessionId}/complete`);
+              alert('✅ Session ended.');
+              await fetchTables();
+              setSelectedSessionId(null);
+            } catch (err) {
+              console.error('Error ending session:', err);
+              alert('❌ Failed to end session.');
+            }
+          }}
+        >
+          Kết thúc phiên
+        </button>
+
+        <button
+          onClick={() => navigate(`/cashier/checkout?sessionId=${selectedSessionId}`)}
+          className="payment-button"
+        >
+          💵 Thanh toán
+        </button>
+
+        <button onClick={closeQRModal} className="modal-close-button">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+      {/* Reservation Selection Modal
       {showReservationModal && (
         <div className="modal-overlay" onClick={closeReservationModal}>
           <div className="modal-content reservation-modal" onClick={e => e.stopPropagation()}>
@@ -497,8 +615,98 @@ function CashierTablePage() {
             <button onClick={closeReservationModal} className="close-btn">Close</button>
           </div>
         </div>
-      )}
+      )} */}
+{/* Reservation Selection Modal */}
+{showReservationModal && (
+  <div className="reservation-modal-backdrop" onClick={closeReservationModal}>
+    <div className="reservation-modal-container" onClick={e => e.stopPropagation()}>
+      <div className="reservation-modal-header">
+        <h3>Chọn khách đã đặt bàn</h3>
+        <div className="header-decoration-line"></div>
+      </div>
+      
+      <div className="reservation-content-section">
+        {getMatchingReservations().length === 0 ? (
+          <div className="no-reservations-state">
+            <div className="empty-icon">📋</div>
+            <p className="empty-message">Không có đặt bàn pending nào</p>
+            <p className="debug-info">
+              Debug: Tổng {pendingReservations.length} reservations được tải
+            </p>
+          </div>
+        ) : (
+          <div className="reservation-list-container">
+            {getMatchingReservations().map(reservation => {
+              const selectedTable = tables.find(t => t._id === selectedTableForReservation);
+              const isTableTooSmall = selectedTable && reservation.guestCount > selectedTable.capacity;
 
+              return (
+                <div key={reservation._id} className="reservation-card">
+                  <div className="reservation-details">
+                    <div className="customer-name">
+                      <span className="name-icon">👤</span>
+                      <strong>{reservation.name}</strong>
+                    </div>
+                    
+                    <div className="reservation-info-grid">
+                      <div className="info-item">
+                        <span className="info-icon">📞</span>
+                        <span className="info-text">{reservation.phone}</span>
+                      </div>
+                      
+                      <div className="info-item">
+                        <span className="info-icon">👥</span>
+                        <span className="info-text">{reservation.guestCount} người</span>
+                      </div>
+                      
+                      <div className="info-item">
+                        <span className="info-icon">⏰</span>
+                        <span className="info-text">
+                          {formatReservationDateTime(reservation.reservationDate, reservation.reservationTime)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {isTableTooSmall && (
+                      <div className="table-warning-alert">
+                        <span className="warning-icon">⚠️</span>
+                        <span className="warning-text">
+                          Bàn {selectedTable.tableNumber} có thể hơi nhỏ ({selectedTable.capacity} chỗ)
+                        </span>
+                      </div>
+                    )}
+
+                    {reservation.specialRequest && (
+                      <div className="special-request-note">
+                        <span className="request-icon">📝</span>
+                        <span className="request-text">{reservation.specialRequest}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <button
+                    className="select-reservation-button"
+                    onClick={() => handleSelectReservation(reservation._id)}
+                  >
+                    <span className="select-icon">✓</span>
+                    Chọn
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      
+      <div className="reservation-modal-footer">
+        <button onClick={closeReservationModal} className="close-modal-button">
+          <span className="close-icon">✕</span>
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       {/* Click outside to close create options */}
       {showCreateOptions && (
         <div className="overlay" onClick={closeCreateOptions}></div>
