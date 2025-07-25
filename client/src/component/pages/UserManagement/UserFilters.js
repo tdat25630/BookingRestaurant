@@ -12,7 +12,7 @@ const UserFilters = ({ searchTerm, setSearchTerm, filterRole, setFilterRole }) =
                     </InputGroup.Text>
                     <Form.Control
                         type="input"
-                        placeholder="Search by name, email, or phone"
+                        placeholder="Tìm kiếm người dùng..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />

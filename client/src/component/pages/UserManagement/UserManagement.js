@@ -140,7 +140,7 @@ const UserManagement = () => {
         <Container className="mt-4 user-management-container">
             <Row className="mb-4">
                 <Col>
-                    <h2>User Management</h2>
+                    <h2>Quản lý người dùng</h2>
                 </Col>
                 <Col xs="auto">
                     <Button
@@ -148,7 +148,7 @@ const UserManagement = () => {
                         onClick={() => setShowAddModal(true)}
                         className="add-user-btn"
                     >
-                        <FaUserPlus className="me-2" /> Add New User
+                        <FaUserPlus className="me-2" /> Thêm người dùng
                     </Button>
                 </Col>
             </Row>

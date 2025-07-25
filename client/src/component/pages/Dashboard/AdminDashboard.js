@@ -71,15 +71,37 @@ const AdminDashboard = () => {
 
         // Menu items count
         axios.get('http://localhost:8080/api/menu-items',
+          { headers, withCredentials: true }),
+
+        // Categories 
+        axios.get('http://localhost:8080/api/menu-categories',
           { headers, withCredentials: true })
       ];
 
       const results = await Promise.allSettled(apiCalls);
 
-      // Process results
-      if (results[0].status === 'fulfilled') {
-        newDashboardData.bestSellers = results[0].value.data?.data || [];
+      let categoryMap = {};
+      if (results[6].status === 'fulfilled') {
+        const categories = results[6].value.data || [];
+        categoryMap = categories.reduce((acc, cat) => {
+          acc[cat._id] = cat.name;
+          return acc;
+        }, {});
       }
+       // Process results
+       if (results[0].status === 'fulfilled') {
+        const bestSellersData = results[0].value.data?.data || [];
+        // Map category names cho best sellers
+        newDashboardData.bestSellers = bestSellersData.map(item => ({
+          ...item,
+          categoryName: categoryMap[item.categoryId] || 
+                       categoryMap[item.menuItem?.categoryId] || 
+                       categoryMap[item.category] || 
+                       'Không có danh mục'
+        }));
+      }
+
+      
 
       if (results[1].status === 'fulfilled') {
         const monthlyData = results[1].value.data?.data || {};
@@ -218,7 +240,7 @@ const AdminDashboard = () => {
                     <h3>{dashboardData.totalOrders}</h3>
                     <p>Đơn Hàng Tháng Này</p>
                     <small className="text-info fw-bold">
-                      🍽️ Hôm nay: {formatCurrency(dashboardData.todayRevenue)}
+                       Hôm nay: {formatCurrency(dashboardData.todayRevenue)}
                     </small>
                   </div>
                 </div>
@@ -237,7 +259,7 @@ const AdminDashboard = () => {
                     <h3>{dashboardData.totalUsers}</h3>
                     <p>Tổng Người Dùng</p>
                     <small className="text-primary fw-bold">
-                      👥 Khách hàng đã đăng ký
+                       Khách hàng đã đăng ký
                     </small>
                   </div>
                 </div>
@@ -256,7 +278,7 @@ const AdminDashboard = () => {
                     <h3>{dashboardData.totalMenuItems}</h3>
                     <p>Món Ăn</p>
                     <small className="text-warning fw-bold">
-                      🍽️ Tổng số món trong menu
+                       Tổng số món trong menu
                     </small>
                   </div>
                 </div>
@@ -274,7 +296,7 @@ const AdminDashboard = () => {
                   <Col>
                     <h5 className="mb-0 fw-bold">
                       <FaChartLine className="me-3" />
-                      📊 Doanh Thu Theo Ngày
+                       Doanh Thu Theo Ngày
                     </h5>
                     <small className="opacity-75">Theo dõi doanh thu hàng ngày trong tháng</small>
                   </Col>
@@ -361,82 +383,81 @@ const AdminDashboard = () => {
           </Col>
         </Row>
 
-        {/* Best Sellers - Full Width */}
-        <Row className="mb-4">
-          <Col>
-            <Card className="best-sellers-card">
-              <Card.Header>
-                <h5 className="mb-0 fw-bold text-white">
-                  <FaCrown className="me-3" />
-                  👑 Top 5 Món Ăn Bán Chạy
-                </h5>
-                <small className="text-white opacity-75">Những món ăn được yêu thích nhất</small>
-              </Card.Header>
-              <Card.Body>
-                {dashboardData.bestSellers.length > 0 ? (
-                  <Row>
-                    {/* Table Section */}
-                    <Col xl={8} lg={7}>
-                      <div className="table-responsive">
-                        <Table hover className="mb-0">
-                          <thead>
-                            <tr>
-                              <th className="text-center">#</th>
-                              <th>Món Ăn</th>
-                              <th className="text-center">Giá</th>
-                              <th className="text-center">Số Lượng</th>
-                              <th className="text-center">Doanh Thu</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {dashboardData.bestSellers.map((item, index) => (
-                              <tr key={item.id}>
-                                <td className="text-center">
-                                  <span className={`rank-badge rank-${index + 1}`}>
-                                    {index + 1}
-                                  </span>
-                                </td>
-                                <td>
-                                  <div className="d-flex align-items-center">
-                                    {item.image && (
-                                      <img
-                                        src={item.image}
-                                        alt={item.name}
-                                        className="item-image me-3"
-                                      />
-                                    )}
-                                    <div>
-                                      <strong className="d-block">{item.name}</strong>
-                                      <small className="text-muted">
-                                        {item.category || 'Phân loại'}
-                                      </small>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="text-center fw-bold">
-                                  {formatCurrency(item.price)}
-                                </td>
-                                <td className="text-center">
-                                  <span className="quantity-badge">
-                                    {item.totalQuantity}
-                                  </span>
-                                </td>
-                                <td className="text-center">
-                                  <strong className="text-success fs-6">
-                                    {formatCurrency(item.totalRevenue)}
-                                  </strong>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </Table>
-                      </div>
-                    </Col>
-
+     {/* Best Sellers - Full Width */}
+<Row className="mb-4">
+  <Col>
+    <Card className="best-sellers-card">
+      <Card.Header>
+        <h5 className="mb-0 fw-bold text-white">
+          <FaCrown className="me-3" />
+           Top 5 Món Ăn Bán Chạy
+        </h5>
+        <small className="text-white opacity-75">Những món ăn được yêu thích nhất</small>
+      </Card.Header>
+      <Card.Body>
+        {dashboardData.bestSellers.length > 0 ? (
+          <Row>
+            {/* Table Section */}
+            <Col xl={8} lg={7}>
+              <div className="table-responsive">
+                <Table hover className="mb-0">
+                  <thead>
+                    <tr>
+                      <th className="text-center text-dark">#</th>
+                      <th className="text-dark">Món Ăn</th>
+                      <th className="text-center text-dark">Giá</th>
+                      <th className="text-center text-dark">Số Lượng</th>
+                      <th className="text-center text-dark">Doanh Thu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dashboardData.bestSellers.map((item, index) => (
+                      <tr key={item.id}>
+                        <td className="text-center">
+                          <span className={`rank-badge rank-${index + 1}`}>
+                            {index + 1}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            {item.image && (
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="item-image me-3"
+                              />
+                            )}
+                            <div>
+                              <strong className="d-block text-dark">{item.name}</strong>
+                              <small className="text-muted">
+                                {item.categoryName}
+                              </small>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="text-center fw-bold" style={{color: '#007bff'}}>
+                          {formatCurrency(item.price)}
+                        </td>
+                        <td className="text-center">
+                          <span className="quantity-badge">
+                            {item.totalQuantity}
+                          </span>
+                        </td>
+                        <td className="text-center">
+                          <strong className="text-success fs-6">
+                            {formatCurrency(item.totalRevenue)}
+                          </strong>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </Col>
                     {/* Pie Chart Section */}
                     <Col xl={4} lg={5}>
                       <div className="h-100 d-flex flex-column">
-                        <h6 className="fw-bold mb-3 text-center">🥧 Phân bố doanh thu</h6>
+                        <h6 className="fw-bold mb-3 text-center"> Phân bố doanh thu</h6>
                         <div className="flex-grow-1">
                           <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
