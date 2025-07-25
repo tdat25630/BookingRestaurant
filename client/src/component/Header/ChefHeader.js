@@ -141,7 +141,7 @@ const ChefHeader = () => {
                         >
                             <NavDropdown.Item href="/chef/profile">
                                 <FontAwesomeIcon icon={faCog} className="me-1" />
-                                Profile
+                                Hồ sơ của tôi
                             </NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item onClick={handleLogout}>

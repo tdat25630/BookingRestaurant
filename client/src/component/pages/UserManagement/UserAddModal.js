@@ -67,17 +67,17 @@ const UserAddModal = ({ show, handleClose, onAddSuccess, onError }) => {
     return (
         <Modal show={show} onHide={handleModalClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Add New User</Modal.Title>
+                <Modal.Title>Thêm người dùng mới</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form>
                     <Input
-                        label="Username"
+                        label="Tên đăng nhập"
                         type="text"
                         name="username"
                         value={formData.username}
                         onChange={handleInputChange}
-                        placeholder="Enter username"
+                        placeholder="Nhập tên người dùng"
                         required
                     />
 
@@ -87,19 +87,19 @@ const UserAddModal = ({ show, handleClose, onAddSuccess, onError }) => {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        placeholder="Enter email"
+                        placeholder="Nhập email"
                         required
                     />
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Password</Form.Label>
+                        <Form.Label>Mật khẩu</Form.Label>
                         <InputGroup>
                             <Form.Control
                                 type={showPassword ? "text" : "password"}
                                 name="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                placeholder="Enter password"
+                                placeholder="Nhập mật khẩu"
                                 required
                             />
                             <Button
@@ -112,36 +112,36 @@ const UserAddModal = ({ show, handleClose, onAddSuccess, onError }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Role</Form.Label>
+                        <Form.Label>Vai trò</Form.Label>
                         <Form.Select
                             name="role"
                             value={formData.role}
                             onChange={handleInputChange}
                         >
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                            <option value="staff">Staff</option>
-                            <option value="chef">Chef</option>
-                            <option value="cashier">Cashier</option>
+                            <option value="user">Người dùng</option>
+                            <option value="admin">Quản trị viên</option>
+                            <option value="staff">Nhân viên</option>
+                            <option value="chef">Đầu bếp</option>
+                            <option value="cashier">Thu ngân</option>
                         </Form.Select>
                     </Form.Group>
 
                     <Input
-                        label="Phone"
+                        label="Số điện thoại"
                         type="text"
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
-                        placeholder="Enter phone number"
+                        placeholder="Nhập số điện thoại"
                     />
                 </Form>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleModalClose}>
-                    Cancel
+                    Hủy
                 </Button>
                 <Button variant="primary" onClick={handleAddUser}>
-                    Add User
+                    Thêm người dùng
                 </Button>
             </Modal.Footer>
         </Modal>

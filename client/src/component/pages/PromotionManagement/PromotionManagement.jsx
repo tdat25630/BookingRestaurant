@@ -269,15 +269,15 @@ const PromotionManagement = () => {
           <div className="header-content">
             <h1>
               <FaGift className="me-3" />
-              Promotion Management
+              Quản lý khuyến mãi
             </h1>
-            <p>Manage discounts, coupons, and promotional campaigns</p>
+            <p>Quản lý giảm giá, phiếu giảm giá và chiến dịch khuyến mại</p>
             <div className="summary-info">
               <span className="total-count">
-                Total Promotions: <strong>{promotions.length}</strong>
+                Tổng số khuyến mãi: <strong>{promotions.length}</strong>
               </span>
               <span className="active-count">
-                Active: <strong>{promotions.filter(p => {
+                Đang hoạt động: <strong>{promotions.filter(p => {
                   const now = new Date();
                   const start = new Date(p.start_date);
                   const end = new Date(p.end_date);
@@ -295,7 +295,7 @@ const PromotionManagement = () => {
             }}
           >
             <FaPlus className="me-2" />
-            Add New Promotion
+            Thêm khuyến mãi mới
           </Button>
         </div>
 
@@ -322,7 +322,7 @@ const PromotionManagement = () => {
                   </InputGroup.Text>
                   <Form.Control
                     type="input"
-                    placeholder="Search by code or description..."
+                    placeholder="Tìm kiếm theo mã hoặc mô tả..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -333,11 +333,11 @@ const PromotionManagement = () => {
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                 >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="expired">Expired</option>
-                  <option value="upcoming">Upcoming</option>
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="active">Đang hoạt động</option>
+                  <option value="inactive">Ngừng hoạt động</option>
+                  <option value="expired">Hết hạn</option>
+                  <option value="upcoming">Sắp diễn ra</option>
                 </Form.Select>
               </Col>
               <Col md={2}>
@@ -345,9 +345,9 @@ const PromotionManagement = () => {
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
                 >
-                  <option value="all">All Types</option>
-                  <option value="percentage">Percentage</option>
-                  <option value="fixed_amount">Fixed Amount</option>
+                  <option value="all">Tất cả các loại</option>
+                  <option value="percentage">Phần trăm</option>
+                  <option value="fixed_amount">Số tiền cố định</option>
                 </Form.Select>
               </Col>
               <Col md={2}>
@@ -355,11 +355,11 @@ const PromotionManagement = () => {
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                 >
-                  <option value="createdAt">Created Date</option>
-                  <option value="start_date">Start Date</option>
-                  <option value="end_date">End Date</option>
-                  <option value="code">Code</option>
-                  <option value="discount_value">Discount Value</option>
+                  <option value="createdAt">Ngày tạo</option>
+                  <option value="start_date">Ngày bắt đầu</option>
+                  <option value="end_date">Ngày kết thúc</option>
+                  <option value="code">Mã</option>
+                  <option value="discount_value">Giá trị giảm giá</option>
                 </Form.Select>
               </Col>
               <Col md={2}>
@@ -369,7 +369,7 @@ const PromotionManagement = () => {
                   className="w-100"
                 >
                   <FaSort className="me-1" />
-                  {sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+                  {sortOrder === 'asc' ? 'Tăng dần' : 'Giảm dần'}
                 </Button>
               </Col>
             </Row>
@@ -382,13 +382,13 @@ const PromotionManagement = () => {
             {loading ? (
               <div className="loading-spinner">
                 <Spinner animation="border" />
-                <span className="ms-2">Loading promotions...</span>
+                <span className="ms-2">Đang tải khuyến mãi...</span>
               </div>
             ) : currentItems.length === 0 ? (
               <div className="empty-state">
                 <FaGift size={48} className="text-muted mb-3" />
-                <h3>No promotions found</h3>
-                <p>Create your first promotion to get started</p>
+                <h3>Không tìm thấy khuyến mãi</h3>
+                <p>Tạo khuyến mãi đầu tiên của bạn để bắt đầu</p>
               </div>
             ) : (
               <>
@@ -396,14 +396,14 @@ const PromotionManagement = () => {
                   <Table hover className="promotion-table">
                     <thead>
                       <tr style={{ color: 'black' }}>
-                        <th>Code</th>
-                        <th>Description</th>
-                        <th>Type</th>
-                        <th>Discount</th>
-                        <th>Period</th>
-                        <th>Status</th>
-                        <th>Usage</th>
-                        <th>Actions</th>
+                        <th>Mã</th>
+                        <th>Mô tả</th>
+                        <th>Loại</th>
+                        <th>Giảm giá</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                        <th>Sử dụng</th>
+                        <th>Hành động</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -505,7 +505,7 @@ const PromotionManagement = () => {
                       {[...Array(totalPages)].map((_, index) => (
                         <Pagination.Item
                           key={index + 1}
-                          active={index + 1 === currentPage}
+                        active  ={index + 1 === currentPage}
                           onClick={() => setCurrentPage(index + 1)}
                         >
                           {index + 1}

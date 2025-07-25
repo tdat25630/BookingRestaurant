@@ -3,7 +3,7 @@ import CashierCheckout from "../component/pages/Checkout/CashierCheckout";
 import CashierTablePage from "../component/pages/ManagementTable/CashierTablePage";
 import CashierReservation from '../component/pages/Reservation/CashierReservation';
 import UserProfile from '../component/pages/UserProfile/UserProfile';
-
+import PreOrder from '../component/pages/Reservation/PreOrder';
 
 const isCashier = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -20,6 +20,7 @@ const CashierRoutes = () => {
           <Route path="reservation" element={<CashierReservation />} />
           <Route path="profile" element={<UserProfile />} />
           <Route path="tables" element={<CashierTablePage />} />
+          <Route path="pre-order" element={<PreOrder />} />
         </>
       ) : (
         <Route path="*" element={<Navigate to="/login" replace />} />

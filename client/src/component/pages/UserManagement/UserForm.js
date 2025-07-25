@@ -7,7 +7,7 @@ const UserForm = ({ formData, handleInputChange, showPassword, setShowPassword, 
     return (
         <Form>
             <Input
-                label="Username*"
+                label="Tên đăng nhập*"
                 type="text"
                 name="username"
                 value={formData.username}
@@ -53,11 +53,11 @@ const UserForm = ({ formData, handleInputChange, showPassword, setShowPassword, 
                     value={formData.role}
                     onChange={handleInputChange}
                 >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                    <option value="staff">Staff</option>
-                    <option value="chef">Chef</option>
-                    <option value="cashier">Cashier</option>
+                    <option value="user">Người dùng</option>
+                    <option value="admin">Quản trị viên</option>
+                    <option value="staff">Nhân viên</option>
+                    <option value="chef">Đầu bếp</option>
+                    <option value="cashier">Thu ngân</option>
                 </Form.Select>
             </Form.Group>
 

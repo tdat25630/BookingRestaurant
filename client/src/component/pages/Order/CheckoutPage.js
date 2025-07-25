@@ -89,11 +89,11 @@ function CheckoutPage() {
         setFinalAmount(res.data.data.newTotalAmount);
         setVoucherMessage({
           type: "info",
-          text: 'Discount previewed. Press "Apply" to confirm.',
+          text: 'Nhấn "Áp dụng Voucher" để xác nhận.',
         });
       }
     } catch (error) {
-      const message = error.response?.data?.message || "An unknown error occurred.";
+      const message = error.response?.data?.message || "Đã xảy ra lỗi không xác định.";
       setDiscount(0);
       setFinalAmount(pendingOrder?.totalAmount || 0);
       setVoucherMessage({ type: "error", text: message });
@@ -189,45 +189,46 @@ function CheckoutPage() {
     <>
       <Header />
       <div className="checkout-container">
-        <h2>🧾 Your Bill</h2>
+        <h2> Hóa đơn của bạn</h2>
         <div key={pendingOrder._id} className="order-card">
           <h4>
-            🕒 {new Date(pendingOrder.orderTime).toLocaleString("en-US")}
+            {new Date(pendingOrder.orderTime).toLocaleString("en-US")}
           </h4>
-          <p>
+          {/* <p>
             <strong>Payment Status:</strong>{" "}
             <span className={`status-${pendingOrder.paymentStatus}`}>
               {pendingOrder.paymentStatus === "unpaid" ? "Unpaid" : "Paid"}
             </span>
-          </p>
+          </p> */}
 
           <ul className="order-items-list">
             {pendingOrder.items.map((item) => (
               <li key={item._id}>
-                🍽 {item.menuItemId?.name || "Unknown Item"} × {item.quantity} —{" "}
+                 {item.menuItemId?.name || "Unknown Item"} × {item.quantity} —{" "}
                 {item.price.toLocaleString("en-US")}₫
               </li>
             ))}
           </ul>
 
-          <p className="sub-total">
-            <strong>Subtotal: </strong>
+          {/* <p className="sub-total">
+            <strong>Tổng phụ: </strong>
             {pendingOrder.totalAmount?.toLocaleString("en-US") || 0}₫
-          </p>
+          </p> */}
           {discount > 0 && (
             <p className="discount-applied">
-              <strong>Discount: </strong>-{discount.toLocaleString("en-US")}₫
+              <strong>
+Giảm giá: </strong>-{discount.toLocaleString("en-US")}₫
             </p>
           )}
           <p className="total-amount">
-            <strong>Total: </strong>
+            <strong>Tổng cộng: </strong>
             {finalAmount?.toLocaleString("en-US") || 0}₫
           </p>
         </div>
 
         <div className="user-points-container">
           <p>
-            ✨ <strong>Your current points:</strong> {user?.points || 0}
+             <strong>Điểm hiện tại của bạn:</strong> {user?.points || 0}
           </p>
         </div>
 
@@ -238,7 +239,8 @@ function CheckoutPage() {
               value={selectedVoucher}
               onChange={(e) => handleVoucherChange(e.target.value)}
             >
-              <option value="">-- Choose Voucher --</option>
+              <option value="">-- 
+Chọn Voucher --</option>
               {vouchers.map((voucher) => (
                 <option key={voucher._id} value={voucher.code}>
                   {voucher.code} - {voucher.description} ({voucher.points_required}{" "}
@@ -251,7 +253,7 @@ function CheckoutPage() {
               className="btn-apply-voucher"
               disabled={!selectedVoucher || discount <= 0 || isApplyingVoucher}
             >
-              {isApplyingVoucher ? "Applying..." : "Apply"}
+              {isApplyingVoucher ? "Applying..." : "Áp dụng Voucher"}
             </button>
           </div>
         ) : null}
@@ -267,7 +269,7 @@ function CheckoutPage() {
             onClick={() => navigate(`/menu?sessionId=${sessionId}`)}
             className="btn-action"
           >
-            ➕ Add More Items
+            Gọi thêm món
           </button>
       
         </div>

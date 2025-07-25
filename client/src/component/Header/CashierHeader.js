@@ -27,6 +27,7 @@ const CashierHeader = () => {
                     <Nav className="ms-auto">
                         <Nav.Link as={Link} to="/cashier/tables" className="nav-link">Bàn ăn</Nav.Link>
                         <Nav.Link as={Link} to="/cashier/reservation" className="nav-link">Đặt bàn</Nav.Link>
+                        <Nav.Link as={Link} to="/cashier/pre-order" className="nav-link">Đơn đặt trước</Nav.Link>
 
                         <NavDropdown
                             title={<span><FaUserCircle className="me-1" />Cashier</span>}
@@ -35,12 +36,12 @@ const CashierHeader = () => {
                         >
                             <NavDropdown.Item as={Link} to="/cashier/profile">
                                 <FaUserCircle className="me-1" />
-                                My Profile
+                                Hồ sơ của tôi
                             </NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item onClick={handleLogout}>
                                 <FaSignOutAlt className="me-1" />
-                                Logout
+                                Đăng xuất
                             </NavDropdown.Item>
                         </NavDropdown>
                     </Nav>

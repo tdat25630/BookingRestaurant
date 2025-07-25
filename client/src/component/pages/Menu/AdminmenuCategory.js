@@ -92,7 +92,7 @@ function AdminMenuCategory() {
                 <div className="search-container">
                     <input
                         type="text"
-                        placeholder="Search category..."
+                        placeholder="Tìm kiếm danh mục..."
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
@@ -106,14 +106,14 @@ function AdminMenuCategory() {
                 <form onSubmit={handleSubmit} className="category-form">
                     <input
                         name="name"
-                        placeholder="Category name"
+                        placeholder="Tên danh mục"
                         value={form.name}
                         onChange={handleChange}
                         required
                     />
                     <input
                         name="description"
-                        placeholder="Description"
+                        placeholder="Mô tả"
                         value={form.description}
                         onChange={handleChange}
                     />

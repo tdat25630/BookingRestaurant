@@ -14,11 +14,11 @@ const UserList = ({ users, onEdit, onDelete }) => {
       <thead>
         <tr>
           <th style={{ color: 'black' }}>#</th>
-          <th style={{ color: 'black' }}>Username</th>
+          <th style={{ color: 'black' }}>Tên người dùng</th>
           <th style={{ color: 'black' }}>Email</th>
-          <th style={{ color: 'black' }}>Role</th>
-          <th style={{ color: 'black' }}>Phone</th>
-          <th style={{ color: 'black' }}>Actions</th>
+          <th style={{ color: 'black' }}>Vai trò</th>
+          <th style={{ color: 'black' }}>Số điện thoại</th>
+          <th style={{ color: 'black' }}>Hành động</th>
         </tr>
       </thead>
       <tbody>
@@ -53,7 +53,7 @@ const UserList = ({ users, onEdit, onDelete }) => {
           ))
         ) : (
           <tr>
-            <td colSpan="6" className="text-center">No users found</td>
+            <td colSpan="6" className="text-center">Không tìm thấy người dùng</td>
           </tr>
         )}
       </tbody>

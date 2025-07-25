@@ -27,9 +27,9 @@ const UserFilters = ({ searchTerm, setSearchTerm, filterRole, setFilterRole }) =
                         value={filterRole}
                         onChange={(e) => setFilterRole(e.target.value)}
                     >
-                        <option value="all">All Roles</option>
-                        <option value="user">Users Only</option>
-                        <option value="admin">Admins Only</option>
+                        <option value="all">Tất cả các vai trò</option>
+                        <option value="user">Chỉ người dùng</option>
+                        <option value="admin">Chỉ quản trị viên</option>
                     </Form.Select>
                 </InputGroup>
             </Col>
