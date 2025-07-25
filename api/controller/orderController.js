@@ -116,10 +116,46 @@ exports.updateOrderStatus = async (req, res) => {
 };
 
 // Lấy tất cả đơn hàng
+// exports.getAllOrders = async (req, res) => {
+//   try {
+//     const { date } = req.query; // frontend should send e.g. ?date=2025-07-22
+
+//     let dateFilter = {};
+//     if (date) {
+//       const selectedDate = new Date(date);
+//       const startOfDay = new Date(selectedDate.setHours(0, 0, 0, 0));
+//       const endOfDay = new Date(selectedDate.setHours(23, 59, 59, 999));
+
+//       dateFilter = {
+//         orderTime: { $gte: startOfDay, $lte: endOfDay }
+//       };
+//     }
+
+//     const orders = await Order.find(dateFilter)
+//       .populate({
+//         path: 'sessionId',
+//         populate: {
+//           path: 'table',
+//           model: 'Table'
+//         }
+//       })
+    
+//       .sort({ orderTime: -1 })
+//       .lean();
+
+//     res.json(orders);
+//   } catch (err) {
+//     res.status(500).json({ error: 'Không thể lấy danh sách đơn hàng', details: err.message });
+//   }
+// };
+
+
 exports.getAllOrders = async (req, res) => {
   try {
-    const { date } = req.query; // frontend should send e.g. ?date=2025-07-22
+    const { date, status, tableId } = req.query;
+    console.log('🔍 Query params:', { date, status, tableId });
 
+    // Build date filter
     let dateFilter = {};
     if (date) {
       const selectedDate = new Date(date);
@@ -129,26 +165,217 @@ exports.getAllOrders = async (req, res) => {
       dateFilter = {
         orderTime: { $gte: startOfDay, $lte: endOfDay }
       };
+      console.log('📅 Date filter:', dateFilter);
     }
 
-    const orders = await Order.find(dateFilter)
+    // Build additional filters
+    let additionalFilters = {};
+    if (status) {
+      additionalFilters.status = status;
+    }
+
+    // Combine all filters
+    const filters = { ...dateFilter, ...additionalFilters };
+    console.log('🔧 Final filters:', filters);
+
+    // Lấy orders đơn giản trước
+    const orders = await Order.find(filters)
       .populate({
         path: 'sessionId',
-        populate: {
-          path: 'table',
-          model: 'Table'
-        }
+        populate: [
+          {
+            path: 'table',
+            model: 'Table'
+          },
+          {
+            path: 'user', // ✅ Sửa từ userId thành user
+            model: 'User',
+            select: 'username email phone points'
+          }
+        ]
       })
+      .populate('userId', 'username email phone points')
       .sort({ orderTime: -1 })
       .lean();
 
-    res.json(orders);
+    console.log('📊 Found orders count:', orders.length);
+    
+    // Debug: In ra 1 order đầu tiên để xem cấu trúc
+    if (orders.length > 0) {
+      console.log('🔍 First order structure:', JSON.stringify(orders[0], null, 2));
+    }
+
+    // Nếu không có orders, trả về ngay
+    if (orders.length === 0) {
+      return res.json({
+        orders: [],
+        summary: {
+          totalOrders: 0,
+          totalRevenue: 0,
+          ordersByStatus: {},
+          paymentStatusBreakdown: {},
+          uniqueCustomers: 0,
+          registeredUsers: 0,
+          guestUsers: 0,
+          tablesUsed: 0
+        },
+        customerList: [],
+        filters: {
+          date: date || null,
+          status: status || null,
+          tableId: tableId || null
+        }
+      });
+    }
+
+    // ✅ THÊM: Lấy OrderItems cho mỗi order
+    const ordersWithItems = await Promise.all(
+      orders.map(async (order) => {
+        try {
+          const orderItems = await OrderItem.find({ orderId: order._id })
+            .populate('menuItemId', 'name price image category')
+            .lean();
+          
+          // Tạo customerInfo cho order này
+          let customerInfo = {
+            customerName: null,
+            customerPhone: null,
+            table: { number: 'N/A' },
+            guestCount: 1,
+            registeredUser: null
+          };
+
+          if (order.sessionId) {
+            customerInfo.customerName = order.sessionId.customerName || null;
+            customerInfo.customerPhone = order.sessionId.customerPhone || null;
+            customerInfo.guestCount = order.sessionId.guestCount || 1;
+            customerInfo.table.number = order.sessionId.table?.number || 'N/A';
+            
+            // ✅ Sửa từ userId thành user
+            customerInfo.registeredUser = order.sessionId.user || null;
+            
+            // Debug log
+            console.log(`📋 Order ${order._id} - Session data:`, {
+              customerName: order.sessionId.customerName,
+              customerPhone: order.sessionId.customerPhone,
+              tableNumber: order.sessionId.table?.number,
+              guestCount: order.sessionId.guestCount
+            });
+          }
+
+          if (order.userId && !customerInfo.registeredUser) {
+            customerInfo.registeredUser = order.userId;
+            customerInfo.customerName = customerInfo.customerName || order.userId.username;
+            customerInfo.customerPhone = customerInfo.customerPhone || order.userId.phone;
+          }
+          
+          return {
+            ...order,
+            items: orderItems || [],
+            customerInfo: customerInfo
+          };
+        } catch (err) {
+          console.log('⚠️ Error fetching items for order:', order._id, err.message);
+          return {
+            ...order,
+            items: [],
+            customerInfo: {
+              customerName: null,
+              customerPhone: null,
+              table: { number: 'N/A' },
+              guestCount: 1,
+              registeredUser: null
+            }
+          };
+        }
+      })
+    );
+
+    console.log('🍽️ Orders with items count:', ordersWithItems.length);
+
+    // Tính toán customer summary - đơn giản hóa
+    const customerSummary = ordersWithItems.map(order => {
+      let customerInfo = {
+        orderId: order._id,
+        customerName: null,
+        customerPhone: null,
+        tableNumber: null,
+        guestCount: 1,
+        isRegisteredUser: false
+      };
+
+      try {
+        if (order.sessionId) {
+          customerInfo.customerName = order.sessionId.customerName || null;
+          customerInfo.customerPhone = order.sessionId.customerPhone || null;
+          customerInfo.guestCount = order.sessionId.guestCount || 1;
+          customerInfo.tableNumber = order.sessionId.table?.number || 'N/A';
+          customerInfo.isRegisteredUser = !!order.sessionId.user; // ✅ Sửa userId thành user
+        }
+
+        if (order.userId && !customerInfo.isRegisteredUser) {
+          customerInfo.isRegisteredUser = true;
+          customerInfo.customerName = customerInfo.customerName || order.userId.username;
+          customerInfo.customerPhone = customerInfo.customerPhone || order.userId.phone;
+        }
+      } catch (err) {
+        console.log('⚠️ Error processing customer info for order:', order._id, err.message);
+      }
+
+      return customerInfo;
+    });
+
+    console.log('👥 Customer summary count:', customerSummary.length);
+
+    // Tính toán summary
+    const summary = {
+      totalOrders: ordersWithItems.length,
+      totalRevenue: ordersWithItems.reduce((sum, order) => sum + (order.totalAmount || 0), 0),
+      ordersByStatus: ordersWithItems.reduce((acc, order) => {
+        acc[order.status] = (acc[order.status] || 0) + 1;
+        return acc;
+      }, {}),
+      paymentStatusBreakdown: ordersWithItems.reduce((acc, order) => {
+        acc[order.paymentStatus] = (acc[order.paymentStatus] || 0) + 1;
+        return acc;
+      }, {}),
+      uniqueCustomers: new Set(
+        customerSummary
+          .filter(c => c.customerPhone || c.customerName)
+          .map(c => c.customerPhone || c.customerName)
+      ).size,
+      registeredUsers: customerSummary.filter(c => c.isRegisteredUser).length,
+      guestUsers: customerSummary.filter(c => !c.isRegisteredUser).length,
+      tablesUsed: new Set(
+        customerSummary.map(c => c.tableNumber).filter(t => t !== 'N/A')
+      ).size
+    };
+
+    console.log('📈 Summary calculated:', summary);
+
+    // Response
+    const response = {
+      orders: ordersWithItems, // ✅ Trả về orders đã có items
+      summary: summary,
+      customerList: customerSummary,
+      filters: {
+        date: date || null,
+        status: status || null,
+        tableId: tableId || null
+      }
+    };
+
+    console.log('✅ Sending response with orders count:', response.orders.length);
+    res.json(response);
+
   } catch (err) {
-    res.status(500).json({ error: 'Không thể lấy danh sách đơn hàng', details: err.message });
+    console.error('❌ Lỗi lấy danh sách đơn hàng:', err);
+    res.status(500).json({ 
+      error: 'Không thể lấy danh sách đơn hàng', 
+      details: err.message 
+    });
   }
 };
-
-
 // Thêm một món ăn vào đơn hàng theo sessionId
 exports.addItemToOrder = async (req, res) => {
   try {

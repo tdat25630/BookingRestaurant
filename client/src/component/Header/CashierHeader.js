@@ -28,6 +28,8 @@ const CashierHeader = () => {
                         <Nav.Link as={Link} to="/cashier/tables" className="nav-link">Bàn ăn</Nav.Link>
                         <Nav.Link as={Link} to="/cashier/reservation" className="nav-link">Đặt bàn</Nav.Link>
                         <Nav.Link as={Link} to="/cashier/pre-order" className="nav-link">Đơn đặt trước</Nav.Link>
+                        <Nav.Link as={Link} to="/cashier/orders" className="nav-link">Quản lý đơn</Nav.Link>
+
 
                         <NavDropdown
                             title={<span><FaUserCircle className="me-1" />Cashier</span>}
@@ -36,7 +38,7 @@ const CashierHeader = () => {
                         >
                             <NavDropdown.Item as={Link} to="/cashier/profile">
                                 <FaUserCircle className="me-1" />
-                                Hồ sơ của tôi
+                                Hồ sơ 
                             </NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item onClick={handleLogout}>

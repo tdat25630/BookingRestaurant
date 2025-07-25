@@ -24,9 +24,11 @@ const AdminHeader = () => {
 
                 <Navbar.Toggle aria-controls="admin-navbar-nav" />
                 <Navbar.Collapse id="admin-navbar-nav">                    <Nav className="ms-auto">
-                    <Nav.Link as={Link} to="/admin" className="nav-link">Doanh số</Nav.Link>
+                    <Nav.Link as={Link} to="/admin" className="nav-link">Tổng quan </Nav.Link>
                     <Nav.Link as={Link} to="/admin/tables" className="nav-link">Bàn</Nav.Link>
                     <Nav.Link as={Link} to="/admin/reservation" className="nav-link">Đặt bàn</Nav.Link>
+                    <Nav.Link as={Link} to="/admin/orders" className="nav-link">Đơn hàng</Nav.Link>
+
                     <Nav.Link as={Link} to="/admin/users" className="nav-link">
                         
                         Người dùng
