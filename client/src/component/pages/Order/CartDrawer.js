@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useOrder } from "../../../context/OrderContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -47,7 +47,7 @@ function CartItem({ item, increaseQuantity, decreaseQuantity, updateNote, remove
       )}
 
       <button className="remove-btn" onClick={() => removeFromCart(item._id)}>
-         Remove
+        Remove
       </button>
     </li>
   );
@@ -133,10 +133,10 @@ function CartDrawer({ isOpen, onClose }) {
       <div className="cart-footer">
         <p className="total">Total: {total.toLocaleString()}₫</p>
         <button className="send-btn" onClick={handleSendOrder}>
-           Send Order
+          Send Order
         </button>
         <button className="clear-btn" onClick={clearCart}>
-           Clear All
+          Clear All
         </button>
       </div>
     </div>

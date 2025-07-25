@@ -3,12 +3,8 @@ import { Navbar, Container, Nav, NavDropdown, Badge } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUtensils,
-  faHatCowboy,
   faSignOutAlt,
   faClock,
-  faFire,
-  faCheckCircle,
-  faRefresh,
   faCog
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
@@ -17,12 +13,6 @@ import './ChefHeader.css';
 const ChefHeader = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [stats, setStats] = useState({
-    pendingOrders: 0,
-    preparingOrders: 0,
-    completedToday: 0
-  });
-
   // Update current time every minute
   useEffect(() => {
     const timer = setInterval(() => {
@@ -31,32 +21,9 @@ const ChefHeader = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch chef stats
-  useEffect(() => {
-    fetchChefStats();
-    // Refresh stats every 30 seconds
-    const statsTimer = setInterval(fetchChefStats, 30000);
-    return () => clearInterval(statsTimer);
-  }, []);
-
-  const fetchChefStats = async () => {
-    try {
-      const response = await fetch('/api/chef/dashboard-stats');
-      const data = await response.json();
-      setStats(data);
-    } catch (error) {
-      console.error('Error fetching chef stats:', error);
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/login');
-  };
-
-  const handleRefresh = () => {
-    fetchChefStats();
-    window.location.reload();
   };
 
   const formatTime = (date) => {
@@ -83,11 +50,6 @@ const ChefHeader = () => {
         <Navbar.Toggle aria-controls="chef-navbar-nav" />
         <Navbar.Collapse id="chef-navbar-nav">
           <Nav className="me-auto">
-            {/*
-                        <Nav.Link href="/chef/orders" className="chef-nav-link">
-                            Đơn hàng
-                        </Nav.Link>
-            */}
             <Nav.Link href="/chef/dashboard" className="chef-nav-link">
               Dashboard
             </Nav.Link>
@@ -96,40 +58,8 @@ const ChefHeader = () => {
             </Nav.Link>
           </Nav>
 
-          {/* Quick Stats */}
-          {/* 
-                    <Nav className="chef-stats">
-                        <div className="stat-item pending">
-                            <FontAwesomeIcon icon={faClock} className="me-1" />
-                            <span>Chờ</span>
-                            <Badge bg="warning" className="ms-1">
-                                {stats.pendingOrders}
-                            </Badge>
-                        </div>
-                        
-                        <div className="stat-item preparing">
-                            <FontAwesomeIcon icon={faFire} className="me-1" />
-                            <span>Đang nấu</span>
-                            <Badge bg="danger" className="ms-1">
-                                {stats.preparingOrders}
-                            </Badge>
-                        </div>
-                        
-                        <div className="stat-item completed">
-                            <FontAwesomeIcon icon={faCheckCircle} className="me-1" />
-                            <span>Hoàn thành</span>
-                            <Badge bg="success" className="ms-1">
-                                {stats.completedToday}
-                            </Badge>
-                        </div>
-                    </Nav>
-          */}
-
           {/* Actions */}
           <Nav className="ms-auto">
-            {/* <Nav.Link onClick={handleRefresh} className="action-btn" title="Refresh">
-                            <FontAwesomeIcon icon={faRefresh} />
-                        </Nav.Link> */}
 
             <NavDropdown
               title={

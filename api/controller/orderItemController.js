@@ -2,12 +2,14 @@ const MenuItem = require('../models/MenuItem');
 const OrderItem = require('../models/orderItem');
 const Order = require('../models/order');
 const createError = require('../util/errorHandle');
+const { broadcastEvent } = require('../websocket');
 
 exports.createOrderItem = async (req, res) => {
   try {
     const item = new OrderItem(req.body);
     await item.save();
-    res.status(201).json(item);
+    broadcastEvent('orderCreated');
+    return res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -96,7 +98,9 @@ exports.deleteById = async (req, res) => {
   try {
     const { id } = req.params
     const items = await OrderItem.findOneAndDelete({ _id: id });
-    res.json(items);
+
+    broadcastEvent('orderCreated');
+    return res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -110,7 +114,9 @@ exports.updateOrderItemStatus = async (req, res) => {
       await OrderItem.findByIdAndUpdate(
         req.params.id,
         { status: req.body.status }, { new: true });
-    res.json(updated);
+
+    broadcastEvent('orderCreated');
+    return res.json(updated);
 
   } catch (err) {
     console.log(err)
@@ -168,5 +174,53 @@ exports.getBestSellerItems = async (req, res, next) => {
   } catch (err) {
     console.error('🔥 Lỗi lấy danh sách món ăn bán chạy:', err);
     return next(createError(500, 'Không thể lấy danh sách món ăn bán chạy', { cause: err }));
+  }
+};
+
+exports.countByStatus = async (req, res) => {
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1); // next midnight
+
+    const stats = await Promise.all([
+      OrderItem.countDocuments({
+        status: 'ordered',
+        createdAt: { $gte: startOfDay, $lt: endOfDay }
+      }),
+
+      OrderItem.countDocuments({
+        status: 'preparing',
+        createdAt: { $gte: startOfDay, $lt: endOfDay }
+      }),
+
+      OrderItem.countDocuments({
+        status: 'cooking',
+        createdAt: { $gte: startOfDay, $lt: endOfDay }
+      }),
+
+      OrderItem.countDocuments({
+        status: 'done',
+        createdAt: { $gte: startOfDay, $lt: endOfDay }
+      }),
+
+    ]);
+    console.log(stats)
+
+    res.json({
+      ordered: stats[0],
+      preparing: stats[1],
+      cooking: stats[2],
+      done: stats[3],
+    });
+
+  } catch (err) {
+    console.error('❌ Lỗi lấy thống kê Chef:', err);
+    res.status(500).json({
+      error: 'Không thể lấy thống kê',
+      details: err.message
+    });
   }
 };

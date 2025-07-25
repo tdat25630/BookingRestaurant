@@ -1,5 +1,6 @@
 const Order = require('../models/order');
 const OrderItem = require('../models/orderItem');
+const { broadcastEvent } = require('../websocket');
 
 exports.getOrdersForChef = async (req, res) => {
   try {
@@ -147,6 +148,8 @@ exports.updateOrderStatusByChef = async (req, res) => {
       }
     });
 
+    broadcastEvent('orderCreated');
+
     if (!updatedOrder) {
       return res.status(404).json({ error: 'Không tìm thấy đơn hàng' });
     }
@@ -237,6 +240,8 @@ exports.updateOrderItemStatusByChef = async (req, res) => {
     if (newOrderStatus) {
       await Order.findByIdAndUpdate(orderId, updateOrderData);
     }
+
+    broadcastEvent('orderCreated');
 
     res.json({
       message: `Đã cập nhật ${idsToUpdate.length} món ăn thành ${status}`,

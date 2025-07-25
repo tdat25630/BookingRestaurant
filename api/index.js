@@ -15,65 +15,61 @@ const promotionRoutes = require('./routes/promotionRoute');
 const staffRoutes = require('./routes/staffRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
-
-
-
-const app = express();
+const http = require('http');
+const { setupWebSocket } = require('./websocket');
 
 require('dotenv').config();
 require('./cron-job/expireReservationsJob');
 
+const app = express();
+const server = http.createServer(app);
+
+// === WebSocket Setup ===
+setupWebSocket(server);
+
+// === Middleware ===
 app.use(express.json());
 app.use(cookieParser());
-
-// Cấu hình CORS để cho phép credentials (cookies)
 app.use(cors({
-  origin: 'http://localhost:3000', // URL của frontend
-  credentials: true, // Quan trọng cho việc gửi cookies
+  origin: 'http://localhost:3000',
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-
+// === MongoDB Connection ===
 const connectDb = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("Connected to MongoDB");
+    console.log("✅ Connected to MongoDB");
   } catch (error) {
-
-    console.error("MongoDB connection failed: ", error);
+    console.error("❌ MongoDB connection failed:", error);
     process.exit(1);
   }
-}
+};
 
+// === Routes ===
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/reservation', require('./routes/reservation.route'));
 app.use('/api/zalopay', require('./routes/zaloPayRoutes'));
 
-
-// app.use('/api/admin', require('./routes/AdminRoute'));
 app.use('/api/menu-categories', menuCategoryRoutes);
 app.use('/api/menu-items', menuItemRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/dining-sessions', diningSessionRoutes);
 app.use('/api/tables', tableRoutes);
 app.use('/api/invoices', invoiceRoutes);
-
-app.use('/api/promotions', promotionRoutes);
-
 app.use('/api/orders', orderRoutes);
 app.use('/api/order-items', orderItemRoutes);
-
 app.use('/api/chef', chefRoutes);
-
-// middlewares
-app.use(errorMiddleware);
 app.use('/api/staff', staffRoutes);
 
-const PORT = process.env.PORT || 8080;
+app.use(errorMiddleware);
 
-app.listen(PORT, () => {
+// === Start Server ===
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => {
   connectDb();
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Express & WebSocket server running on port ${PORT}`);
 });

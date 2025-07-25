@@ -6,7 +6,8 @@
     "jspdf": "^3.0.1",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
-    "sweetalert2": "^11.22.2"
+    "sweetalert2": "^11.22.2",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "jest": "^30.0.5",

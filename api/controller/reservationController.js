@@ -187,6 +187,7 @@ exports.getReservations = async (req, res) => {
       if (startTime) filters.reservationTime.$gte = startTime;
       if (endTime) filters.reservationTime.$lte = endTime;
     }
+    console.log(filters)
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 

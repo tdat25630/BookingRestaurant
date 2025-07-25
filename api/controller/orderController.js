@@ -4,7 +4,9 @@ const OrderItem = require('../models/orderItem');
 const Promotion = require('../models/promotion');
 const createError = require('../util/errorHandle');
 const mongoose = require('mongoose');
+const { broadcastEvent } = require('../websocket');
 // Tạo đơn hàng mới hoặc thêm vào đơn pending
+
 exports.createOrUpdateOrder = async (req, res) => {
   try {
     const { sessionId, items } = req.body;
@@ -34,6 +36,8 @@ exports.createOrUpdateOrder = async (req, res) => {
         })
       );
 
+      broadcastEvent('orderCreated');
+
       return res.json({ message: 'Đã thêm món vào hóa đơn hiện tại', order, items: newItems });
     } else {
       const newOrder = new Order({
@@ -57,6 +61,8 @@ exports.createOrUpdateOrder = async (req, res) => {
           return newItem.save();
         })
       );
+
+      broadcastEvent('orderCreated');
 
       return res.status(201).json({ message: 'Đã tạo hóa đơn mới', order: savedOrder, items: newItems });
     }
@@ -753,6 +759,8 @@ const updateMultipleOrderItems = async (updates) => {
       }
     };
   });
+
+  broadcastEvent('orderCreated');
 
   return await OrderItem.bulkWrite(bulkOperations);
 }

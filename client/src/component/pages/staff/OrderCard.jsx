@@ -121,9 +121,14 @@ const OrderCard = ({
 
       {/* Confirm Button */}
       <div className="order-actions">
-        <button onClick={handleConfirmItems} className="btn btn-success">
-          Xác nhận
-        </button>
+        {order.items?.some(item => item.status === 'ordered') && (
+          <div className="order-actions">
+            <button onClick={handleConfirmItems} className="btn btn-success">
+              Xác nhận
+            </button>
+          </div>
+        )}
+
       </div>
 
     </div>

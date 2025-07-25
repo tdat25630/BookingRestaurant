@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './ChefOrder.css';
 import ChefHeader from '../../Header/ChefHeader';
 import './Chef.css';
 import { Row, Col, Form, Button } from 'react-bootstrap';
+const socket = new WebSocket('ws://localhost:8080');
 
 const Chef = () => {
   const [orderItems, setOrderItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({});
   const [filter, setFilter] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -16,30 +17,37 @@ const Chef = () => {
   });
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const socketRef = useRef(null);
+  const filterRef = useRef(filter);
 
-  const fetchOrders = async (showLoading = true) => {
+  const fetchOrders = async (overrideFilter) => {
     try {
-      if (showLoading) setLoading(true);
+      //if (showLoading) setLoading(true);
       setError('');
-      const params = new URLSearchParams();
-      if (filter.date) params.append('date', filter.date);
-      if (filter.tableNumber) params.append('tableNumber', filter.tableNumber);
-      if (filter.status && filter.status !== 'all') params.append('status', filter.status);
+      const usedFilter = overrideFilter || filter;
+      console.log(usedFilter)
 
-      const response = await axios.get(`http://localhost:8080/api/order-items/chef?${params}`);
+      const params = new URLSearchParams();
+      if (usedFilter.date) params.append('date', usedFilter.date);
+      if (usedFilter.tableNumber) params.append('tableNumber', usedFilter.tableNumber);
+      if (usedFilter.status && usedFilter.status !== 'all') params.append('status', usedFilter.status);
+
+      const response = await axios.get(`http://localhost:8080/api/order-items/chef?${params.toString()}`);
       setOrderItems(response.data.items || []);
+
     } catch (err) {
       console.error(err);
       setError('Không thể tải danh sách đơn hàng');
     } finally {
-      setLoading(false);
+      //setLoading(false);
       setRefreshing(false);
     }
   };
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/chef/dashboard/stats');
+      const res = await axios.get('http://localhost:8080/api/order-items/stats');
+      console.log('check stats: ', res.data)
       setStats(res.data);
     } catch (err) {
       console.error(err);
@@ -59,22 +67,61 @@ const Chef = () => {
     }
   };
 
-  // ⏱️ Debounced fetch
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      fetchOrders();
-      fetchStats();
-    }, 300); // debounce 300ms
-    return () => clearTimeout(timeout);
+    filterRef.current = filter;
+    fetchOrders(filter); // make sure correct filter is used initially
+    fetchStats();
   }, [filter]);
 
-  //useEffect(() => {
-  //  const interval = setInterval(() => {
-  //    fetchOrders(false); // refresh silently
-  //  }, 5000); // every 5 seconds
+  // 📡 Setup WebSocket ONCE
+  useEffect(() => {
+    let reconnectInterval;
 
-  //  return () => clearInterval(interval); // cleanup
-  //}, []);
+    const connectWebSocket = () => {
+      socketRef.current = new WebSocket('ws://localhost:8080');
+
+      socketRef.current.onopen = () => {
+        console.log('WebSocket connected');
+        if (reconnectInterval) {
+          clearInterval(reconnectInterval);
+          reconnectInterval = null;
+        }
+      };
+
+      socketRef.current.onmessage = (event) => {
+        const message = event.data;
+        console.log('[WebSocket] Message:', message);
+
+        if (message === 'orderCreated' || message === 'orderUpdated') {
+          console.log('receive an event');
+          fetchOrders(false); // use current filter
+          fetchStats();
+        }
+      };
+
+      socketRef.current.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      socketRef.current.onclose = () => {
+        console.log('WebSocket disconnected');
+        if (!reconnectInterval) {
+          reconnectInterval = setInterval(() => {
+            console.log('Attempting to reconnect WebSocket...');
+            connectWebSocket();
+          }, 3000); // retry every 3 seconds
+        }
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      clearInterval(reconnectInterval);
+      socketRef.current?.close();
+    };
+  }, []);
+
 
   const getItemStatusBadge = (status) => {
     const config = {
@@ -126,7 +173,7 @@ const Chef = () => {
 
           <Col md={3}>
             <Form.Control
-              type="text"
+              type="input"
               value={filter.tableNumber}
               onChange={(e) => setFilter(prev => ({ ...prev, tableNumber: e.target.value }))}
               placeholder="Số bàn"
@@ -137,15 +184,37 @@ const Chef = () => {
         <Row className="mb-3">
           <Col>
             <div className="d-flex flex-wrap gap-2">
-              {statusOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  variant={filter.status === option.value ? 'primary' : 'outline-primary'}
-                  onClick={() => setFilter(prev => ({ ...prev, status: option.value }))}
-                >
-                  {option.label}
-                </Button>
-              ))}
+              {statusOptions.map((option) => {
+                const stat = stats[option.value]
+                const totalStat = option.value === 'all'
+                  ? Object.entries(stats).reduce((acc, [key, value]) => acc + (typeof value === 'number' ? value : 0), 0)
+                  : stat;
+                return (
+                  <Button
+                    key={option.value}
+                    variant={filter.status === option.value ? 'primary' : 'secondary'}
+                    onClick={() => setFilter(prev => ({ ...prev, status: option.value }))}
+                  >
+                    {option.label}
+                    <span style={{
+                      display: 'inline-block',
+                      minWidth: '24px',
+                      height: '24px',
+                      backgroundColor: '#db0f27',
+                      color: 'white',
+                      borderRadius: '50%',
+                      textAlign: 'center',
+                      lineHeight: '24px',
+                      fontWeight: 'bold'
+                    }}>
+                      {option.value !== 'all' ? stat
+                        : totalStat
+                      }
+                    </span>
+
+                  </Button>
+                )
+              })}
             </div>
           </Col>
         </Row>

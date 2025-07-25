@@ -18,7 +18,6 @@ function MenuPage() {
   const [sessionValid, setSessionValid] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [order, setOrder] = useState({})
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   const itemsPerPage = 12;
 
