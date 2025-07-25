@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react'; // Standard import with hooks
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import './InvoicePrint.css'; // Make sure this CSS file exists
+import './InvoicePrint.css';
 
 function PrintableInvoice() {
     const { orderId } = useParams();
     const [invoiceData, setInvoiceData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
+    const [discount, setDiscount] = useState(0);
     useEffect(() => {
         if (!orderId) {
             setError('Order ID is missing from the URL.');
@@ -18,7 +18,6 @@ function PrintableInvoice() {
 
         const fetchInvoice = async () => {
             try {
-                // Use the correct API endpoint to find the invoice by its orderId
                 const res = await axios.get(`http://localhost:8080/api/invoices/by-order/${orderId}`);
                 if (res.data.success) {
                     setInvoiceData(res.data.data);
@@ -76,7 +75,6 @@ function PrintableInvoice() {
                 </table>
                 <hr />
                 <div className="invoice-summary">
-                    {/* Assuming subtotal is the same as total for now */}
                     <p><strong>Subtotal:</strong> {invoice.total_amount.toLocaleString('en-US')}₫</p>
                     <p><strong>Discount:</strong> {invoice.discount.toLocaleString('en-US')}₫</p>
                     <h3 className="grand-total">

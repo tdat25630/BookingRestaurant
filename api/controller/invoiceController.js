@@ -108,16 +108,21 @@ exports.handleZaloPayCallback = async (req, res, next) => {
                 
                 const existingInvoice = await Invoice.findOne({ order_id: orderId });
                 if (!existingInvoice) {
+                    const items = await OrderItem.find({ orderId: orderId });
+                    const originalSubTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                    const finalTotalAmount = order.totalAmount;
+                    const discountAmount = originalSubTotal - finalTotalAmount;
+
                     const newInvoice = new Invoice({
                         order_id: orderId,
                         customer_id: order.customerId || order.userId || null,
-                        total_amount: order.totalAmount,
+                        total_amount: finalTotalAmount, 
+                        discount: discountAmount > 0 ? discountAmount : 0, 
                         payment_method: 'zalopay_qr',
                         payment_status: 'paid'
                     });
                     await newInvoice.save();
                 }
-
                 if (order.sessionId) {
                     const session = await DiningSession.findByIdAndUpdate(order.sessionId, {
                         status: 'completed',
