@@ -35,9 +35,15 @@ const Home = () => {
   const [loadingDishes, setLoadingDishes] = useState(true);
   const [dishesError, setDishesError] = useState(null);
 
-
+  const isChef = () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    return user?.role === "chef";
+  };
 
   useEffect(() => {
+    if (isChef) {
+      navigate('/chef');
+    }
     const getUserInfo = () => {
       try {
         // Lấy từ localStorage
