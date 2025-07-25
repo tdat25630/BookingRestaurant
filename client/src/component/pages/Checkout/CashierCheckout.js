@@ -107,22 +107,30 @@ function CashierCheckout() {
   };
 
   const handleCashPayment = async () => {
-    if (!pendingOrder) return alert("Không có đơn hàng để thanh toán.");
+    if (!pendingOrder) return alert("No order available to pay.");
+    
     const isConfirmed = window.confirm(
-      `Xác nhận thanh toán tiền mặt ${pendingOrder.totalAmount.toLocaleString(
-        "en-US"
-      )}₫?`
+      `Confirm cash payment of ${pendingOrder.totalAmount.toLocaleString("en-US")}₫?`
     );
+
     if (isConfirmed) {
       try {
         await axios.put(
           `http://localhost:8080/api/orders/${pendingOrder._id}/pay-by-cash`
         );
+        
         await addPointsForOrder(pendingOrder);
-        alert("✅ Thanh toán tiền mặt thành công!");
-        navigate("/cashier/tables");
+
+        if (sessionId) {
+            await axios.put(`http://localhost:8080/api/dining-sessions/${sessionId}/complete`);
+        }
+
+        alert("✅ Cash payment successful and session ended!");
+        
+        navigate(`/invoice/print/${pendingOrder._id}`);
+
       } catch (error) {
-        alert(`❌ ${error.response?.data?.message || "Đã có lỗi xảy ra."}`);
+        alert(`❌ ${error.response?.data?.message || "An error occurred."}`);
       }
     }
   };

@@ -34,7 +34,7 @@ exports.bookingOtpEmail = async (req, res) => {
     }
 
     console.log(checkCache)
-    //await emailService.sendBookingConfirm({ otp, email, name });
+    await emailService.sendBookingConfirm({ otp, email, name });
 
     return res.status(201).json({ success: true });
   } catch (error) {
@@ -67,11 +67,11 @@ exports.bookingOtpPhone = async (req, res) => {
 
     const requestId = crypto.randomBytes(4).toString('hex');
 
-    //await sms.sendEsms({
-    //  phone,
-    //  code: otp,
-    //  requestId
-    //});
+    await sms.sendEsms({
+     phone,
+     code: otp,
+     requestId
+    });
 
     return res.status(201).json({ success: true, message: 'OTP đã được gửi.' });
 
