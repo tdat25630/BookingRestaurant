@@ -1,6 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import ChefOrder from '../component/pages/Chef/ChefOrder';
+import Chef from '../component/pages/Chef/Chef';
 import ChefmenuItem from '../component/pages/Chef/ChefmenuItem';
+import ChefOrder from '../component/pages/Chef/ChefOrder';
+import ChOrder from '../component/pages/staff/ChOrder/ChOrder';
+import UserProfile from '../component/pages/UserProfile/UserProfile';
 
 // import ChefDashboard from '../component/pages/Dashboard/ChefDashboard';
 
@@ -15,17 +18,12 @@ const ChefRoutes = () => {
       {isChef() ? (
         <>
           {/* Main Chef Order Management Page */}
-          <Route path="/" element={<ChefOrder />} />
-          <Route path="/orders" element={<ChefOrder />} />
+          <Route path="/" element={<Chef />} />
+          <Route path="/orders" element={<ChOrder />} />
           <Route path="item" element={<ChefmenuItem />} />
-
-          {/* Future routes for other chef functionalities */}
-          {/* <Route path="/dashboard" element={<ChefDashboard />} /> */}
-          {/* <Route path="/menu" element={<ChefMenu />} /> */}
-          {/* <Route path="/reports" element={<ChefReports />} /> */}
-          
           {/* Redirect any unknown chef routes to main order page */}
           <Route path="*" element={<Navigate to="/chef" replace />} />
+           <Route path="profile" element={<UserProfile />} />
         </>
       ) : (
         <Route path="*" element={<Navigate to="/login" replace />} />

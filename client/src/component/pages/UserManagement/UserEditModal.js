@@ -66,7 +66,7 @@ const UserEditModal = ({ show, handleClose, user, onEditSuccess, onError }) => {
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Edit User</Modal.Title>
+                <Modal.Title>Chỉnh sửa người dùng</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <UserForm
@@ -79,10 +79,10 @@ const UserEditModal = ({ show, handleClose, user, onEditSuccess, onError }) => {
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>
-                    Cancel
+                    Hủy
                 </Button>
                 <Button variant="primary" onClick={handleEditUser}>
-                    Save Changes
+                    Lưu thay đổi
                 </Button>
             </Modal.Footer>
         </Modal>

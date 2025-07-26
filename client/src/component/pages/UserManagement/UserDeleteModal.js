@@ -27,17 +27,17 @@ const UserDeleteModal = ({ show, handleClose, user, onDeleteSuccess, onError }) 
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Confirm Deletion</Modal.Title>
+                <Modal.Title>Xác nhận xóa</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                Are you sure you want to delete user <strong>{user?.username}</strong>? This action cannot be undone.
+                Bạn có chắc chắn muốn xóa người dùng <strong>{user?.username}</strong>? Hành động này không thể hoàn tác.
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>
-                    Cancel
+                    Hủy
                 </Button>
                 <Button variant="danger" onClick={handleDeleteUser}>
-                    Delete
+                    Xóa
                 </Button>
             </Modal.Footer>
         </Modal>

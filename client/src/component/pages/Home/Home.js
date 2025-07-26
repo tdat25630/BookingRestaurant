@@ -272,10 +272,10 @@ const Home = () => {
                     <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
                     Đặt Bàn Ngay
                   </Button>
-                  <BootstrapButton variant="outline-light" size="lg" className="secondary-btn">
+                  {/* <BootstrapButton variant="outline-light" size="lg" className="secondary-btn">
                     <FontAwesomeIcon icon={faUtensils} className="me-2" />
                     Khám Phá Menu
-                  </BootstrapButton>
+                  </BootstrapButton> */}
                 </div>
               </div>
             </Col>
@@ -293,7 +293,7 @@ const Home = () => {
       </section>
 
       {/* Quick Booking Section */}
-      {upcomingBookings.length > 0 && (
+      {/* {upcomingBookings.length > 0 && (
         <section className="quick-booking-section">
           <Container>
             <Row>
@@ -340,7 +340,7 @@ const Home = () => {
             </Row>
           </Container>
         </section>
-      )}
+      )} */}
 
       {/* Featured Dishes Section */}
       <section className="featured-dishes">
@@ -406,7 +406,7 @@ const Home = () => {
                   <Card.Body>
                     <div className="dish-header">
                       <h5 className="dish-name">{dish.name}</h5>
-                      <span className="dish-category">{dish.category}</span>
+                      {/* <span className="dish-category">{dish.category}</span> */}
                     </div>
                     <p className="dish-restaurant">
                       <FontAwesomeIcon icon={faUtensils} className="me-2" />
@@ -467,52 +467,17 @@ const Home = () => {
               </Col>
             ))}
           </Row>
-          <div className="text-center mt-4">
+          {/* <div className="text-center mt-4">
             <BootstrapButton variant="outline-primary" size="lg">
               Xem Tất Cả Món Ăn
               <FontAwesomeIcon icon={faArrowRight} className="ms-2" />
             </BootstrapButton>
-          </div>
+          </div> */}
         </Container>
       </section>
 
       {/* Testimonials Section */}
-      <section className="testimonials-section">
-        <Container>
-          <div className="section-header">
-            <h2>
-              <FontAwesomeIcon icon={faQuoteLeft} className="me-3" />
-              Khách Hàng Nói Gì
-            </h2>
-            <p>Những trải nghiệm tuyệt vời về món ăn</p>
-          </div>
-          <Row>
-            {testimonials.map(testimonial => (
-              <Col md={4} key={testimonial.id} className="mb-4">
-                <Card className="testimonial-card">
-                  <Card.Body>
-                    <div className="testimonial-rating">
-                      {renderStars(testimonial.rating)}
-                    </div>
-                    <p className="testimonial-comment">"{testimonial.comment}"</p>
-                    <div className="testimonial-author">
-                      <img
-                        src={testimonial.avatar}
-                        alt={testimonial.name}
-                        className="author-avatar"
-                      />
-                      <div className="author-info">
-                        <h6>{testimonial.name}</h6>
-                        <small>Về món {testimonial.dish}</small>
-                      </div>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Container>
-      </section>
+
 
       {/* CTA Section */}
       <section className="cta-section">

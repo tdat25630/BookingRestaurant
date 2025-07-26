@@ -9,6 +9,7 @@ import Home from './component/pages/Home/Home';
 import Login from './component/pages/Login/Login';
 import Register from './component/pages/Register/Register';
 import Reservation from "./component/pages/Reservation/Reservation";
+import AboutUs from "./component/pages/AboutUs/AboutUs";
 
 import MenuPage from "./component/pages/Menu/MenuPage";
 import ConfirmOrderPage from "./component/pages/Order/ConfirmOrderPage";
@@ -26,7 +27,7 @@ import AdminLayout from './component/LayoutAdmin/AdminLayout';
 import UserProfile from './component/pages/UserProfile/UserProfile';
 import AdminDashboard from './component/pages/Dashboard/AdminDashboard';
 import PromotionManagement from './component/pages/PromotionManagement/PromotionManagement';
-
+import PrintableInvoice from "./component/pages/Invoice/InvoicePrint";
 function App() {
     return (
         <SessionProvider>
@@ -34,12 +35,15 @@ function App() {
                 <Router>
                     <Routes>
                         <Route path="/register" element={<Register />} />
+
+                        <Route path="/profile" element={<UserProfile />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/home" element={<Home />} />
                         <Route path="/" element={<Navigate to="/home" />} />
 
                         <Route path="/booking" element={<Reservation />} />
-
+                        <Route path="/aboutus" element={<AboutUs />} />
+                        <Route path="/invoice/print/:orderId" element={<PrintableInvoice />} />
                         <Route path="/menu" element={<MenuPage />} />
                         <Route path="/confirm" element={<ConfirmOrderPage />} />
                         <Route path="/checkout" element={<CheckoutPage />} />

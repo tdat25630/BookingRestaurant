@@ -17,26 +17,28 @@ const AdminHeader = () => {
     return (
         <Navbar expand="lg" className="custom-navbar" variant="dark">
             <Container>
-                <Navbar.Brand href="/admin/dashboard" className="brand">
+                <Navbar.Brand href="/admin" className="brand">
                     <FontAwesomeIcon icon={faUtensils} className="me-2" />
-                    Admin Panel
+                    Trang Admin
                 </Navbar.Brand>
 
                 <Navbar.Toggle aria-controls="admin-navbar-nav" />
                 <Navbar.Collapse id="admin-navbar-nav">                    <Nav className="ms-auto">
-                    <Nav.Link as={Link} to="/admin/dashboard" className="nav-link">Dashboard</Nav.Link>
-                    <Nav.Link as={Link} to="/admin/tables" className="nav-link">Tables</Nav.Link>
-                    <Nav.Link as={Link} to="/admin/reservation" className="nav-link">Bookings</Nav.Link>
+                    <Nav.Link as={Link} to="/admin" className="nav-link">Tổng quan </Nav.Link>
+                    <Nav.Link as={Link} to="/admin/tables" className="nav-link">Bàn</Nav.Link>
+                    <Nav.Link as={Link} to="/admin/reservation" className="nav-link">Đặt bàn</Nav.Link>
+                    <Nav.Link as={Link} to="/admin/orders" className="nav-link">Đơn hàng</Nav.Link>
+
                     <Nav.Link as={Link} to="/admin/users" className="nav-link">
-                        <FontAwesomeIcon icon={faUsers} className="me-1" />
-                        User
+                        
+                        Người dùng
                     </Nav.Link>
                     <Nav.Link href="/admin/promotions">
-                        <FaGift className="me-2" />
-                        Promotions
+                        
+                        Khuyến mãi
                     </Nav.Link>
-                    <Nav.Link as={Link} to="/admin/category" className="nav-link">Category</Nav.Link>
-                    <Nav.Link as={Link} to="/admin/item" className="nav-link">Menu</Nav.Link>
+                    <Nav.Link as={Link} to="/admin/category" className="nav-link">Danh mục</Nav.Link>
+                    <Nav.Link as={Link} to="/admin/item" className="nav-link">Thực đơn</Nav.Link>
                     <NavDropdown
                         title={<span><FaUserCircle className="me-1" />Admin</span>}
                         id="admin-dropdown"
@@ -44,12 +46,12 @@ const AdminHeader = () => {
                     >
                         <NavDropdown.Item as={Link} to="/admin/profile">
                             <FaUserCircle className="me-1" />
-                            My Profile
+                            Hồ sơ của tôi
                         </NavDropdown.Item>
                         <NavDropdown.Divider />
                         <NavDropdown.Item onClick={handleLogout}>
                             <FaSignOutAlt className="me-1" />
-                            Logout
+                            Đăng xuất
                         </NavDropdown.Item>
                     </NavDropdown>
                 </Nav>

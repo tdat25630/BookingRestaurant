@@ -17,6 +17,7 @@ function MenuPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sessionValid, setSessionValid] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [order, setOrder] = useState({})
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   const itemsPerPage = 12;
@@ -61,89 +62,56 @@ function MenuPage() {
   }, [sessionId]);
 
   // Tải dữ liệu menu, category và giỏ hàng
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const [categoriesRes, menuRes, orderRes] = await Promise.all([
-  //         axios.get("http://localhost:8080/api/menu-categories"),
-  //         axios.get("http://localhost:8080/api/menu-items"),
-  //         axios.get(`http://localhost:8080/api/orders/session/${sessionId}`)
-  //       ]);
-
-  //       setCategories(categoriesRes.data);
-  //       setMenuItems(menuRes.data);
-
-  //       const currentOrder = orderRes.data;
-  //       if (currentOrder?._id) {
-  //         setOrderId(currentOrder._id);
-  //         const itemsRes = await axios.get(
-  //           `http://localhost:8080/api/order-items/order/${currentOrder._id}`
-  //         );
-  //         const formattedItems = itemsRes.data.map((item) => ({
-  //           _id: item.menuItemId,
-  //           name: item.menuItem?.name || "Không rõ",
-  //           price: item.price,
-  //           quantity: item.quantity,
-  //           notes: item.notes || "",
-  //         }));
-  //         loadCartFromServer(formattedItems);
-  //       }
-  //     } catch (err) {
-  //       console.error(" Lỗi khi tải dữ liệu:", err);
-  //     }
-  //   };
-  //   if (sessionValid) fetchData();
-  // }, [sessionValid]);
-
-  // Tải dữ liệu menu, category và giỏ hàng
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // Gọi menu và category
-      const [categoriesRes, menuRes] = await Promise.all([
-        axios.get("http://localhost:8080/api/menu-categories"),
-        axios.get("http://localhost:8080/api/menu-items")
-      ]);
-
-      setCategories(categoriesRes.data);
-      setMenuItems(menuRes.data);
-
-      // Gọi order nếu có (bắt lỗi riêng)
+  useEffect(() => {
+    const fetchData = async () => {
       try {
-        const orderRes = await axios.get(`http://localhost:8080/api/orders/session/${sessionId}`);
-        const currentOrder = orderRes.data;
+        // Gọi menu và category
+        const [categoriesRes, menuRes] = await Promise.all([
+          axios.get("http://localhost:8080/api/menu-categories"),
+          axios.get("http://localhost:8080/api/menu-items")
+        ]);
 
-        if (currentOrder?._id) {
-          setOrderId(currentOrder._id);
+        setCategories(categoriesRes.data);
+        setMenuItems(menuRes.data);
 
-          const itemsRes = await axios.get(
-            `http://localhost:8080/api/order-items/order/${currentOrder._id}`
-          );
+        // Gọi order nếu có (bắt lỗi riêng)
+        try {
+          const orderRes = await axios.get(`http://localhost:8080/api/orders/session/${sessionId}`);
+          const currentOrder = orderRes.data;
+          setOrder(currentOrder[0])
+          console.log(currentOrder)
 
-          const formattedItems = itemsRes.data.map((item) => ({
-            _id: item.menuItemId,
-            name: item.menuItem?.name || "Không rõ",
-            price: item.price,
-            quantity: item.quantity,
-            notes: item.notes || "",
-          }));
+          if (currentOrder?._id) {
+            setOrderId(currentOrder._id);
 
-          loadCartFromServer(formattedItems);
+            const itemsRes = await axios.get(
+              `http://localhost:8080/api/order-items/order/${currentOrder._id}`
+            );
+
+            const formattedItems = itemsRes.data.map((item) => ({
+              _id: item.menuItemId,
+              name: item.menuItem?.name || "Không rõ",
+              price: item.price,
+              quantity: item.quantity,
+              notes: item.notes || "",
+            }));
+
+            loadCartFromServer(formattedItems);
+          }
+        } catch (orderErr) {
+          if (orderErr.response?.status === 404) {
+            console.log("📭 Chưa có đơn hàng nào cho phiên này.");
+          } else {
+            console.error("❌ Lỗi khi lấy đơn hàng:", orderErr);
+          }
         }
-      } catch (orderErr) {
-        if (orderErr.response?.status === 404) {
-          console.log("📭 Chưa có đơn hàng nào cho phiên này.");
-        } else {
-          console.error("❌ Lỗi khi lấy đơn hàng:", orderErr);
-        }
+      } catch (err) {
+        console.error("❌ Lỗi khi tải dữ liệu menu hoặc danh mục:", err);
       }
-    } catch (err) {
-      console.error("❌ Lỗi khi tải dữ liệu menu hoặc danh mục:", err);
-    }
-  };
+    };
 
-  if (sessionValid) fetchData();
-}, [sessionValid]);
+    if (sessionValid) fetchData();
+  }, [sessionValid]);
 
   if (sessionValid === null) return <p>🔍 Đang kiểm tra phiên ăn uống...</p>;
   if (sessionValid === false) {
@@ -170,36 +138,29 @@ useEffect(() => {
     <>
       <Header />
       <div className="menu-page-container">
+        <h4>{order?.sessionId?.customerName ?
+          "Khác hàng: " + order?.sessionId?.customerName : ''
+        }</h4>
         <h2> Menu</h2>
 
- 
-        {/* <input
-  type="text"
-  placeholder="Search..."
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  className="search-input"
-  style={{ border: '2px solid red' }}
-/> */}
-
-<input
-  type="text"
-  placeholder="Search..."
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  style={{
-    width: '300px',
-    height: '40px',
-    fontSize: '16px',
-    margin: '20px auto',
-    display: 'block',
-    border: '2px solid blue',
-    zIndex: 1000,
-    position: 'relative',
-    backgroundColor: '#fff',
-    color: '#000', 
-  }}
-/>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: '300px',
+            height: '40px',
+            fontSize: '16px',
+            margin: '20px auto',
+            display: 'block',
+            border: '2px solid blue',
+            zIndex: 1000,
+            position: 'relative',
+            backgroundColor: '#fff',
+            color: '#000',
+          }}
+        />
 
 
 

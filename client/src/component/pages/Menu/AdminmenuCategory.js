@@ -85,14 +85,14 @@ function AdminMenuCategory() {
         <>
             <AdminHeader />
             <div className="admin-category-container">
-                <h2>Admin Menu Categories</h2>
+                <h2>Quản lý danh mục </h2>
                 {error && <div className="error-message">{error}</div>}
 
                 {/* Search bar */}
                 <div className="search-container">
                     <input
                         type="text"
-                        placeholder="Search category..."
+                        placeholder="Tìm kiếm danh mục..."
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
@@ -106,18 +106,18 @@ function AdminMenuCategory() {
                 <form onSubmit={handleSubmit} className="category-form">
                     <input
                         name="name"
-                        placeholder="Category name"
+                        placeholder="Tên danh mục"
                         value={form.name}
                         onChange={handleChange}
                         required
                     />
                     <input
                         name="description"
-                        placeholder="Description"
+                        placeholder="Mô tả"
                         value={form.description}
                         onChange={handleChange}
                     />
-                    <button type="submit">{editingId ? "Update" : "Add"}</button>
+                    <button type="submit">{editingId ? "Update" : "Thêm"}</button>
                     {editingId && (
                         <button type="button" onClick={handleCancel} className="cancel-btn">
                             Cancel
@@ -130,9 +130,9 @@ function AdminMenuCategory() {
                     <table>
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Actions</th>
+                                <th>Tên danh mục </th>
+                                <th>Mô tả</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -141,8 +141,8 @@ function AdminMenuCategory() {
                                     <td>{cat.name}</td>
                                     <td>{cat.description}</td>
                                     <td>
-                                        <button onClick={() => handleEdit(cat)} className="edit-btn">Edit</button>
-                                        <button onClick={() => handleDelete(cat._id)} className="delete-btn">Delete</button>
+                                        <button onClick={() => handleEdit(cat)} className="edit-btn">Sửa</button>
+                                        <button onClick={() => handleDelete(cat._id)} className="delete-btn">Xoá</button>
                                     </td>
                                 </tr>
                             ))}

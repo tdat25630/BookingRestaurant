@@ -36,4 +36,14 @@ router.put('/users/:id', userController.updateUserRole);
 router.delete('/users/:id', userController.deleteUser);
 
 
+// --- Table Routes --- (ADD THESE)
+router.get('/tables', tableController.getTables);
+router.post('/tables', tableController.createTable);
+router.put('/tables/:id', tableController.updateTable);
+router.delete('/tables/:id', tableController.deleteTable);
+
+// --- Dining Session Routes --- (ADD THESE TOO)
+router.get('/dining-sessions/table/:tableId', tableController.getActiveSession);
+router.post('/dining-sessions', tableController.createSession);
+
 module.exports = router;

@@ -130,7 +130,7 @@ const DishSelectionModal = ({ show, onHide, menuItems, selectedDishes, setSelect
                 />
                 <div className="row g-3">
                   {paginatedItems.map(item => (
-                    <div key={item._id} className="col-6 col-sm-6 col-md-4 col-lg-3">
+                    <div key={item._id} className="col-6 col-md-4">
                       <div className="card h-100 text-center">
                         <img
                           src={item.image}
@@ -138,7 +138,7 @@ const DishSelectionModal = ({ show, onHide, menuItems, selectedDishes, setSelect
                           className="card-img-top"
                           style={{ height: '120px', objectFit: 'cover' }}
                         />
-                        <div className="card-body">
+                        <div className="card-body" style={{ color: 'white' }}>
                           <strong>{item.name}</strong>
                           <p className="mb-1">{item.price.toLocaleString()}₫</p>
                           <Form.Control

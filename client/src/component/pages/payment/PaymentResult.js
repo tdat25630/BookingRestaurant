@@ -5,12 +5,11 @@ import './PaymentResult.css';
 function PaymentResult() {
   const [searchParams] = useSearchParams();
   
-  // Lấy các tham số từ URL
   const status = searchParams.get('status');
   const orderId = searchParams.get('orderId');
   const amount = searchParams.get('amount');
-  const bankCode = searchParams.get('bankcode');
-  const resultCode = searchParams.get('resultCode');
+  const bankCode = searchParams.get('bankcode'); 
+  const resultCode = searchParams.get('resultCode'); 
   
   const isSuccess = status === 'success';
 
@@ -41,7 +40,14 @@ function PaymentResult() {
             )}
         </div>
         
-        <Link to="/" className="btn-home">Quay về Trang chủ</Link>
+        <div className="result-actions">
+            {isSuccess && orderId && (
+                <Link to={`/invoice/print/${orderId}`} className="btn-action btn-print">
+                    In Hóa đơn
+                </Link>
+            )}
+            <Link to="/" className="btn-action btn-home">Quay về Trang chủ</Link>
+        </div>
       </div>
     </div>
   );

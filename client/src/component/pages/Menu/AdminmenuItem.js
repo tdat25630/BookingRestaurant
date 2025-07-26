@@ -17,7 +17,8 @@ function AdminMenuItem() {
     image: '',
     price: '',
     isAvailable: true,
-    category: ''
+    category: '',
+    needPreOrder: false
   });
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -66,6 +67,7 @@ function AdminMenuItem() {
       formData.append('description', form.description);
       formData.append('price', form.price);
       formData.append('isAvailable', form.isAvailable);
+      formData.append('needPreOrder', form.needPreOrder);
       formData.append('category', form.category);
       if (form.image instanceof File) {
         formData.append('image', form.image);
@@ -133,12 +135,12 @@ function AdminMenuItem() {
     <>
       <AdminHeader />
       <Container className="menu-page-container">
-        <h2>Admin - Manage Menu Items</h2>
+        <h2>Admin - Quản lý thực đơn</h2>
 
         <div className="admin-menu-wrapper">
           {/* LEFT SIDE */}
           <div className="menu-list">
-            <button className="create-btn" onClick={handleCreateNew}>+ Create New</button>
+            <button className="create-btn" onClick={handleCreateNew}>+ Thêm món ăn</button>
 
             <div className="filters">
               <input
@@ -160,7 +162,7 @@ function AdminMenuItem() {
                   setCurrentPage(1);
                 }}
               >
-                <option value="">All Categories</option>
+                <option value="">Tất cả danh mục</option>
                 {categories.map((cat) => (
                   <option key={cat._id} value={cat._id}>{cat.name}</option>
                 ))}
@@ -266,6 +268,21 @@ function AdminMenuItem() {
                   </label>
                 </div>
 
+                <div className="form-check d-flex align-items-center" style={{ marginLeft: '30px', maxWidth: '400px', margin: '10px auto' }}>
+                  <input
+                    style={{ width: '20px' }}
+                    className="form-check-input"
+                    type="checkbox"
+                    id="needPreOrder"
+                    name="needPreOrder"
+                    checked={form.needPreOrder}
+                    onChange={handleChange}
+                  />
+                  <label className="form-check-label ms-2" htmlFor="needPreOrder">
+                    Món đặt trước
+                  </label>
+                </div>
+
                 <button
                   className="submit-button"
                   type="submit"
@@ -281,6 +298,7 @@ function AdminMenuItem() {
                   type="button"
                   style={{ backgroundColor: !loading ? '#ff6666' : 'gray' }}
                   disabled={loading}
+                  onClick={() => setShowForm(false)}
                 >
                   {loading && <span className="spinner-border spinner-border-sm me-2" role="status" />}
                   Hủy

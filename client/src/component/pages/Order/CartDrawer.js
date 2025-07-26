@@ -106,8 +106,8 @@ function CartDrawer({ isOpen, onClose }) {
     <div className={`cart-drawer ${isOpen ? "open" : ""}`}>
       <div className="cart-header">
         <h3> Your Cart</h3>
-        <button className="close-btn" onClick={onClose}>
-          ✕
+        <button className="btn btn-danger" onClick={onClose}>
+          Close
         </button>
       </div>
 

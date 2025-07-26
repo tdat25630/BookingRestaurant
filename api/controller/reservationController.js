@@ -34,7 +34,7 @@ exports.bookingOtpEmail = async (req, res) => {
     }
 
     console.log(checkCache)
-    //await emailService.sendBookingConfirm({ otp, email, name });
+    await emailService.sendBookingConfirm({ otp, email, name });
 
     return res.status(201).json({ success: true });
   } catch (error) {
@@ -67,11 +67,11 @@ exports.bookingOtpPhone = async (req, res) => {
 
     const requestId = crypto.randomBytes(4).toString('hex');
 
-    //await sms.sendEsms({
-    //  phone,
-    //  code: otp,
-    //  requestId
-    //});
+    await sms.sendEsms({
+     phone,
+     code: otp,
+     requestId
+    });
 
     return res.status(201).json({ success: true, message: 'OTP đã được gửi.' });
 
@@ -116,6 +116,19 @@ exports.createReservation = async (req, res) => {
 
     cache.del(key);
 
+    const newReservation = new Reservation({
+      name,
+      phone: phone || null,
+      email: email || null,
+      reservationDate,
+      reservationTime,
+      guestCount,
+      specialRequest,
+      userId: accountId || null, // Lưu userId nếu có
+      preOrders: preOrders || [],
+      status: 'pending'
+    });
+
     const reservation = new Reservation({
       guestCount,
       name,
@@ -130,7 +143,7 @@ exports.createReservation = async (req, res) => {
       reservation.accountId = accountId;
     }
 
-    const newReservation = await reservation.save();
+     await newReservation.save();
 
     return res.status(201).json(newReservation);
   } catch (err) {
@@ -181,7 +194,9 @@ exports.getReservations = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const [reservations, total] = await Promise.all([
-      Reservation.find(filters).skip(skip).limit(parseInt(limit)),
+      Reservation.find(filters).skip(skip).limit(parseInt(limit))
+      .sort({reservationDate: -1})
+      .populate('preOrders.itemId'),
       Reservation.countDocuments(filters)
     ]);
 
