@@ -10,6 +10,7 @@ router.get('/chef', orderItemController.getSortedItems);
 router.put('/:id/status', orderItemController.updateOrderItemStatus);
 router.post('/:sessionId/items', orderController.addItemToOrder);
 router.put('/', orderController.updateManyItems);
+router.put('/note/:id', orderItemController.updateItemNote);
 router.delete('/:id', orderItemController.deleteById);
 
 router.get('/bestsellers', orderItemController.getBestSellerItems);

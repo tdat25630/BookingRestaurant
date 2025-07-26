@@ -177,9 +177,10 @@ function Reservation() {
         setOtpStatus(`OTP đã gửi qua ${otpTarget === 'phone' ? 'số điện thoại' : 'email'}`);
         setOtpSent(true);
         setResendTimer(60);
+      } else if (res.status === 429) {
+        setOtpStatus(data.message || 'Bạn đang gửi quá nhiều yêu cầu. Vui lòng thử lại sau.');
       } else {
-        const data = await res.json();
-        setOtpStatus(data.error || 'Lỗi khi gửi OTP');
+        setOtpStatus(data.error || data.message || 'Lỗi khi gửi OTP');
       }
     } catch (error) {
       setOtpStatus('Lỗi kết nối tới máy chủ');

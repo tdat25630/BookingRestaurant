@@ -123,6 +123,25 @@ exports.updateOrderItemStatus = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.updateItemNote = async (req, res) => {
+  console.log('test: ', req.body)
+  try {
+
+    const updated =
+      await OrderItem.findByIdAndUpdate(
+        req.params.id,
+        { notes: req.body.notes }, { new: true });
+
+    broadcastEvent('orderCreated');
+    return res.json(updated);
+
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.getBestSellerItems = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 5;

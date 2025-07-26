@@ -7,7 +7,7 @@ const cache = require('../util/cache');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
-const OTP_TTL_SECONDS = 300; // 5 minutes
+//const OTP_TTL_SECONDS = 300; // 5 minutes
 const OTP_LENGTH = 6;
 
 function generateOTP(length = 6) {
@@ -19,21 +19,50 @@ function generateOTP(length = 6) {
   return otp;
 }
 
+const OTP_TTL_SECONDS = 300; // OTP valid for 5 minutes
+const RATE_LIMIT_WINDOW_SECONDS = 300; // 5-minute rate limit window
+const MAX_REQUESTS = 2;
+
 exports.bookingOtpEmail = async (req, res) => {
   try {
     const { email, name } = req.body;
 
-    //const selector = crypto.randomBytes(4).toString('hex');
-    const otp = generateOTP(OTP_LENGTH);
-    const key = email;
-    cache.set(key, otp, OTP_TTL_SECONDS);
+    const rateLimitKey = `otp-requests-${email}`;
+    const now = Date.now();
+    let requestData = cache.get(rateLimitKey);
 
-    const checkCache = cache.get(key);
-    if (!checkCache) {
+    if (requestData) {
+      if (now > requestData.expiresAt) {
+        // Window expired → reset
+        requestData = { count: 1, expiresAt: now + RATE_LIMIT_WINDOW_SECONDS * 1000 };
+      } else if (requestData.count >= MAX_REQUESTS) {
+        return res.status(429).json({
+          success: false,
+          message: "You can only request OTP twice every 5 minutes.",
+        });
+      } else {
+        // Still in window and under limit
+        requestData.count += 1;
+      }
+    } else {
+      // First request
+      requestData = { count: 1, expiresAt: now + RATE_LIMIT_WINDOW_SECONDS * 1000 };
+    }
+
+    // Set rate limit data with proper TTL
+    const ttl = Math.ceil((requestData.expiresAt - now) / 1000);
+    cache.set(rateLimitKey, requestData, ttl);
+
+    // Generate OTP
+    const otp = generateOTP(OTP_LENGTH);
+    const otpKey = `otp-${email}`;
+    cache.set(otpKey, otp, OTP_TTL_SECONDS);
+
+    if (!cache.get(otpKey)) {
       throw new Error("Cache failed to store OTP.");
     }
 
-    console.log(checkCache)
+    console.log(`OTP for ${email}:`, otp);
     await emailService.sendBookingConfirm({ otp, email, name });
 
     return res.status(201).json({ success: true });
@@ -42,6 +71,7 @@ exports.bookingOtpEmail = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
 exports.bookingOtpPhone = async (req, res) => {
   try {

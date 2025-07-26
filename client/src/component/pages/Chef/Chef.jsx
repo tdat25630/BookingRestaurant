@@ -4,7 +4,6 @@ import './ChefOrder.css';
 import ChefHeader from '../../Header/ChefHeader';
 import './Chef.css';
 import { Row, Col, Form, Button } from 'react-bootstrap';
-const socket = new WebSocket('ws://localhost:8080');
 
 const Chef = () => {
   const [orderItems, setOrderItems] = useState([]);
@@ -287,4 +286,3 @@ const Chef = () => {
 };
 
 export default Chef;
-

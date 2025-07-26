@@ -17,8 +17,10 @@ const Order = () => {
   const [tableFilter, setTableFilter] = useState('');
   const [dateFilter, setDateFilter] = useState(() => {
     const today = new Date();
-    return today.toISOString().split('T')[0]; // YYYY-MM-DD
+    const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+    return localDate.toISOString().split('T')[0]; // local YYYY-MM-DD
   });
+
   const [itemSortOption, setItemSortOption] = useState({});
   const [defaultStatus, setDefaultStatus] = useState('ordered');
 
