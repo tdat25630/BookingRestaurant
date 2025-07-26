@@ -183,7 +183,7 @@ function Reservation() {
         setOtpStatus(data.error || data.message || 'Lỗi khi gửi OTP');
       }
     } catch (error) {
-      setOtpStatus('Lỗi kết nối tới máy chủ');
+      setOtpStatus('Lỗi khi gửi OTP');
     }
   };
 
